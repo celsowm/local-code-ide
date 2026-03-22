@@ -3,447 +3,211 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Item {
+    id: root
+
+    readonly property bool compact: width < 520
+    readonly property bool discoverComplete: modelHubViewModel.selectedRepoId.length > 0
+    readonly property bool chooseComplete: modelHubViewModel.selectedFilePath.length > 0
+    readonly property bool downloadComplete: modelHubViewModel.downloadedPath.length > 0 || modelHubViewModel.canUseSelectedAsCurrent
+    readonly property bool activateComplete: modelHubViewModel.hasCurrentLocalModel
+
+    QtObject {
+        id: themeTokens
+
+        readonly property int outerGap: 10
+        readonly property int cardPadding: 10
+        readonly property int radius: 8
+
+        readonly property color pageColor: "#1f2024"
+        readonly property color cardColor: "#23262b"
+        readonly property color cardColorAlt: "#1f2227"
+        readonly property color borderColor: "#343840"
+        readonly property color textPrimary: "#eceff4"
+        readonly property color textSecondary: "#b9c1cc"
+        readonly property color textMuted: "#8b95a3"
+        readonly property color accentColor: "#57a6ff"
+        readonly property color successColor: "#7dce83"
+        readonly property color warningColor: "#e0b45f"
+    }
+
+    function setStep(stepIndex) {
+        modelHubViewModel.wizardStep = Math.max(0, Math.min(3, stepIndex))
+    }
+
+    function stepTitle(index) {
+        if (index === 0)
+            return "Discover"
+        if (index === 1)
+            return "Choose GGUF"
+        if (index === 2)
+            return "Download"
+        return "Activate & Server"
+    }
+
+    function stepComplete(index) {
+        if (index === 0)
+            return discoverComplete
+        if (index === 1)
+            return chooseComplete
+        if (index === 2)
+            return downloadComplete
+        return activateComplete
+    }
+
+    function stepWarning(index) {
+        if (index === 1 && !discoverComplete)
+            return "Pick a repository in Step 1 before choosing a GGUF file."
+        if (index === 2 && !chooseComplete)
+            return "Pick a GGUF file in Step 2 before starting a download."
+        if (index === 3 && !downloadComplete)
+            return "No local GGUF detected yet. Download one in Step 3 or select a file that already exists locally."
+        return ""
+    }
+
+    readonly property Component activeStepComponent: {
+        if (modelHubViewModel.wizardStep === 0)
+            return discoverStep
+        if (modelHubViewModel.wizardStep === 1)
+            return chooseStep
+        if (modelHubViewModel.wizardStep === 2)
+            return downloadStep
+        return activateServerStep
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: themeTokens.pageColor
+    }
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+        anchors.margins: themeTokens.outerGap
+        spacing: themeTokens.outerGap
 
-        Label {
-            text: "MODEL HUB"
-            color: "#d4d4d4"
-            font.bold: true
-        }
-
-        Label {
-            text: modelHubViewModel.providerName
-            color: "#9cdcfe"
-        }
-
-        Rectangle {
+        ModelHubCard {
             Layout.fillWidth: true
-            color: "#1e1e1e"
-            radius: 6
-            border.color: "#2d2d30"
-            implicitHeight: hardwareColumn.implicitHeight + 16
+            cornerRadius: themeTokens.radius
+            padding: themeTokens.cardPadding
+            spacing: 6
+            surfaceColor: themeTokens.cardColor
+            outlineColor: themeTokens.borderColor
 
-            ColumnLayout {
-                id: hardwareColumn
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Label { text: "LOCAL HARDWARE"; color: "#d4d4d4"; font.bold: true }
-                    Item { Layout.fillWidth: true }
-                    IconButton { text: "Refresh"; iconName: "refresh"; onClicked: modelHubViewModel.refreshHardware() }
-                    IconButton { text: "Use auto profile"; iconName: "auto_profile"; onClicked: modelHubViewModel.applyDetectedProfile() }
-                }
-
-                Label {
-                    text: modelHubViewModel.hardwareSummary
-                    color: "#c5c5c5"
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-
-                Label {
-                    text: modelHubViewModel.recommendationSummary
-                    color: "#6a9955"
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            color: "#1e1e1e"
-            radius: 6
-            border.color: "#2d2d30"
-            implicitHeight: serverColumn.implicitHeight + 16
-
-            ColumnLayout {
-                id: serverColumn
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Label { text: "LOCAL LLAMA SERVER"; color: "#d4d4d4"; font.bold: true }
-                    Item { Layout.fillWidth: true }
-                    IconButton {
-                        text: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting ? "Stop" : "Start"
-                        iconName: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting ? "stop" : "start"
-                        enabled: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting || modelHubViewModel.canStartServer
-                        onClicked: {
-                            if (modelHubViewModel.serverRunning || modelHubViewModel.serverStarting) {
-                                modelHubViewModel.stopServer()
-                            } else {
-                                modelHubViewModel.startServer()
-                            }
-                        }
-                    }
-                    IconButton { text: "Probe"; iconName: "probe"; onClicked: modelHubViewModel.probeServer() }
-                    IconButton { text: "Clear logs"; iconName: "clear_logs"; onClicked: modelHubViewModel.clearServerLogs() }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Label {
-                        text: modelHubViewModel.serverHealthy ? "online" : (modelHubViewModel.serverRunning || modelHubViewModel.serverStarting ? "starting" : "offline")
-                        color: modelHubViewModel.serverHealthy ? "#6a9955" : ((modelHubViewModel.serverRunning || modelHubViewModel.serverStarting) ? "#cca700" : "#808080")
-                        font.bold: true
-                    }
-
-                    Label {
-                        text: modelHubViewModel.serverStatusLine
-                        color: "#c5c5c5"
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    TextField {
-                        Layout.preferredWidth: 170
-                        text: modelHubViewModel.serverExecutablePath
-                        placeholderText: "llama-server"
-                        color: "#d4d4d4"
-                        background: Rectangle { color: "#181818"; radius: 4; border.color: "#3c3c3c" }
-                        onTextChanged: modelHubViewModel.serverExecutablePath = text
-                    }
-
-                    TextField {
-                        Layout.preferredWidth: 180
-                        text: modelHubViewModel.serverBaseUrl
-                        placeholderText: "http://127.0.0.1:8080"
-                        color: "#d4d4d4"
-                        background: Rectangle { color: "#181818"; radius: 4; border.color: "#3c3c3c" }
-                        onTextChanged: modelHubViewModel.serverBaseUrl = text
-                    }
-
-                    SpinBox {
-                        from: 1024
-                        to: 131072
-                        stepSize: 1024
-                        editable: true
-                        value: modelHubViewModel.runtimeContextSize
-                        onValueModified: modelHubViewModel.runtimeContextSize = value
-                    }
-
-                    TextField {
-                        Layout.fillWidth: true
-                        text: modelHubViewModel.serverExtraArguments
-                        placeholderText: "--n-gpu-layers 999 --threads 8"
-                        color: "#d4d4d4"
-                        background: Rectangle { color: "#181818"; radius: 4; border.color: "#3c3c3c" }
-                        onTextChanged: modelHubViewModel.serverExtraArguments = text
-                    }
-                }
-
-                Label {
-                    text: modelHubViewModel.currentLocalLaunchCommand
-                    color: "#6a9955"
-                    wrapMode: Text.WrapAnywhere
-                    Layout.fillWidth: true
-                }
-
-                Label {
-                    text: "ctx change takes effect on next server start"
-                    color: "#808080"
-                    wrapMode: Text.WrapAnywhere
-                    Layout.fillWidth: true
-                }
-
-                ScrollView {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 100
-
-                    TextArea {
-                        readOnly: true
-                        text: modelHubViewModel.serverLogs
-                        color: "#d4d4d4"
-                        font.family: "monospace"
-                        wrapMode: TextArea.WrapAnywhere
-                        background: Rectangle { color: "#111111"; radius: 4 }
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            TextField {
-                Layout.preferredWidth: 140
-                text: modelHubViewModel.author
-                placeholderText: "author"
-                color: "#d4d4d4"
-                background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                onTextChanged: modelHubViewModel.author = text
+            Label {
+                text: "MODEL HUB"
+                color: themeTokens.textPrimary
+                font.bold: true
             }
 
-            TextField {
+            Label {
+                text: modelHubViewModel.providerName
+                color: themeTokens.accentColor
                 Layout.fillWidth: true
-                text: modelHubViewModel.searchQuery
-                placeholderText: "buscar repo GGUF (coder, qwen, phi, mistral...)"
-                color: "#d4d4d4"
-                background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                onTextChanged: modelHubViewModel.searchQuery = text
-                onAccepted: modelHubViewModel.searchRepos()
+                wrapMode: Text.Wrap
             }
 
-            IconButton {
-                text: "Search"
-                iconName: "search"
-                onClicked: modelHubViewModel.searchRepos()
+            Label {
+                text: modelHubViewModel.statusMessage
+                color: themeTokens.textSecondary
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
             }
         }
 
-        RowLayout {
+        Flow {
+            id: chipsFlow
             Layout.fillWidth: true
             spacing: 8
 
-            ComboBox {
-                Layout.preferredWidth: 150
-                model: ["balanced", "laptop", "quality", "coding"]
-                currentIndex: Math.max(0, model.indexOf(modelHubViewModel.recommendationProfile))
-                onActivated: modelHubViewModel.recommendationProfile = currentText
-            }
+            Repeater {
+                model: 4
 
-            Label {
-                text: "auto: " + modelHubViewModel.autoDetectedProfile
-                color: "#808080"
-            }
+                delegate: ModelHubStepChip {
+                    required property int index
 
-            IconButton {
-                text: "Suggest"
-                iconName: "suggest"
-                onClicked: modelHubViewModel.suggestFile()
-            }
-
-            Label {
-                text: modelHubViewModel.helperText
-                color: "#808080"
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
+                    stepIndex: index
+                    title: root.stepTitle(index)
+                    active: modelHubViewModel.wizardStep === index
+                    done: root.stepComplete(index)
+                    tokens: themeTokens
+                    width: root.compact
+                        ? chipsFlow.width
+                        : Math.floor((chipsFlow.width - (chipsFlow.spacing * 3)) / 4)
+                    onClicked: root.setStep(index)
+                }
             }
         }
 
-        Label {
-            text: modelHubViewModel.statusMessage
-            color: "#c5c5c5"
-            wrapMode: Text.Wrap
+        Rectangle {
             Layout.fillWidth: true
+            visible: root.stepWarning(modelHubViewModel.wizardStep).length > 0
+            color: "#3a3224"
+            border.color: "#826232"
+            radius: themeTokens.radius
+            implicitHeight: warningText.implicitHeight + (themeTokens.cardPadding * 2)
+
+            Label {
+                id: warningText
+                anchors.fill: parent
+                anchors.margins: themeTokens.cardPadding
+                text: root.stepWarning(modelHubViewModel.wizardStep)
+                color: "#f2d7a2"
+                wrapMode: Text.Wrap
+            }
         }
 
-        SplitView {
+        ScrollView {
+            id: stepScroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            orientation: Qt.Horizontal
+            clip: true
+            contentWidth: availableWidth
 
-            Rectangle {
-                SplitView.preferredWidth: 260
-                color: "#1e1e1e"
-                border.color: "#2d2d30"
+            Item {
+                width: stepScroll.availableWidth
+                implicitHeight: stepLoader.item ? stepLoader.item.implicitHeight : 0
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 6
-                    spacing: 6
-
-                    Label {
-                        text: "REPOSITORIES (" + modelHubViewModel.repoCount + ")"
-                        color: "#d4d4d4"
-                        font.bold: true
-                    }
-
-                    ListView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        model: modelHubViewModel.reposModel
-
-                        delegate: Rectangle {
-                            width: ListView.view.width
-                            height: 74
-                            color: mouseArea.containsMouse ? "#2a2d2e" : (repoId === modelHubViewModel.selectedRepoId ? "#262b33" : "transparent")
-                            border.color: repoId === modelHubViewModel.selectedRepoId ? "#007acc" : "transparent"
-                            radius: 4
-
-                            ColumnLayout {
-                                anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 2
-
-                                Label { text: repoId; color: "#9cdcfe"; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                                Label { text: (pipelineTag || "unknown") + " · ↓" + downloads + " · ♥" + likes; color: "#808080"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: lastModified; color: "#6a9955"; Layout.fillWidth: true; elide: Text.ElideRight }
-                            }
-
-                            MouseArea {
-                                id: mouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: modelHubViewModel.selectRepo(repoId)
-                            }
-                        }
-                    }
+                Loader {
+                    id: stepLoader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    sourceComponent: root.activeStepComponent
                 }
             }
+        }
+    }
 
-            Rectangle {
-                SplitView.fillWidth: true
-                color: "#181818"
-                border.color: "#2d2d30"
+    Component {
+        id: discoverStep
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 8
+        ModelHubDiscoverStep {
+            tokens: themeTokens
+            compact: root.compact
+        }
+    }
 
-                    Label {
-                        text: "GGUF FILES (" + modelHubViewModel.fileCount + ")"
-                        color: "#d4d4d4"
-                        font.bold: true
-                    }
+    Component {
+        id: chooseStep
 
-                    ListView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        model: modelHubViewModel.filesModel
+        ModelHubChooseStep {
+            tokens: themeTokens
+            discoverComplete: root.discoverComplete
+        }
+    }
 
-                        delegate: Rectangle {
-                            width: ListView.view.width
-                            height: 62
-                            color: mouseArea2.containsMouse ? "#2a2d2e" : (path === modelHubViewModel.selectedFilePath ? "#262b33" : "transparent")
-                            border.color: activeLocal ? "#6a9955" : (recommended ? "#cca700" : (path === modelHubViewModel.selectedFilePath ? "#007acc" : "transparent"))
-                            radius: 4
+    Component {
+        id: downloadStep
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 10
+        ModelHubDownloadStep {
+            tokens: themeTokens
+            chooseComplete: root.chooseComplete
+        }
+    }
 
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
+    Component {
+        id: activateServerStep
 
-                                    Label { text: name; color: "#d4d4d4"; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                                    Label {
-                                        text: quantization + " · " + sizeLabel + (isSplit ? " · split" : "") + (activeLocal ? " · active" : "")
-                                        color: activeLocal ? "#6a9955" : (recommended ? "#ffd866" : "#808080")
-                                        Layout.fillWidth: true
-                                        elide: Text.ElideRight
-                                    }
-                                }
-
-                                Button {
-                                    text: activeLocal ? "Active" : (recommended ? "Suggested" : "Select")
-                                    onClicked: modelHubViewModel.selectedFilePath = path
-                                }
-                            }
-
-                            MouseArea {
-                                id: mouseArea2
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: modelHubViewModel.selectedFilePath = path
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 1
-                        color: "#2d2d30"
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        TextField {
-                            Layout.fillWidth: true
-                            text: modelHubViewModel.targetDownloadDir
-                            color: "#d4d4d4"
-                            background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                            onTextChanged: modelHubViewModel.targetDownloadDir = text
-                        }
-
-                        IconButton {
-                            text: "Download selected"
-                            iconName: "download"
-                            enabled: !modelHubViewModel.downloadActive
-                            onClicked: modelHubViewModel.startDownloadSelected()
-                        }
-
-                        IconButton {
-                            text: "Download suggested"
-                            iconName: "download"
-                            enabled: !modelHubViewModel.downloadActive
-                            onClicked: modelHubViewModel.downloadSuggested()
-                        }
-
-                        IconButton {
-                            text: "Cancel"
-                            iconName: "stop"
-                            enabled: modelHubViewModel.downloadActive
-                            onClicked: modelHubViewModel.cancelDownload()
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        IconButton {
-                            text: "Use selected as active"
-                            iconName: "use_active"
-                            enabled: modelHubViewModel.canUseSelectedAsCurrent
-                            onClicked: modelHubViewModel.useSelectedAsCurrent()
-                        }
-                        IconButton {
-                            text: "Use downloaded as active"
-                            iconName: "use_active"
-                            enabled: modelHubViewModel.downloadedPath.length > 0
-                            onClicked: modelHubViewModel.useDownloadedAsCurrent()
-                        }
-                        Label {
-                            text: modelHubViewModel.currentLocalModelSummary
-                            color: modelHubViewModel.hasCurrentLocalModel ? "#6a9955" : "#808080"
-                            wrapMode: Text.WrapAnywhere
-                            Layout.fillWidth: true
-                        }
-                    }
-
-                    ProgressBar {
-                        Layout.fillWidth: true
-                        from: 0
-                        to: 1
-                        value: modelHubViewModel.downloadProgress
-                        indeterminate: modelHubViewModel.downloadActive && modelHubViewModel.downloadProgress <= 0
-                    }
-
-                    Label {
-                        text: modelHubViewModel.downloadStatus
-                        color: "#c5c5c5"
-                        Layout.fillWidth: true
-                        wrapMode: Text.Wrap
-                    }
-
-                    Label {
-                        text: modelHubViewModel.currentLocalLaunchCommand
-                        color: "#6a9955"
-                        Layout.fillWidth: true
-                        wrapMode: Text.WrapAnywhere
-                    }
-                }
-            }
+        ModelHubActivateServerStep {
+            tokens: themeTokens
         }
     }
 }

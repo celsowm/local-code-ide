@@ -3,6 +3,8 @@
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QFileInfo>
+#include <QSet>
+#include <QStandardPaths>
 #include <QUrl>
 #include <limits>
 #include <utility>
@@ -35,6 +37,15 @@ QString defaultDownloadDir() {
     return huggingFaceHubCacheDir();
 }
 
+QString uiStateSettingsPath() {
+    QString base = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (base.isEmpty()) {
+        base = QDir::homePath() + QStringLiteral("/.localcodeide");
+    }
+    QDir().mkpath(base);
+    return QDir(base).filePath(QStringLiteral("ui.ini"));
+}
+
 QString basenameFromRemotePath(const QString& remotePath) {
     return remotePath.section('/', -1);
 }
@@ -62,6 +73,7 @@ ModelHubViewModel::ModelHubViewModel(std::unique_ptr<ide::services::ModelCatalog
     , m_hardwareService(std::move(hardwareService))
     , m_runtimeService(runtimeService)
     , m_serverService(std::move(serverService))
+    , m_uiSettings(uiStateSettingsPath(), QSettings::IniFormat)
     , m_targetDownloadDir(defaultDownloadDir()) {
     connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::statusChanged, this, [this]() {
         emit downloadStatusChanged();
@@ -72,6 +84,9 @@ ModelHubViewModel::ModelHubViewModel(std::unique_ptr<ide::services::ModelCatalog
     });
     connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::activeChanged, this, [this]() {
         emit downloadActiveChanged();
+    });
+    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::diagnosticsChanged, this, [this]() {
+        emit downloadDiagnosticsChanged();
     });
     connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::finishedSuccessfully, this, [this](const QString& localPath) {
         m_downloadedPath = localPath;
@@ -134,6 +149,7 @@ ModelHubViewModel::ModelHubViewModel(std::unique_ptr<ide::services::ModelCatalog
         });
     }
 
+    loadUiState();
     refreshHardware();
 }
 
@@ -170,6 +186,17 @@ void ModelHubViewModel::setSelectedFilePath(const QString& value) {
     emit selectedFileChanged();
 }
 QString ModelHubViewModel::recommendedFilePath() const { return m_recommendedFilePath; }
+int ModelHubViewModel::wizardStep() const { return m_wizardStep; }
+void ModelHubViewModel::setWizardStep(int value) {
+    const int bounded = qBound(0, value, 3);
+    if (m_wizardStep == bounded) {
+        return;
+    }
+    m_wizardStep = bounded;
+    emit wizardStepChanged();
+    saveUiState();
+}
+
 QString ModelHubViewModel::recommendationProfile() const { return m_recommendationProfile; }
 void ModelHubViewModel::setRecommendationProfile(const QString& value) {
     const QString normalized = value.trimmed().toLower();
@@ -180,6 +207,40 @@ void ModelHubViewModel::setRecommendationProfile(const QString& value) {
     emit recommendationProfileChanged();
     suggestFile();
 }
+QString ModelHubViewModel::quantFilter() const { return m_quantFilter; }
+void ModelHubViewModel::setQuantFilter(const QString& value) {
+    const QString normalized = value.trimmed().toUpper();
+    const QString next = normalized.isEmpty() ? QStringLiteral("AUTO") : normalized;
+    if (m_quantFilter.compare(next, Qt::CaseInsensitive) == 0) {
+        return;
+    }
+    m_quantFilter = next;
+    emit quantFilterChanged();
+
+    const auto visible = filteredFiles(m_currentFiles);
+    updateFileModel(visible);
+
+    if (!visible.empty()) {
+        if (m_selectedFilePath.isEmpty()) {
+            m_selectedFilePath = visible.front().path;
+            emit selectedFileChanged();
+        } else {
+            const bool stillVisible = std::any_of(visible.begin(), visible.end(), [this](const auto& file) {
+                return file.path == m_selectedFilePath;
+            });
+            if (!stillVisible) {
+                m_selectedFilePath = visible.front().path;
+                emit selectedFileChanged();
+            }
+        }
+    } else if (!m_selectedFilePath.isEmpty()) {
+        m_selectedFilePath.clear();
+        emit selectedFileChanged();
+    }
+
+    suggestFile();
+}
+QStringList ModelHubViewModel::quantOptions() const { return m_quantOptions; }
 
 QString ModelHubViewModel::autoDetectedProfile() const {
     return m_hardwareProfile.autoProfile(m_searchQuery);
@@ -192,13 +253,13 @@ QString ModelHubViewModel::hardwareSummary() const {
 QString ModelHubViewModel::recommendationSummary() const {
     const double budget = m_hardwareProfile.recommendedBudgetGiB();
     QStringList parts;
-    parts.push_back(QStringLiteral("perfil=%1").arg(m_recommendationProfile));
+    parts.push_back(QStringLiteral("profile=%1").arg(m_recommendationProfile));
     parts.push_back(QStringLiteral("auto=%1").arg(autoDetectedProfile()));
     if (budget > 0.0) {
         parts.push_back(QStringLiteral("budget ~%1 GiB").arg(QString::number(budget, 'f', budget >= 10.0 ? 0 : 1)));
     }
     if (!m_recommendedFilePath.isEmpty()) {
-        parts.push_back(QStringLiteral("sugestão=%1").arg(basenameFromRemotePath(m_recommendedFilePath)));
+        parts.push_back(QStringLiteral("suggestion=%1").arg(basenameFromRemotePath(m_recommendedFilePath)));
     }
     return parts.join(QStringLiteral(" · "));
 }
@@ -220,15 +281,42 @@ double ModelHubViewModel::downloadProgress() const {
     }
     return static_cast<double>(m_downloader->receivedBytes()) / static_cast<double>(total);
 }
+QString ModelHubViewModel::downloadSpeedText() const {
+    const double bytesPerSec = m_downloader->speedBytesPerSec();
+    if (bytesPerSec <= 0.0) {
+        return QStringLiteral("—");
+    }
+    const double kb = bytesPerSec / 1024.0;
+    if (kb < 1024.0) {
+        return QStringLiteral("%1 KB/s").arg(QString::number(kb, 'f', kb >= 100.0 ? 0 : 1));
+    }
+    const double mb = kb / 1024.0;
+    return QStringLiteral("%1 MB/s").arg(QString::number(mb, 'f', mb >= 100.0 ? 0 : 1));
+}
+QString ModelHubViewModel::downloadEtaText() const {
+    const qint64 seconds = m_downloader->etaSeconds();
+    if (seconds < 0) {
+        return QStringLiteral("—");
+    }
+    const qint64 mins = seconds / 60;
+    const qint64 secs = seconds % 60;
+    if (mins > 0) {
+        return QStringLiteral("%1m%2s").arg(QString::number(mins), QString::number(secs).rightJustified(2, '0'));
+    }
+    return QStringLiteral("%1s").arg(QString::number(secs));
+}
+QString ModelHubViewModel::downloadProgressDetails() const { return m_downloader->progressDetails(); }
+QString ModelHubViewModel::downloadPhase() const { return m_downloader->phase(); }
+QString ModelHubViewModel::downloadDiagnostics() const { return m_downloader->diagnosticsText(); }
 bool ModelHubViewModel::downloadActive() const { return m_downloader->isActive(); }
 QString ModelHubViewModel::downloadedPath() const { return m_downloadedPath; }
 QString ModelHubViewModel::providerName() const { return m_catalogService->providerName(); }
 QString ModelHubViewModel::helperText() const {
     if (m_selectedRepoId.isEmpty()) {
-        return QStringLiteral("Selecione um repositório GGUF. A recomendação agora usa RAM/VRAM detectadas localmente, com override opcional por env.");
+        return QStringLiteral("Select a GGUF repository. Recommendations now use locally detected RAM/VRAM, with optional environment overrides.");
     }
 
-    return QStringLiteral("Hardware: %1. Dica padrão: laptop→Q4_K_M, balanced→Q5_K_M, quality→Q6_K/Q8_0, coding dá peso extra para arquivos coder/code.")
+    return QStringLiteral("Hardware: %1. Default guidance: laptop -> Q4_K_M, balanced -> Q5_K_M, quality -> Q6_K/Q8_0, coding gives extra weight to coder/code files.")
         .arg(hardwareSummary());
 }
 
@@ -251,7 +339,7 @@ QString ModelHubViewModel::llamaLaunchHint() const {
     if (m_runtimeService && m_runtimeService->hasActiveModel()) {
         return m_runtimeService->launchCommand(executable, extra, serverBaseUrl());
     }
-    return QStringLiteral("%1 -m /caminho/model.gguf -c %3 --host %4 --port %5%2")
+    return QStringLiteral("%1 -m /path/model.gguf -c %3 --host %4 --port %5%2")
         .arg(executable,
              extra.trimmed().isEmpty() ? QString() : QStringLiteral(" ") + extra.trimmed(),
              QString::number(runtimeContextSize()),
@@ -260,13 +348,13 @@ QString ModelHubViewModel::llamaLaunchHint() const {
 }
 
 QString ModelHubViewModel::currentLocalModelSummary() const {
-    return m_runtimeService ? m_runtimeService->statusLine() : QStringLiteral("Runtime indisponível.");
+    return m_runtimeService ? m_runtimeService->statusLine() : QStringLiteral("Local runtime unavailable.");
 }
 
 QString ModelHubViewModel::currentLocalLaunchCommand() const {
     return m_runtimeService
         ? m_runtimeService->launchCommand(serverExecutablePath(), serverExtraArguments(), serverBaseUrl())
-        : QStringLiteral("llama-server -m /caminho/model.gguf -c %1 --host 127.0.0.1 --port 8080").arg(QString::number(runtimeContextSize()));
+        : QStringLiteral("llama-server -m /path/model.gguf -c %1 --host 127.0.0.1 --port 8080").arg(QString::number(runtimeContextSize()));
 }
 
 bool ModelHubViewModel::hasCurrentLocalModel() const {
@@ -332,7 +420,7 @@ void ModelHubViewModel::setServerBaseUrl(const QString& value) {
 }
 
 QString ModelHubViewModel::serverStatusLine() const {
-    return m_serverService ? m_serverService->statusLine() : QStringLiteral("Gerenciador de llama-server indisponível.");
+    return m_serverService ? m_serverService->statusLine() : QStringLiteral("llama-server manager unavailable.");
 }
 
 QString ModelHubViewModel::serverLogs() const {
@@ -367,12 +455,12 @@ void ModelHubViewModel::searchRepos() {
 
     if (repos.empty()) {
         setStatusMessage(m_catalogService->lastError().isEmpty()
-            ? QStringLiteral("Nenhum repositório encontrado.")
+            ? QStringLiteral("No repositories found.")
             : m_catalogService->lastError());
         return;
     }
 
-    setStatusMessage(QStringLiteral("%1 repositório(s) encontrados em %2.")
+    setStatusMessage(QStringLiteral("%1 repositories found on %2.")
         .arg(QString::number(repoCount()), providerName()));
 
     selectRepo(repos.front().id);
@@ -388,41 +476,43 @@ void ModelHubViewModel::selectRepo(const QString& repoId) {
 
     const auto files = m_catalogService->listFiles(m_selectedRepoId);
     m_currentFiles = files;
+    rebuildQuantOptions(files);
+    const auto visibleFiles = filteredFiles(files);
     m_selectedFilePath.clear();
     m_recommendedFilePath.clear();
     emit selectedFileChanged();
     emit recommendedFileChanged();
-    updateFileModel(files);
-    if (files.empty()) {
+    updateFileModel(visibleFiles);
+    if (visibleFiles.empty()) {
         setStatusMessage(m_catalogService->lastError().isEmpty()
-            ? QStringLiteral("Nenhum arquivo GGUF visível neste repositório.")
+            ? QStringLiteral("No GGUF files visible for the current quant filter.")
             : m_catalogService->lastError());
         return;
     }
 
-    m_selectedFilePath = files.front().path;
+    m_selectedFilePath = visibleFiles.front().path;
     emit selectedFileChanged();
 
     suggestFile();
-    setStatusMessage(QStringLiteral("%1 arquivo(s) GGUF carregados para %2.")
+    setStatusMessage(QStringLiteral("%1 GGUF file(s) loaded for %2.")
         .arg(QString::number(fileCount()), m_selectedRepoId));
 }
 
 void ModelHubViewModel::suggestFile() {
-    const auto files = m_currentFiles.empty() ? m_filesModel.files() : m_currentFiles;
+    const auto files = filteredFiles(m_currentFiles.empty() ? m_filesModel.files() : m_currentFiles);
     m_recommendedFilePath = chooseRecommendedFile(files);
     emit recommendedFileChanged();
     updateFileModel(files);
 
     if (!m_recommendedFilePath.isEmpty()) {
         const QString basename = basenameFromRemotePath(m_recommendedFilePath);
-        setStatusMessage(QStringLiteral("Sugestão: %1 · %2").arg(basename, recommendationSummary()));
+        setStatusMessage(QStringLiteral("Suggested: %1 | %2").arg(basename, recommendationSummary()));
     }
 }
 
 void ModelHubViewModel::startDownloadSelected() {
     if (m_selectedRepoId.isEmpty() || m_selectedFilePath.isEmpty()) {
-        setStatusMessage(QStringLiteral("Selecione um repositório e um arquivo GGUF antes de baixar."));
+        setStatusMessage(QStringLiteral("Select a repository and a GGUF file before downloading."));
         return;
     }
     QDir().mkpath(m_targetDownloadDir);
@@ -435,7 +525,7 @@ void ModelHubViewModel::downloadSuggested() {
         suggestFile();
     }
     if (m_recommendedFilePath.isEmpty()) {
-        setStatusMessage(QStringLiteral("Não encontrei uma quant sugerida para o perfil atual."));
+        setStatusMessage(QStringLiteral("No suggested quantization found for the current profile."));
         return;
     }
     setSelectedFilePath(m_recommendedFilePath);
@@ -467,43 +557,43 @@ void ModelHubViewModel::applyDetectedProfile() {
 
 void ModelHubViewModel::useSelectedAsCurrent() {
     if (!m_runtimeService) {
-        setStatusMessage(QStringLiteral("Runtime local indisponível."));
+        setStatusMessage(QStringLiteral("Local runtime unavailable."));
         return;
     }
     if (m_selectedRepoId.isEmpty() || m_selectedFilePath.isEmpty()) {
-        setStatusMessage(QStringLiteral("Selecione um GGUF antes de marcar como ativo."));
+        setStatusMessage(QStringLiteral("Select a GGUF file before setting it as active."));
         return;
     }
     const QString candidate = candidateLocalPathForRemote(m_selectedFilePath);
     if (!QFileInfo::exists(candidate)) {
-        setStatusMessage(QStringLiteral("Esse GGUF ainda não foi encontrado localmente. Faça o download antes de ativar."));
+        setStatusMessage(QStringLiteral("This GGUF file is not available locally yet. Download it before activating."));
         return;
     }
     m_runtimeService->setActiveModel(m_selectedRepoId, m_selectedFilePath, candidate);
-    setStatusMessage(QStringLiteral("Modelo ativo atualizado para %1").arg(QFileInfo(candidate).fileName()));
+    setStatusMessage(QStringLiteral("Active model updated to %1").arg(QFileInfo(candidate).fileName()));
 }
 
 void ModelHubViewModel::useDownloadedAsCurrent() {
     if (!m_runtimeService) {
-        setStatusMessage(QStringLiteral("Runtime local indisponível."));
+        setStatusMessage(QStringLiteral("Local runtime unavailable."));
         return;
     }
     if (m_downloadedPath.isEmpty() || !QFileInfo::exists(m_downloadedPath)) {
-        setStatusMessage(QStringLiteral("Nenhum arquivo baixado disponível para ativar."));
+        setStatusMessage(QStringLiteral("No downloaded file available to activate."));
         return;
     }
     const QString remotePath = !m_selectedFilePath.isEmpty() ? m_selectedFilePath : QFileInfo(m_downloadedPath).fileName();
     m_runtimeService->setActiveModel(m_selectedRepoId, remotePath, m_downloadedPath);
-    setStatusMessage(QStringLiteral("Download marcado como modelo local ativo."));
+    setStatusMessage(QStringLiteral("Downloaded file set as active local model."));
 }
 
 void ModelHubViewModel::startServer() {
     if (!m_serverService || !m_runtimeService) {
-        setStatusMessage(QStringLiteral("Gerenciador de llama-server indisponível."));
+        setStatusMessage(QStringLiteral("llama-server manager unavailable."));
         return;
     }
     if (!m_runtimeService->hasActiveModel()) {
-        setStatusMessage(QStringLiteral("Escolha um GGUF ativo antes de iniciar o servidor local."));
+        setStatusMessage(QStringLiteral("Choose an active GGUF file before starting the local server."));
         return;
     }
     m_serverService->startWithModel(m_runtimeService->activeLocalPath(), m_runtimeService->contextSize());
@@ -511,7 +601,7 @@ void ModelHubViewModel::startServer() {
 
 void ModelHubViewModel::stopServer() {
     if (!m_serverService) {
-        setStatusMessage(QStringLiteral("Gerenciador de llama-server indisponível."));
+        setStatusMessage(QStringLiteral("llama-server manager unavailable."));
         return;
     }
     m_serverService->stop();
@@ -542,6 +632,50 @@ QString ModelHubViewModel::chooseRecommendedFile(const std::vector<ide::services
         }
     }
     return bestPath;
+}
+
+std::vector<ide::services::interfaces::ModelFileEntry> ModelHubViewModel::filteredFiles(const std::vector<ide::services::interfaces::ModelFileEntry>& files) const {
+    const QString filter = m_quantFilter.trimmed().toUpper();
+    if (filter.isEmpty() || filter == QStringLiteral("AUTO")) {
+        return files;
+    }
+
+    std::vector<ide::services::interfaces::ModelFileEntry> result;
+    result.reserve(files.size());
+    for (const auto& file : files) {
+        if (file.quantization.trimmed().toUpper() == filter) {
+            result.push_back(file);
+        }
+    }
+    return result;
+}
+
+void ModelHubViewModel::rebuildQuantOptions(const std::vector<ide::services::interfaces::ModelFileEntry>& files) {
+    QSet<QString> set;
+    for (const auto& file : files) {
+        const QString quant = file.quantization.trimmed().toUpper();
+        if (!quant.isEmpty() && quant != QStringLiteral("UNKNOWN")) {
+            set.insert(quant);
+        }
+    }
+
+    QStringList options;
+    options.push_back(QStringLiteral("AUTO"));
+    QStringList sorted = set.values();
+    std::sort(sorted.begin(), sorted.end(), [](const QString& a, const QString& b) {
+        return a < b;
+    });
+    options.append(sorted);
+
+    if (m_quantOptions != options) {
+        m_quantOptions = options;
+        emit quantOptionsChanged();
+    }
+
+    if (!m_quantOptions.contains(m_quantFilter, Qt::CaseInsensitive)) {
+        m_quantFilter = QStringLiteral("AUTO");
+        emit quantFilterChanged();
+    }
 }
 
 int ModelHubViewModel::scoreFile(const ide::services::interfaces::ModelFileEntry& file) const {
@@ -640,6 +774,15 @@ QString ModelHubViewModel::candidateLocalPathForRemote(const QString& remotePath
     }
 
     return preferredPath;
+}
+
+void ModelHubViewModel::loadUiState() {
+    m_wizardStep = qBound(0, m_uiSettings.value(QStringLiteral("modelHub/wizardStep"), 0).toInt(), 3);
+}
+
+void ModelHubViewModel::saveUiState() {
+    m_uiSettings.setValue(QStringLiteral("modelHub/wizardStep"), m_wizardStep);
+    m_uiSettings.sync();
 }
 
 void ModelHubViewModel::setStatusMessage(const QString& message) {

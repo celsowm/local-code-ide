@@ -8,8 +8,10 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QRegularExpression>
+#include <QDateTime>
 #include <QUrlQuery>
 #include <algorithm>
+#include <cmath>
 
 namespace ide::adapters::modelhub {
 
@@ -17,6 +19,67 @@ namespace {
 QString repoNameFromId(const QString& id) {
     const int slash = id.indexOf('/');
     return slash >= 0 ? id.mid(slash + 1) : id;
+}
+
+double daysSinceIso(const QString& iso) {
+    const QDateTime parsed = QDateTime::fromString(iso, Qt::ISODate);
+    if (!parsed.isValid()) {
+        return 3650.0;
+    }
+    const qint64 seconds = parsed.secsTo(QDateTime::currentDateTimeUtc());
+    return qMax(0.0, static_cast<double>(seconds) / 86400.0);
+}
+
+bool isGgufRelevant(const ide::services::interfaces::ModelRepoSummary& repo) {
+    const QString haystack = (repo.id + QStringLiteral(" ") + repo.name + QStringLiteral(" ") + repo.tags.join(QStringLiteral(" "))).toLower();
+    return haystack.contains(QStringLiteral("gguf")) || haystack.contains(QStringLiteral("llama.cpp"));
+}
+
+bool hasQueryMatch(const ide::services::interfaces::ModelRepoSummary& repo, const QString& query) {
+    const QString trimmed = query.trimmed().toLower();
+    if (trimmed.isEmpty()) {
+        return false;
+    }
+    const QString haystack = (repo.id + QStringLiteral(" ") + repo.name + QStringLiteral(" ") + repo.tags.join(QStringLiteral(" "))).toLower();
+    const QStringList parts = trimmed.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+    for (const QString& part : parts) {
+        if (haystack.contains(part)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+double repoRelevanceScore(const ide::services::interfaces::ModelRepoSummary& repo, const QString& query) {
+    double score = 0.0;
+    if (isGgufRelevant(repo)) {
+        score += 500.0;
+    }
+    if (!repo.gated) {
+        score += 150.0;
+    } else {
+        score -= 180.0;
+    }
+    if (hasQueryMatch(repo, query)) {
+        score += 220.0;
+    }
+    const QString idLower = repo.id.toLower();
+    if (idLower.contains(QStringLiteral("instruct")) || idLower.contains(QStringLiteral("chat"))) {
+        score += 50.0;
+    }
+
+    const double downloadScore = std::log10(static_cast<double>(qMax<qint64>(1, repo.downloads)));
+    const double likesScore = std::log10(static_cast<double>(qMax<qint64>(1, repo.likes)));
+    score += downloadScore * 80.0;
+    score += likesScore * 45.0;
+
+    const double ageDays = daysSinceIso(repo.lastModified);
+    if (ageDays <= 7.0) score += 90.0;
+    else if (ageDays <= 30.0) score += 60.0;
+    else if (ageDays <= 90.0) score += 25.0;
+    else if (ageDays > 365.0) score -= 20.0;
+
+    return score;
 }
 }
 
@@ -75,9 +138,17 @@ std::vector<ide::services::interfaces::ModelRepoSummary> HuggingFaceModelCatalog
         repos.push_back(std::move(item));
     }
 
-    std::sort(repos.begin(), repos.end(), [](const auto& left, const auto& right) {
+    std::sort(repos.begin(), repos.end(), [&query](const auto& left, const auto& right) {
+        const double leftScore = repoRelevanceScore(left, query);
+        const double rightScore = repoRelevanceScore(right, query);
+        if (leftScore != rightScore) {
+            return leftScore > rightScore;
+        }
         if (left.downloads != right.downloads) {
             return left.downloads > right.downloads;
+        }
+        if (left.likes != right.likes) {
+            return left.likes > right.likes;
         }
         return left.id < right.id;
     });
@@ -166,11 +237,11 @@ QByteArray HuggingFaceModelCatalogProvider::getJson(const QUrl& url) {
 
 QString HuggingFaceModelCatalogProvider::detectQuantization(const QString& name) const {
     static const std::vector<QRegularExpression> patterns = {
-        QRegularExpression(QStringLiteral("(IQ\d(?:_[A-Z]+)?)"), QRegularExpression::CaseInsensitiveOption),
-        QRegularExpression(QStringLiteral("(Q\d_K_[MSL])"), QRegularExpression::CaseInsensitiveOption),
-        QRegularExpression(QStringLiteral("(Q\d_K)"), QRegularExpression::CaseInsensitiveOption),
+        QRegularExpression(QStringLiteral("(IQ\\d(?:_[A-Z]+)?)"), QRegularExpression::CaseInsensitiveOption),
+        QRegularExpression(QStringLiteral("(Q\\d_K_[MSL])"), QRegularExpression::CaseInsensitiveOption),
+        QRegularExpression(QStringLiteral("(Q\\d_K)"), QRegularExpression::CaseInsensitiveOption),
         QRegularExpression(QStringLiteral("(Q8_0)"), QRegularExpression::CaseInsensitiveOption),
-        QRegularExpression(QStringLiteral("(Q\d_\d)"), QRegularExpression::CaseInsensitiveOption)
+        QRegularExpression(QStringLiteral("(Q\\d_\\d)"), QRegularExpression::CaseInsensitiveOption)
     };
 
     for (const auto& pattern : patterns) {

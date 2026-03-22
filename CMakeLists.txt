@@ -47,8 +47,11 @@ qt_add_executable(LocalCodeIDE
     src/adapters/diagnostics/MockDiagnosticProvider.cpp
 
     src/adapters/search/FileSystemSearchProvider.cpp
+    src/adapters/modelhub/HfCliDownloadBackend.cpp
     src/adapters/modelhub/HuggingFaceFileDownloader.cpp
     src/adapters/modelhub/HuggingFaceModelCatalogProvider.cpp
+    src/adapters/modelhub/IFileDownloadBackend.cpp
+    src/adapters/modelhub/QtHttpDownloadBackend.cpp
     src/adapters/terminal/ProcessTerminalBackend.cpp
     src/adapters/workspace/FileSystemWorkspaceProvider.cpp
 
@@ -90,13 +93,28 @@ qt_add_qml_module(LocalCodeIDE
         qml/components/IconButton.qml
         qml/components/IconRegistry.js
         qml/components/AssistantTab.qml
+        qml/components/assistant/AssistantCard.qml
+        qml/components/assistant/AssistantRuntimeSection.qml
+        qml/components/assistant/AssistantContextSection.qml
+        qml/components/assistant/AssistantToolsSection.qml
+        qml/components/assistant/AssistantApprovalsSection.qml
+        qml/components/assistant/AssistantInputSection.qml
+        qml/components/assistant/AssistantOutputSection.qml
         qml/components/BottomPanel.qml
         qml/components/ChatPanel.qml
+        qml/components/chat/ChatTabSelector.qml
+        qml/components/chat/ChatContentStack.qml
         qml/components/CommandPaletteDialog.qml
         qml/components/EditorPane.qml
         qml/components/ExplorerPanel.qml
         qml/components/LeftPanel.qml
         qml/components/ModelHubPanel.qml
+        qml/components/modelhub/ModelHubCard.qml
+        qml/components/modelhub/ModelHubStepChip.qml
+        qml/components/modelhub/ModelHubDiscoverStep.qml
+        qml/components/modelhub/ModelHubChooseStep.qml
+        qml/components/modelhub/ModelHubDownloadStep.qml
+        qml/components/modelhub/ModelHubActivateServerStep.qml
         qml/components/QuickOpenDialog.qml
         qml/components/SearchPanel.qml
         qml/components/Sidebar.qml
