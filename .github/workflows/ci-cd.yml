@@ -37,19 +37,13 @@ jobs:
     - name: Install Qt
       run: |
         python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --outputdir C:\Qt
-        # Set Qt6_DIR to the cmake config directory
-        echo "Qt6_DIR=C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\lib\cmake\Qt6" >> $env:GITHUB_ENV
 
     - name: Configure CMake
       run: |
-        $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
-        $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
-        cmake -S . -B build
+        cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}"
 
     - name: Build
       run: |
-        $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
-        $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
         cmake --build build --config Release
 
     - name: Deploy Qt
@@ -103,13 +97,10 @@ jobs:
     - name: Install Qt
       run: |
         python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --outputdir C:\Qt
-        echo "Qt6_DIR=C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\lib\cmake\Qt6" >> $env:GITHUB_ENV
 
     - name: Build Release
       run: |
-        $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
-        $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
-        cmake -S . -B build
+        cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}"
         cmake --build build --config Release
 
     - name: Deploy Qt
