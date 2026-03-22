@@ -11,6 +11,8 @@ on:
 env:
   QT_VERSION: 6.8.0
   QT_PLATFORM: win64_msvc2022_64
+  QT_ROOT: C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}
+  QT6_DIR: C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}/lib/cmake/Qt6
 
 jobs:
   build:
@@ -40,7 +42,9 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}"
+        cmake -S . -B build `
+          -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT }}" `
+          -DQt6_DIR="${{ env.QT6_DIR }}"
 
     - name: Lint
       run: |
@@ -104,7 +108,9 @@ jobs:
 
     - name: Build Release
       run: |
-        cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}"
+        cmake -S . -B build `
+          -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT }}" `
+          -DQt6_DIR="${{ env.QT6_DIR }}"
         cmake --build build --config Release
 
     - name: Deploy Qt
