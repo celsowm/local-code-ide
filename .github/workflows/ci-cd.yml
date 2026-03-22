@@ -46,13 +46,13 @@ jobs:
           -DCMAKE_PREFIX_PATH="${{ env.QT_DIR }}" `
           -DQt6_DIR="${{ env.QT6_DIR }}"
 
-    - name: Lint
-      run: |
-        python setup.py lint
-
     - name: Build
       run: |
         cmake --build build --config Release
+
+    - name: Lint
+      run: |
+        python setup.py lint
 
     - name: Deploy Qt
       run: |
