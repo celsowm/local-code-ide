@@ -41,6 +41,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QtQuickControls2/QQuickStyle>
 #include <QtQml>
 #include <utility>
 
@@ -58,6 +59,10 @@ QStringList splitArgs(const QString& value) {
 int main(int argc, char* argv[]) {
     QCoreApplication::setOrganizationName(QStringLiteral("LocalCodeIDE"));
     QCoreApplication::setApplicationName(QStringLiteral("LocalCodeIDE"));
+
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
+        QQuickStyle::setStyle(QStringLiteral("Fusion"));
+    }
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;

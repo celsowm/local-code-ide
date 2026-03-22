@@ -115,17 +115,17 @@ ApplicationWindow {
                 SplitView {
                     SplitView.fillWidth: true
                     SplitView.fillHeight: true
-                    orientation: Qt.Vertical
+                    orientation: Qt.Horizontal
 
                     SplitView {
                         SplitView.fillWidth: true
                         SplitView.fillHeight: true
-                        orientation: Qt.Horizontal
+                        orientation: Qt.Vertical
                         EditorPane { SplitView.fillWidth: true; SplitView.fillHeight: true }
-                        ChatPanel { SplitView.preferredWidth: 390; SplitView.minimumWidth: 320 }
+                        BottomPanel { SplitView.fillWidth: true; SplitView.preferredHeight: 280; SplitView.minimumHeight: 220 }
                     }
 
-                    BottomPanel { SplitView.fillWidth: true; SplitView.preferredHeight: 280; SplitView.minimumHeight: 220 }
+                    ChatPanel { SplitView.preferredWidth: 390; SplitView.minimumWidth: 320; SplitView.fillHeight: true }
                 }
             }
 

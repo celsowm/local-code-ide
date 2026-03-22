@@ -1,0 +1,40 @@
+build	Configure CMake	﻿2026-03-22T03:12:33.8149572Z ##[group]Run $env:CMAKE_PREFIX_PATH = "C:\Qt\6.8.0\win64_msvc2022_64"
+build	Configure CMake	2026-03-22T03:12:33.8150099Z [36;1m$env:CMAKE_PREFIX_PATH = "C:\Qt\6.8.0\win64_msvc2022_64"[0m
+build	Configure CMake	2026-03-22T03:12:33.8150491Z [36;1m$env:PATH = "C:\Qt\6.8.0\win64_msvc2022_64\bin;$env:PATH"[0m
+build	Configure CMake	2026-03-22T03:12:33.8150815Z [36;1mcmake -S . -B build[0m
+build	Configure CMake	2026-03-22T03:12:33.8209714Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Configure CMake	2026-03-22T03:12:33.8210028Z env:
+build	Configure CMake	2026-03-22T03:12:33.8210175Z   QT_VERSION: 6.8.0
+build	Configure CMake	2026-03-22T03:12:33.8210357Z   QT_PLATFORM: win64_msvc2022_64
+build	Configure CMake	2026-03-22T03:12:33.8210643Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:12:33.8211077Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+build	Configure CMake	2026-03-22T03:12:33.8211508Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:12:33.8211884Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:12:33.8212253Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:12:33.8212675Z   Qt6_DIR: C:\Qt\6.8.0\win64_msvc2022_64\lib\cmake\Qt6
+build	Configure CMake	2026-03-22T03:12:33.8212927Z ##[endgroup]
+build	Configure CMake	2026-03-22T03:12:34.7101076Z -- Building for: Visual Studio 17 2022
+build	Configure CMake	2026-03-22T03:12:42.6380261Z -- The CXX compiler identification is MSVC 19.44.35223.0
+build	Configure CMake	2026-03-22T03:12:42.7633466Z -- Detecting CXX compiler ABI info
+build	Configure CMake	2026-03-22T03:12:43.8365448Z -- Detecting CXX compiler ABI info - done
+build	Configure CMake	2026-03-22T03:12:43.8529500Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+build	Configure CMake	2026-03-22T03:12:43.8544262Z -- Detecting CXX compile features
+build	Configure CMake	2026-03-22T03:12:43.8592205Z -- Detecting CXX compile features - done
+build	Configure CMake	2026-03-22T03:12:44.3220681Z CMake Error at CMakeLists.txt:12 (find_package):
+build	Configure CMake	2026-03-22T03:12:44.3221477Z   By not providing "FindQt6.cmake" in CMAKE_MODULE_PATH this project has
+build	Configure CMake	2026-03-22T03:12:44.3222705Z   asked CMake to find a package configuration file provided by "Qt6", but
+build	Configure CMake	2026-03-22T03:12:44.3223459Z   CMake did not find one.
+build	Configure CMake	2026-03-22T03:12:44.3223712Z 
+build	Configure CMake	2026-03-22T03:12:44.3224460Z   Could not find a package configuration file provided by "Qt6" (requested
+build	Configure CMake	2026-03-22T03:12:44.3225709Z   version 6.5) with any of the following names:
+build	Configure CMake	2026-03-22T03:12:44.3226094Z 
+build	Configure CMake	2026-03-22T03:12:44.3226207Z     Qt6Config.cmake
+build	Configure CMake	2026-03-22T03:12:44.3226490Z     qt6-config.cmake
+build	Configure CMake	2026-03-22T03:12:44.3226683Z 
+build	Configure CMake	2026-03-22T03:12:44.3227007Z   Add the installation prefix of "Qt6" to CMAKE_PREFIX_PATH or set "Qt6_DIR"
+build	Configure CMake	2026-03-22T03:12:44.3227798Z   to a directory containing one of the above files.  If "Qt6" provides a
+build	Configure CMake	2026-03-22T03:12:44.3228551Z   separate development package or SDK, be sure it has been installed.
+build	Configure CMake	2026-03-22T03:12:44.3229042Z 
+build	Configure CMake	2026-03-22T03:12:44.3229054Z 
+build	Configure CMake	2026-03-22T03:12:44.3229255Z -- Configuring incomplete, errors occurred!
+build	Configure CMake	2026-03-22T03:12:44.4551852Z ##[error]Process completed with exit code 1.

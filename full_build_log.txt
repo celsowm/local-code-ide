@@ -1,0 +1,468 @@
+build	Set up job	﻿2026-03-22T03:23:50.0848277Z Current runner version: '2.332.0'
+build	Set up job	2026-03-22T03:23:50.1117940Z ##[group]Runner Image Provisioner
+build	Set up job	2026-03-22T03:23:50.1118669Z Hosted Compute Agent
+build	Set up job	2026-03-22T03:23:50.1119316Z Version: 20260213.493
+build	Set up job	2026-03-22T03:23:50.1119852Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+build	Set up job	2026-03-22T03:23:50.1120420Z Build Date: 2026-02-13T00:28:41Z
+build	Set up job	2026-03-22T03:23:50.1120919Z Worker ID: {c982a319-dc4c-47a9-8e37-f27c5ebebfed}
+build	Set up job	2026-03-22T03:23:50.1121716Z Azure Region: westus3
+build	Set up job	2026-03-22T03:23:50.1122152Z ##[endgroup]
+build	Set up job	2026-03-22T03:23:50.1123462Z ##[group]Operating System
+build	Set up job	2026-03-22T03:23:50.1124047Z Microsoft Windows Server 2025
+build	Set up job	2026-03-22T03:23:50.1124460Z 10.0.26100
+build	Set up job	2026-03-22T03:23:50.1124811Z Datacenter
+build	Set up job	2026-03-22T03:23:50.1125165Z ##[endgroup]
+build	Set up job	2026-03-22T03:23:50.1125546Z ##[group]Runner Image
+build	Set up job	2026-03-22T03:23:50.1125931Z Image: windows-2025
+build	Set up job	2026-03-22T03:23:50.1126378Z Version: 20260317.61.1
+build	Set up job	2026-03-22T03:23:50.1127209Z Included Software: https://github.com/actions/runner-images/blob/win25/20260317.61/images/windows/Windows2025-Readme.md
+build	Set up job	2026-03-22T03:23:50.1128768Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260317.61
+build	Set up job	2026-03-22T03:23:50.1129449Z ##[endgroup]
+build	Set up job	2026-03-22T03:23:50.1130355Z ##[group]GITHUB_TOKEN Permissions
+build	Set up job	2026-03-22T03:23:50.1132111Z Contents: read
+build	Set up job	2026-03-22T03:23:50.1132517Z Metadata: read
+build	Set up job	2026-03-22T03:23:50.1132887Z Packages: read
+build	Set up job	2026-03-22T03:23:50.1133318Z ##[endgroup]
+build	Set up job	2026-03-22T03:23:50.1135339Z Secret source: Actions
+build	Set up job	2026-03-22T03:23:50.1135902Z Prepare workflow directory
+build	Set up job	2026-03-22T03:23:50.1509870Z Prepare all required actions
+build	Set up job	2026-03-22T03:23:50.1548592Z Getting action download info
+build	Set up job	2026-03-22T03:23:50.5042879Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+build	Set up job	2026-03-22T03:23:50.6877617Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+build	Set up job	2026-03-22T03:23:50.9259939Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build	Set up job	2026-03-22T03:23:51.5556003Z Complete job name: build
+build	Checkout	﻿2026-03-22T03:23:51.9076200Z ##[group]Run actions/checkout@v4
+build	Checkout	2026-03-22T03:23:51.9077904Z with:
+build	Checkout	2026-03-22T03:23:51.9078532Z   repository: celsowm/local-code-ide
+build	Checkout	2026-03-22T03:23:51.9079675Z   token: ***
+build	Checkout	2026-03-22T03:23:51.9080261Z   ssh-strict: true
+build	Checkout	2026-03-22T03:23:51.9080977Z   ssh-user: git
+build	Checkout	2026-03-22T03:23:51.9081725Z   persist-credentials: true
+build	Checkout	2026-03-22T03:23:51.9082555Z   clean: true
+build	Checkout	2026-03-22T03:23:51.9083322Z   sparse-checkout-cone-mode: true
+build	Checkout	2026-03-22T03:23:51.9084204Z   fetch-depth: 1
+build	Checkout	2026-03-22T03:23:51.9084933Z   fetch-tags: false
+build	Checkout	2026-03-22T03:23:51.9085795Z   show-progress: true
+build	Checkout	2026-03-22T03:23:51.9086669Z   lfs: false
+build	Checkout	2026-03-22T03:23:51.9087342Z   submodules: false
+build	Checkout	2026-03-22T03:23:51.9088086Z   set-safe-directory: true
+build	Checkout	2026-03-22T03:23:51.9089230Z env:
+build	Checkout	2026-03-22T03:23:51.9089880Z   QT_VERSION: 6.8.0
+build	Checkout	2026-03-22T03:23:51.9090908Z   QT_PLATFORM: win64_msvc2022_64
+build	Checkout	2026-03-22T03:23:51.9091834Z ##[endgroup]
+build	Checkout	2026-03-22T03:23:52.1175803Z Syncing repository: celsowm/local-code-ide
+build	Checkout	2026-03-22T03:23:52.1178668Z ##[group]Getting Git version info
+build	Checkout	2026-03-22T03:23:52.1180033Z Working directory is 'D:\a\local-code-ide\local-code-ide'
+build	Checkout	2026-03-22T03:23:52.1990554Z [command]"C:\Program Files\Git\bin\git.exe" version
+build	Checkout	2026-03-22T03:23:53.1557215Z git version 2.53.0.windows.2
+build	Checkout	2026-03-22T03:23:53.1608109Z ##[endgroup]
+build	Checkout	2026-03-22T03:23:53.1626572Z Temporarily overriding HOME='D:\a\_temp\f3405e69-ca50-4f2c-a326-4a0f3e9d23fb' before making global git config changes
+build	Checkout	2026-03-22T03:23:53.1627355Z Adding repository directory to the temporary git global config as a safe directory
+build	Checkout	2026-03-22T03:23:53.1639832Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\local-code-ide\local-code-ide
+build	Checkout	2026-03-22T03:23:53.1932588Z Deleting the contents of 'D:\a\local-code-ide\local-code-ide'
+build	Checkout	2026-03-22T03:23:53.1938372Z ##[group]Initializing the repository
+build	Checkout	2026-03-22T03:23:53.1947811Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\local-code-ide\local-code-ide
+build	Checkout	2026-03-22T03:23:53.4126291Z Initialized empty Git repository in D:/a/local-code-ide/local-code-ide/.git/
+build	Checkout	2026-03-22T03:23:53.4184046Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/celsowm/local-code-ide
+build	Checkout	2026-03-22T03:23:53.4494746Z ##[endgroup]
+build	Checkout	2026-03-22T03:23:53.4495286Z ##[group]Disabling automatic garbage collection
+build	Checkout	2026-03-22T03:23:53.4505393Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+build	Checkout	2026-03-22T03:23:53.4796792Z ##[endgroup]
+build	Checkout	2026-03-22T03:23:53.4797475Z ##[group]Setting up auth
+build	Checkout	2026-03-22T03:23:53.4816285Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build	Checkout	2026-03-22T03:23:53.5112347Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build	Checkout	2026-03-22T03:23:57.9800837Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Checkout	2026-03-22T03:23:58.0106599Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build	Checkout	2026-03-22T03:23:58.5634618Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Checkout	2026-03-22T03:23:58.5937256Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build	Checkout	2026-03-22T03:23:59.1214994Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+build	Checkout	2026-03-22T03:23:59.1526371Z ##[endgroup]
+build	Checkout	2026-03-22T03:23:59.1526992Z ##[group]Fetching the repository
+build	Checkout	2026-03-22T03:23:59.1540398Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +359f228b597d4e0e867345f9c962c44d19ffc474:refs/remotes/origin/main
+build	Checkout	2026-03-22T03:24:01.5896876Z From https://github.com/celsowm/local-code-ide
+build	Checkout	2026-03-22T03:24:01.5897659Z  * [new ref]         359f228b597d4e0e867345f9c962c44d19ffc474 -> origin/main
+build	Checkout	2026-03-22T03:24:01.6131521Z ##[endgroup]
+build	Checkout	2026-03-22T03:24:01.6132032Z ##[group]Determining the checkout info
+build	Checkout	2026-03-22T03:24:01.6133922Z ##[endgroup]
+build	Checkout	2026-03-22T03:24:01.6145487Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+build	Checkout	2026-03-22T03:24:01.6473722Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+build	Checkout	2026-03-22T03:24:01.6775336Z ##[group]Checking out the ref
+build	Checkout	2026-03-22T03:24:01.6785875Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+build	Checkout	2026-03-22T03:24:01.7476147Z Switched to a new branch 'main'
+build	Checkout	2026-03-22T03:24:01.7488032Z branch 'main' set up to track 'origin/main'.
+build	Checkout	2026-03-22T03:24:01.7537107Z ##[endgroup]
+build	Checkout	2026-03-22T03:24:01.7866685Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+build	Checkout	2026-03-22T03:24:01.8158966Z 359f228b597d4e0e867345f9c962c44d19ffc474
+build	Setup Python	﻿2026-03-22T03:24:01.8590286Z ##[group]Run actions/setup-python@v5
+build	Setup Python	2026-03-22T03:24:01.8590666Z with:
+build	Setup Python	2026-03-22T03:24:01.8590832Z   python-version: 3.12
+build	Setup Python	2026-03-22T03:24:01.8591018Z   check-latest: false
+build	Setup Python	2026-03-22T03:24:01.8591384Z   token: ***
+build	Setup Python	2026-03-22T03:24:01.8591545Z   update-environment: true
+build	Setup Python	2026-03-22T03:24:01.8591745Z   allow-prereleases: false
+build	Setup Python	2026-03-22T03:24:01.8591962Z   freethreaded: false
+build	Setup Python	2026-03-22T03:24:01.8592176Z env:
+build	Setup Python	2026-03-22T03:24:01.8592314Z   QT_VERSION: 6.8.0
+build	Setup Python	2026-03-22T03:24:01.8592494Z   QT_PLATFORM: win64_msvc2022_64
+build	Setup Python	2026-03-22T03:24:01.8592688Z ##[endgroup]
+build	Setup Python	2026-03-22T03:24:02.0804726Z ##[group]Installed versions
+build	Setup Python	2026-03-22T03:24:02.0919892Z Successfully set up CPython (3.12.10)
+build	Setup Python	2026-03-22T03:24:02.0921853Z ##[endgroup]
+build	Install WiX Toolset	﻿2026-03-22T03:24:02.1174561Z ##[group]Run dotnet tool install --global wix
+build	Install WiX Toolset	2026-03-22T03:24:02.1175054Z [36;1mdotnet tool install --global wix[0m
+build	Install WiX Toolset	2026-03-22T03:24:02.2663978Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Install WiX Toolset	2026-03-22T03:24:02.2664350Z env:
+build	Install WiX Toolset	2026-03-22T03:24:02.2664521Z   QT_VERSION: 6.8.0
+build	Install WiX Toolset	2026-03-22T03:24:02.2664714Z   QT_PLATFORM: win64_msvc2022_64
+build	Install WiX Toolset	2026-03-22T03:24:02.2665005Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install WiX Toolset	2026-03-22T03:24:02.2665424Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+build	Install WiX Toolset	2026-03-22T03:24:02.2665831Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install WiX Toolset	2026-03-22T03:24:02.2666180Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install WiX Toolset	2026-03-22T03:24:02.2666537Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install WiX Toolset	2026-03-22T03:24:02.2666822Z ##[endgroup]
+build	Install WiX Toolset	2026-03-22T03:25:13.9019411Z You can invoke the tool using the following command: wix
+build	Install WiX Toolset	2026-03-22T03:25:13.9020345Z Tool 'wix' (version '6.0.2') was successfully installed.
+build	Install dependencies	﻿2026-03-22T03:25:16.7668406Z ##[group]Run python -m pip install --upgrade pip
+build	Install dependencies	2026-03-22T03:25:16.7668879Z [36;1mpython -m pip install --upgrade pip[0m
+build	Install dependencies	2026-03-22T03:25:16.7669159Z [36;1mpip install aqtinstall[0m
+build	Install dependencies	2026-03-22T03:25:16.7727996Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Install dependencies	2026-03-22T03:25:16.7728333Z env:
+build	Install dependencies	2026-03-22T03:25:16.7728495Z   QT_VERSION: 6.8.0
+build	Install dependencies	2026-03-22T03:25:16.7728691Z   QT_PLATFORM: win64_msvc2022_64
+build	Install dependencies	2026-03-22T03:25:16.7728982Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install dependencies	2026-03-22T03:25:16.7729399Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+build	Install dependencies	2026-03-22T03:25:16.7729794Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install dependencies	2026-03-22T03:25:16.7730163Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install dependencies	2026-03-22T03:25:16.7730526Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install dependencies	2026-03-22T03:25:16.7730824Z ##[endgroup]
+build	Install dependencies	2026-03-22T03:25:41.3567658Z Requirement already satisfied: pip in C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages (26.0.1)
+build	Install dependencies	2026-03-22T03:25:44.5656205Z Collecting aqtinstall
+build	Install dependencies	2026-03-22T03:25:44.7747751Z   Downloading aqtinstall-3.3.0-py3-none-any.whl.metadata (11 kB)
+build	Install dependencies	2026-03-22T03:25:44.9189232Z Collecting bs4 (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:44.9432127Z   Downloading bs4-0.0.2-py2.py3-none-any.whl.metadata (411 bytes)
+build	Install dependencies	2026-03-22T03:25:45.0779674Z Collecting defusedxml (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:45.0894229Z   Downloading defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+build	Install dependencies	2026-03-22T03:25:45.2393184Z Collecting humanize (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:45.2530988Z   Downloading humanize-4.15.0-py3-none-any.whl.metadata (7.8 kB)
+build	Install dependencies	2026-03-22T03:25:45.3733071Z Collecting patch-ng (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:45.3892833Z   Downloading patch-ng-1.19.0.tar.gz (18 kB)
+build	Install dependencies	2026-03-22T03:25:45.5529041Z   Installing build dependencies: started
+build	Install dependencies	2026-03-22T03:25:49.7024491Z   Installing build dependencies: finished with status 'done'
+build	Install dependencies	2026-03-22T03:25:49.7042192Z   Getting requirements to build wheel: started
+build	Install dependencies	2026-03-22T03:25:50.7567547Z   Getting requirements to build wheel: finished with status 'done'
+build	Install dependencies	2026-03-22T03:25:50.7597005Z   Preparing metadata (pyproject.toml): started
+build	Install dependencies	2026-03-22T03:25:51.1223840Z   Preparing metadata (pyproject.toml): finished with status 'done'
+build	Install dependencies	2026-03-22T03:25:51.2096779Z Collecting py7zr>=0.22.0 (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:51.2216695Z   Downloading py7zr-1.1.0-py3-none-any.whl.metadata (17 kB)
+build	Install dependencies	2026-03-22T03:25:51.3590390Z Collecting requests>=2.31.0 (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:51.3711845Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+build	Install dependencies	2026-03-22T03:25:51.4879275Z Collecting semantic-version (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:51.4996421Z   Downloading semantic_version-2.10.0-py2.py3-none-any.whl.metadata (9.7 kB)
+build	Install dependencies	2026-03-22T03:25:51.5986645Z Collecting texttable (from aqtinstall)
+build	Install dependencies	2026-03-22T03:25:51.6103610Z   Downloading texttable-1.7.0-py2.py3-none-any.whl.metadata (9.8 kB)
+build	Install dependencies	2026-03-22T03:25:51.9495464Z Collecting pycryptodomex>=3.20.0 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:51.9641419Z   Downloading pycryptodomex-3.23.0-cp37-abi3-win_amd64.whl.metadata (3.5 kB)
+build	Install dependencies	2026-03-22T03:25:52.1167779Z Collecting brotli>=1.2.0 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:52.1283142Z   Downloading brotli-1.2.0-cp312-cp312-win_amd64.whl.metadata (6.3 kB)
+build	Install dependencies	2026-03-22T03:25:52.3317816Z Collecting psutil (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:52.3446263Z   Downloading psutil-7.2.2-cp37-abi3-win_amd64.whl.metadata (22 kB)
+build	Install dependencies	2026-03-22T03:25:52.4979738Z Collecting backports.zstd>=1.0.0 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:52.5130439Z   Downloading backports_zstd-1.3.0-cp312-cp312-win_amd64.whl.metadata (7.1 kB)
+build	Install dependencies	2026-03-22T03:25:52.8819242Z Collecting pyppmd>=1.3.1 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:52.8962544Z   Downloading pyppmd-1.3.1-cp312-cp312-win_amd64.whl.metadata (5.6 kB)
+build	Install dependencies	2026-03-22T03:25:53.0460434Z Collecting pybcj>=1.0.6 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.0600352Z   Downloading pybcj-1.0.7-cp312-cp312-win_amd64.whl.metadata (4.0 kB)
+build	Install dependencies	2026-03-22T03:25:53.1382541Z Collecting multivolumefile>=0.2.3 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.1495350Z   Downloading multivolumefile-0.2.3-py3-none-any.whl.metadata (6.3 kB)
+build	Install dependencies	2026-03-22T03:25:53.3233025Z Collecting inflate64>=1.0.4 (from py7zr>=0.22.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.3404598Z   Downloading inflate64-1.0.4-cp312-cp312-win_amd64.whl.metadata (4.5 kB)
+build	Install dependencies	2026-03-22T03:25:53.4957705Z Collecting charset_normalizer<4,>=2 (from requests>=2.31.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.5088677Z   Downloading charset_normalizer-3.4.6-cp312-cp312-win_amd64.whl.metadata (41 kB)
+build	Install dependencies	2026-03-22T03:25:53.6325381Z Collecting idna<4,>=2.5 (from requests>=2.31.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.6438032Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+build	Install dependencies	2026-03-22T03:25:53.7615123Z Collecting urllib3<3,>=1.21.1 (from requests>=2.31.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.7741337Z   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+build	Install dependencies	2026-03-22T03:25:53.8826156Z Collecting certifi>=2017.4.17 (from requests>=2.31.0->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:53.8943566Z   Downloading certifi-2026.2.25-py3-none-any.whl.metadata (2.5 kB)
+build	Install dependencies	2026-03-22T03:25:54.0033308Z Collecting beautifulsoup4 (from bs4->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:54.0158261Z   Downloading beautifulsoup4-4.14.3-py3-none-any.whl.metadata (3.8 kB)
+build	Install dependencies	2026-03-22T03:25:54.1530278Z Collecting soupsieve>=1.6.1 (from beautifulsoup4->bs4->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:54.1647164Z   Downloading soupsieve-2.8.3-py3-none-any.whl.metadata (4.6 kB)
+build	Install dependencies	2026-03-22T03:25:54.2919407Z Collecting typing-extensions>=4.0.0 (from beautifulsoup4->bs4->aqtinstall)
+build	Install dependencies	2026-03-22T03:25:54.3061334Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+build	Install dependencies	2026-03-22T03:25:54.3772806Z Downloading aqtinstall-3.3.0-py3-none-any.whl (71 kB)
+build	Install dependencies	2026-03-22T03:25:54.4369858Z Downloading py7zr-1.1.0-py3-none-any.whl (71 kB)
+build	Install dependencies	2026-03-22T03:25:54.5309158Z Downloading backports_zstd-1.3.0-cp312-cp312-win_amd64.whl (313 kB)
+build	Install dependencies	2026-03-22T03:25:54.6186171Z Downloading brotli-1.2.0-cp312-cp312-win_amd64.whl (369 kB)
+build	Install dependencies	2026-03-22T03:25:54.7537684Z Downloading inflate64-1.0.4-cp312-cp312-win_amd64.whl (35 kB)
+build	Install dependencies	2026-03-22T03:25:54.8325523Z Downloading multivolumefile-0.2.3-py3-none-any.whl (17 kB)
+build	Install dependencies	2026-03-22T03:25:54.9199589Z Downloading pybcj-1.0.7-cp312-cp312-win_amd64.whl (24 kB)
+build	Install dependencies	2026-03-22T03:25:55.0071495Z Downloading pycryptodomex-3.23.0-cp37-abi3-win_amd64.whl (1.8 MB)
+build	Install dependencies	2026-03-22T03:25:55.0845632Z    ---------------------------------------- 1.8/1.8 MB 19.8 MB/s  0:00:00
+build	Install dependencies	2026-03-22T03:25:55.0978172Z Downloading pyppmd-1.3.1-cp312-cp312-win_amd64.whl (46 kB)
+build	Install dependencies	2026-03-22T03:25:55.1747847Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+build	Install dependencies	2026-03-22T03:25:55.2613605Z Downloading charset_normalizer-3.4.6-cp312-cp312-win_amd64.whl (154 kB)
+build	Install dependencies	2026-03-22T03:25:55.3413908Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+build	Install dependencies	2026-03-22T03:25:55.4371883Z Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+build	Install dependencies	2026-03-22T03:25:55.5236643Z Downloading certifi-2026.2.25-py3-none-any.whl (153 kB)
+build	Install dependencies	2026-03-22T03:25:55.6099739Z Downloading bs4-0.0.2-py2.py3-none-any.whl (1.2 kB)
+build	Install dependencies	2026-03-22T03:25:55.6748356Z Downloading beautifulsoup4-4.14.3-py3-none-any.whl (107 kB)
+build	Install dependencies	2026-03-22T03:25:55.7236080Z Downloading soupsieve-2.8.3-py3-none-any.whl (37 kB)
+build	Install dependencies	2026-03-22T03:25:55.7714471Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+build	Install dependencies	2026-03-22T03:25:55.8265013Z Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+build	Install dependencies	2026-03-22T03:25:55.9123155Z Downloading humanize-4.15.0-py3-none-any.whl (132 kB)
+build	Install dependencies	2026-03-22T03:25:55.9670060Z Downloading psutil-7.2.2-cp37-abi3-win_amd64.whl (137 kB)
+build	Install dependencies	2026-03-22T03:25:56.0691949Z Downloading semantic_version-2.10.0-py2.py3-none-any.whl (15 kB)
+build	Install dependencies	2026-03-22T03:25:56.1691586Z Downloading texttable-1.7.0-py2.py3-none-any.whl (10 kB)
+build	Install dependencies	2026-03-22T03:25:56.2663308Z Building wheels for collected packages: patch-ng
+build	Install dependencies	2026-03-22T03:25:56.2689520Z   Building wheel for patch-ng (pyproject.toml): started
+build	Install dependencies	2026-03-22T03:25:56.6795714Z   Building wheel for patch-ng (pyproject.toml): finished with status 'done'
+build	Install dependencies	2026-03-22T03:25:56.6819385Z   Created wheel for patch-ng: filename=patch_ng-1.19.0-py3-none-any.whl size=17627 sha256=96ca49a02c5e3327d3a11799ba1c5e1c80fae7472ec3d40fe1ea325847621ab7
+build	Install dependencies	2026-03-22T03:25:56.6821451Z   Stored in directory: c:\users\runneradmin\appdata\local\pip\cache\wheels\2f\9b\5f\c830acdd8d5e238b8f11ba5b95585e56d2d826c7bcc3d78dc8
+build	Install dependencies	2026-03-22T03:25:56.6846866Z Successfully built patch-ng
+build	Install dependencies	2026-03-22T03:25:56.7288399Z Installing collected packages: texttable, brotli, urllib3, typing-extensions, soupsieve, semantic-version, pyppmd, pycryptodomex, pybcj, psutil, patch-ng, multivolumefile, inflate64, idna, humanize, defusedxml, charset_normalizer, certifi, backports.zstd, requests, py7zr, beautifulsoup4, bs4, aqtinstall
+build	Install dependencies	2026-03-22T03:26:03.8249563Z 
+build	Install dependencies	2026-03-22T03:26:03.8291845Z Successfully installed aqtinstall-3.3.0 backports.zstd-1.3.0 beautifulsoup4-4.14.3 brotli-1.2.0 bs4-0.0.2 certifi-2026.2.25 charset_normalizer-3.4.6 defusedxml-0.7.1 humanize-4.15.0 idna-3.11 inflate64-1.0.4 multivolumefile-0.2.3 patch-ng-1.19.0 psutil-7.2.2 py7zr-1.1.0 pybcj-1.0.7 pycryptodomex-3.23.0 pyppmd-1.3.1 requests-2.32.5 semantic-version-2.10.0 soupsieve-2.8.3 texttable-1.7.0 typing-extensions-4.15.0 urllib3-2.6.3
+build	Install Qt	﻿2026-03-22T03:26:04.2009334Z ##[group]Run python -m aqt install-qt windows desktop 6.8.0 win64_msvc2022_64 --outputdir C:\Qt
+build	Install Qt	2026-03-22T03:26:04.2010069Z [36;1mpython -m aqt install-qt windows desktop 6.8.0 win64_msvc2022_64 --outputdir C:\Qt[0m
+build	Install Qt	2026-03-22T03:26:04.2077019Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Install Qt	2026-03-22T03:26:04.2077367Z env:
+build	Install Qt	2026-03-22T03:26:04.2077536Z   QT_VERSION: 6.8.0
+build	Install Qt	2026-03-22T03:26:04.2077743Z   QT_PLATFORM: win64_msvc2022_64
+build	Install Qt	2026-03-22T03:26:04.2078062Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install Qt	2026-03-22T03:26:04.2078490Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+build	Install Qt	2026-03-22T03:26:04.2078891Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install Qt	2026-03-22T03:26:04.2079268Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install Qt	2026-03-22T03:26:04.2079637Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Install Qt	2026-03-22T03:26:04.2079915Z ##[endgroup]
+build	Install Qt	2026-03-22T03:26:07.9769939Z INFO    : aqtinstall(aqt) v3.3.0 on Python 3.12.10 [CPython MSC v.1943 64 bit (AMD64)]
+build	Install Qt	2026-03-22T03:26:11.7614067Z INFO    : Found extension qtwebengine
+build	Install Qt	2026-03-22T03:26:13.4237507Z INFO    : Found extension qtpdf
+build	Install Qt	2026-03-22T03:26:15.3087987Z INFO    : Downloading qtbase...
+build	Install Qt	2026-03-22T03:26:15.3095605Z INFO    : Downloading qttools...
+build	Install Qt	2026-03-22T03:26:15.3186753Z INFO    : Downloading qtdeclarative...
+build	Install Qt	2026-03-22T03:26:15.3232801Z INFO    : Downloading qtsvg...
+build	Install Qt	2026-03-22T03:26:16.3485490Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:16.3578154Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:16.3694509Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:16.3733289Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:17.5522529Z INFO    : Finished installation of qtsvg-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z in 3.30564560
+build	Install Qt	2026-03-22T03:26:18.5617496Z INFO    : Downloading qttranslations...
+build	Install Qt	2026-03-22T03:26:19.4521689Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:20.9708820Z INFO    : Finished installation of qttranslations-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z in 3.40248780
+build	Install Qt	2026-03-22T03:26:21.8860215Z INFO    : Downloading d3dcompiler_47...
+build	Install Qt	2026-03-22T03:26:21.8992293Z INFO    : Finished installation of qttools-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z in 7.65181160
+build	Install Qt	2026-03-22T03:26:22.9394950Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:22.9470812Z INFO    : Downloading opengl32sw...
+build	Install Qt	2026-03-22T03:26:23.8957012Z INFO    : Redirected: qt.mirror.constant.com
+build	Install Qt	2026-03-22T03:26:24.1230325Z INFO    : Finished installation of d3dcompiler_47-x64.7z in 3.13547940
+build	Install Qt	2026-03-22T03:26:25.4900885Z INFO    : Finished installation of opengl32sw-64-mesa_11_2_2-signed_sha256.7z in 3.57060000
+build	Install Qt	2026-03-22T03:26:27.2532582Z INFO    : Finished installation of qtbase-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z in 13.00763100
+build	Install Qt	2026-03-22T03:27:03.3058299Z INFO    : Finished installation of qtdeclarative-Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64.7z in 49.05924230
+build	Install Qt	2026-03-22T03:27:03.4671877Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\bin\qmake.exe
+build	Install Qt	2026-03-22T03:27:03.4726609Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Concurrent.prl
+build	Install Qt	2026-03-22T03:27:03.4732747Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Concurrentd.prl
+build	Install Qt	2026-03-22T03:27:03.4738247Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Core.prl
+build	Install Qt	2026-03-22T03:27:03.4742755Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Cored.prl
+build	Install Qt	2026-03-22T03:27:03.4747025Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DBus.prl
+build	Install Qt	2026-03-22T03:27:03.4751287Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DBusd.prl
+build	Install Qt	2026-03-22T03:27:03.4755475Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Designer.prl
+build	Install Qt	2026-03-22T03:27:03.4760391Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DesignerComponents.prl
+build	Install Qt	2026-03-22T03:27:03.4764725Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DesignerComponentsd.prl
+build	Install Qt	2026-03-22T03:27:03.4772643Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Designerd.prl
+build	Install Qt	2026-03-22T03:27:03.4776732Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DeviceDiscoverySupport.prl
+build	Install Qt	2026-03-22T03:27:03.4781797Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6DeviceDiscoverySupportd.prl
+build	Install Qt	2026-03-22T03:27:03.4786176Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6EntryPoint.prl
+build	Install Qt	2026-03-22T03:27:03.4790341Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6EntryPointd.prl
+build	Install Qt	2026-03-22T03:27:03.4794697Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6ExampleIcons.prl
+build	Install Qt	2026-03-22T03:27:03.4799522Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6ExampleIconsd.prl
+build	Install Qt	2026-03-22T03:27:03.4803714Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6ExamplesAssetDownloader.prl
+build	Install Qt	2026-03-22T03:27:03.4807959Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6ExamplesAssetDownloaderd.prl
+build	Install Qt	2026-03-22T03:27:03.4812082Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6FbSupport.prl
+build	Install Qt	2026-03-22T03:27:03.4816770Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6FbSupportd.prl
+build	Install Qt	2026-03-22T03:27:03.4822198Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Gui.prl
+build	Install Qt	2026-03-22T03:27:03.4826859Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Guid.prl
+build	Install Qt	2026-03-22T03:27:03.4831505Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Help.prl
+build	Install Qt	2026-03-22T03:27:03.4836463Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Helpd.prl
+build	Install Qt	2026-03-22T03:27:03.4840708Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsAnimation.prl
+build	Install Qt	2026-03-22T03:27:03.4845353Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsAnimationd.prl
+build	Install Qt	2026-03-22T03:27:03.4850053Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsFolderListModel.prl
+build	Install Qt	2026-03-22T03:27:03.4854735Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsFolderListModeld.prl
+build	Install Qt	2026-03-22T03:27:03.4859250Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsPlatform.prl
+build	Install Qt	2026-03-22T03:27:03.4863589Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsPlatformd.prl
+build	Install Qt	2026-03-22T03:27:03.4867969Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsQmlModels.prl
+build	Install Qt	2026-03-22T03:27:03.4872347Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsQmlModelsd.prl
+build	Install Qt	2026-03-22T03:27:03.4877014Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsSettings.prl
+build	Install Qt	2026-03-22T03:27:03.4881217Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsSettingsd.prl
+build	Install Qt	2026-03-22T03:27:03.4885742Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsSharedImage.prl
+build	Install Qt	2026-03-22T03:27:03.4890368Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsSharedImaged.prl
+build	Install Qt	2026-03-22T03:27:03.4894851Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsWavefrontMesh.prl
+build	Install Qt	2026-03-22T03:27:03.4899562Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6LabsWavefrontMeshd.prl
+build	Install Qt	2026-03-22T03:27:03.4903858Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Network.prl
+build	Install Qt	2026-03-22T03:27:03.4908314Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Networkd.prl
+build	Install Qt	2026-03-22T03:27:03.4912634Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6OpenGL.prl
+build	Install Qt	2026-03-22T03:27:03.4918161Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6OpenGLd.prl
+build	Install Qt	2026-03-22T03:27:03.4922261Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6OpenGLWidgets.prl
+build	Install Qt	2026-03-22T03:27:03.4926702Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6OpenGLWidgetsd.prl
+build	Install Qt	2026-03-22T03:27:03.4931044Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6PacketProtocol.prl
+build	Install Qt	2026-03-22T03:27:03.4935469Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6PacketProtocold.prl
+build	Install Qt	2026-03-22T03:27:03.4940215Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6PrintSupport.prl
+build	Install Qt	2026-03-22T03:27:03.4944548Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6PrintSupportd.prl
+build	Install Qt	2026-03-22T03:27:03.4948700Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Qml.prl
+build	Install Qt	2026-03-22T03:27:03.4953538Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlAssetDownloader.prl
+build	Install Qt	2026-03-22T03:27:03.4958857Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlAssetDownloaderd.prl
+build	Install Qt	2026-03-22T03:27:03.4963485Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlCompiler.prl
+build	Install Qt	2026-03-22T03:27:03.4967780Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlCompilerd.prl
+build	Install Qt	2026-03-22T03:27:03.4972451Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlCore.prl
+build	Install Qt	2026-03-22T03:27:03.4977329Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlCored.prl
+build	Install Qt	2026-03-22T03:27:03.4981765Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Qmld.prl
+build	Install Qt	2026-03-22T03:27:03.4985989Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlDebug.prl
+build	Install Qt	2026-03-22T03:27:03.4990443Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlDebugd.prl
+build	Install Qt	2026-03-22T03:27:03.4995840Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlDom.prl
+build	Install Qt	2026-03-22T03:27:03.5000412Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlDomd.prl
+build	Install Qt	2026-03-22T03:27:03.5004780Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlLocalStorage.prl
+build	Install Qt	2026-03-22T03:27:03.5009223Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlLocalStoraged.prl
+build	Install Qt	2026-03-22T03:27:03.5013511Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlLS.prl
+build	Install Qt	2026-03-22T03:27:03.5018771Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlLSd.prl
+build	Install Qt	2026-03-22T03:27:03.5023418Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlMeta.prl
+build	Install Qt	2026-03-22T03:27:03.5027829Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlMetad.prl
+build	Install Qt	2026-03-22T03:27:03.5032021Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlModels.prl
+build	Install Qt	2026-03-22T03:27:03.5036823Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlModelsd.prl
+build	Install Qt	2026-03-22T03:27:03.5041094Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlNetwork.prl
+build	Install Qt	2026-03-22T03:27:03.5045385Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlNetworkd.prl
+build	Install Qt	2026-03-22T03:27:03.5049637Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlToolingSettings.prl
+build	Install Qt	2026-03-22T03:27:03.5053935Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlToolingSettingsd.prl
+build	Install Qt	2026-03-22T03:27:03.5058718Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlTypeRegistrar.prl
+build	Install Qt	2026-03-22T03:27:03.5063067Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlTypeRegistrard.prl
+build	Install Qt	2026-03-22T03:27:03.5067441Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlWorkerScript.prl
+build	Install Qt	2026-03-22T03:27:03.5072119Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlWorkerScriptd.prl
+build	Install Qt	2026-03-22T03:27:03.5077191Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlXmlListModel.prl
+build	Install Qt	2026-03-22T03:27:03.5081469Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QmlXmlListModeld.prl
+build	Install Qt	2026-03-22T03:27:03.5085633Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Quick.prl
+build	Install Qt	2026-03-22T03:27:03.5090358Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2.prl
+build	Install Qt	2026-03-22T03:27:03.5094800Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Basic.prl
+build	Install Qt	2026-03-22T03:27:03.5099583Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Basicd.prl
+build	Install Qt	2026-03-22T03:27:03.5103958Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2BasicStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5108400Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2BasicStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5112878Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2d.prl
+build	Install Qt	2026-03-22T03:27:03.5117663Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2FluentWinUI3StyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5122033Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2FluentWinUI3StyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5126466Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Fusion.prl
+build	Install Qt	2026-03-22T03:27:03.5131123Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Fusiond.prl
+build	Install Qt	2026-03-22T03:27:03.5134884Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2FusionStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5139695Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2FusionStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5144071Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Imagine.prl
+build	Install Qt	2026-03-22T03:27:03.5148287Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Imagined.prl
+build	Install Qt	2026-03-22T03:27:03.5152661Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2ImagineStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5157087Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2ImagineStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5161694Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Impl.prl
+build	Install Qt	2026-03-22T03:27:03.5166152Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Impld.prl
+build	Install Qt	2026-03-22T03:27:03.5170341Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Material.prl
+build	Install Qt	2026-03-22T03:27:03.5175003Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Materiald.prl
+build	Install Qt	2026-03-22T03:27:03.5179825Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2MaterialStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5184038Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2MaterialStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5188350Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Universal.prl
+build	Install Qt	2026-03-22T03:27:03.5192720Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2Universald.prl
+build	Install Qt	2026-03-22T03:27:03.5197117Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2UniversalStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5201960Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2UniversalStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5206379Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2WindowsStyleImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5210525Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControls2WindowsStyleImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5214874Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControlsTestUtils.prl
+build	Install Qt	2026-03-22T03:27:03.5220517Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickControlsTestUtilsd.prl
+build	Install Qt	2026-03-22T03:27:03.5225357Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Quickd.prl
+build	Install Qt	2026-03-22T03:27:03.5229693Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2.prl
+build	Install Qt	2026-03-22T03:27:03.5234513Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2d.prl
+build	Install Qt	2026-03-22T03:27:03.5238785Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2QuickImpl.prl
+build	Install Qt	2026-03-22T03:27:03.5243502Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2QuickImpld.prl
+build	Install Qt	2026-03-22T03:27:03.5247906Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2Utils.prl
+build	Install Qt	2026-03-22T03:27:03.5252120Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickDialogs2Utilsd.prl
+build	Install Qt	2026-03-22T03:27:03.5256336Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickEffects.prl
+build	Install Qt	2026-03-22T03:27:03.5261011Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickEffectsd.prl
+build	Install Qt	2026-03-22T03:27:03.5265262Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickLayouts.prl
+build	Install Qt	2026-03-22T03:27:03.5270710Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickLayoutsd.prl
+build	Install Qt	2026-03-22T03:27:03.5276635Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickParticles.prl
+build	Install Qt	2026-03-22T03:27:03.5281781Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickParticlesd.prl
+build	Install Qt	2026-03-22T03:27:03.5286573Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickShapes.prl
+build	Install Qt	2026-03-22T03:27:03.5291910Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickShapesd.prl
+build	Install Qt	2026-03-22T03:27:03.5296400Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTemplates2.prl
+build	Install Qt	2026-03-22T03:27:03.5301358Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTemplates2d.prl
+build	Install Qt	2026-03-22T03:27:03.5305952Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTest.prl
+build	Install Qt	2026-03-22T03:27:03.5311339Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTestd.prl
+build	Install Qt	2026-03-22T03:27:03.5315739Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTestUtils.prl
+build	Install Qt	2026-03-22T03:27:03.5320608Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickTestUtilsd.prl
+build	Install Qt	2026-03-22T03:27:03.5325506Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickVectorImage.prl
+build	Install Qt	2026-03-22T03:27:03.5330356Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickVectorImaged.prl
+build	Install Qt	2026-03-22T03:27:03.5334820Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickVectorImageGenerator.prl
+build	Install Qt	2026-03-22T03:27:03.5339457Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickVectorImageGeneratord.prl
+build	Install Qt	2026-03-22T03:27:03.5344005Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickWidgets.prl
+build	Install Qt	2026-03-22T03:27:03.5348591Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6QuickWidgetsd.prl
+build	Install Qt	2026-03-22T03:27:03.5353603Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Sql.prl
+build	Install Qt	2026-03-22T03:27:03.5358228Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Sqld.prl
+build	Install Qt	2026-03-22T03:27:03.5362526Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Svg.prl
+build	Install Qt	2026-03-22T03:27:03.5367209Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Svgd.prl
+build	Install Qt	2026-03-22T03:27:03.5372180Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6SvgWidgets.prl
+build	Install Qt	2026-03-22T03:27:03.5376833Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6SvgWidgetsd.prl
+build	Install Qt	2026-03-22T03:27:03.5381099Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Test.prl
+build	Install Qt	2026-03-22T03:27:03.5385486Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Testd.prl
+build	Install Qt	2026-03-22T03:27:03.5390217Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6UiTools.prl
+build	Install Qt	2026-03-22T03:27:03.5394553Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6UiToolsd.prl
+build	Install Qt	2026-03-22T03:27:03.5399842Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Widgets.prl
+build	Install Qt	2026-03-22T03:27:03.5404259Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Widgetsd.prl
+build	Install Qt	2026-03-22T03:27:03.5408773Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Xml.prl
+build	Install Qt	2026-03-22T03:27:03.5414691Z INFO    : Patching C:\Qt\6.8.0\msvc2022_64\lib\Qt6Xmld.prl
+build	Install Qt	2026-03-22T03:27:03.5422265Z INFO    : Finished installation
+build	Install Qt	2026-03-22T03:27:03.5423200Z INFO    : Time elapsed: 55.56551920 second
+build	Configure CMake	﻿2026-03-22T03:27:03.7085235Z ##[group]Run cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/6.8.0/win64_msvc2022_64"
+build	Configure CMake	2026-03-22T03:27:03.7085981Z [36;1mcmake -S . -B build -DCMAKE_PREFIX_PATH="C:/Qt/6.8.0/win64_msvc2022_64"[0m
+build	Configure CMake	2026-03-22T03:27:03.7145490Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Configure CMake	2026-03-22T03:27:03.7145865Z env:
+build	Configure CMake	2026-03-22T03:27:03.7146054Z   QT_VERSION: 6.8.0
+build	Configure CMake	2026-03-22T03:27:03.7146300Z   QT_PLATFORM: win64_msvc2022_64
+build	Configure CMake	2026-03-22T03:27:03.7146636Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:27:03.7147103Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+build	Configure CMake	2026-03-22T03:27:03.7147562Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:27:03.7147947Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:27:03.7148359Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+build	Configure CMake	2026-03-22T03:27:03.7148668Z ##[endgroup]
+build	Configure CMake	2026-03-22T03:27:04.6012120Z -- Building for: Visual Studio 17 2022
+build	Configure CMake	2026-03-22T03:27:32.2329442Z -- The CXX compiler identification is MSVC 19.44.35225.0
+build	Configure CMake	2026-03-22T03:27:32.5745405Z -- Detecting CXX compiler ABI info
+build	Configure CMake	2026-03-22T03:27:34.7885059Z -- Detecting CXX compiler ABI info - done
+build	Configure CMake	2026-03-22T03:27:34.8062534Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+build	Configure CMake	2026-03-22T03:27:34.8074514Z -- Detecting CXX compile features
+build	Configure CMake	2026-03-22T03:27:34.8091808Z -- Detecting CXX compile features - done
+build	Configure CMake	2026-03-22T03:27:35.6046245Z CMake Error at CMakeLists.txt:12 (find_package):
+build	Configure CMake	2026-03-22T03:27:35.6047105Z   By not providing "FindQt6.cmake" in CMAKE_MODULE_PATH this project has
+build	Configure CMake	2026-03-22T03:27:35.6047978Z   asked CMake to find a package configuration file provided by "Qt6", but
+build	Configure CMake	2026-03-22T03:27:35.6048665Z   CMake did not find one.
+build	Configure CMake	2026-03-22T03:27:35.6048943Z 
+build	Configure CMake	2026-03-22T03:27:35.6049268Z   Could not find a package configuration file provided by "Qt6" (requested
+build	Configure CMake	2026-03-22T03:27:35.6050057Z   version 6.5) with any of the following names:
+build	Configure CMake	2026-03-22T03:27:35.6050697Z 
+build	Configure CMake	2026-03-22T03:27:35.6050989Z     Qt6Config.cmake
+build	Configure CMake	2026-03-22T03:27:35.6051407Z     qt6-config.cmake
+build	Configure CMake	2026-03-22T03:27:35.6051636Z 
+build	Configure CMake	2026-03-22T03:27:35.6051988Z   Add the installation prefix of "Qt6" to CMAKE_PREFIX_PATH or set "Qt6_DIR"
+build	Configure CMake	2026-03-22T03:27:35.6052736Z   to a directory containing one of the above files.  If "Qt6" provides a
+build	Configure CMake	2026-03-22T03:27:35.6053583Z   separate development package or SDK, be sure it has been installed.
+build	Configure CMake	2026-03-22T03:27:35.6054394Z 
+build	Configure CMake	2026-03-22T03:27:35.6054409Z 
+build	Configure CMake	2026-03-22T03:27:35.6054673Z -- Configuring incomplete, errors occurred!
+build	Configure CMake	2026-03-22T03:27:35.7503112Z ##[error]Process completed with exit code 1.
+build	Post Checkout	﻿2026-03-22T03:27:35.7722146Z Post job cleanup.
+build	Post Checkout	2026-03-22T03:27:35.9759757Z [command]"C:\Program Files\Git\bin\git.exe" version
+build	Post Checkout	2026-03-22T03:27:36.0038290Z git version 2.53.0.windows.2
+build	Post Checkout	2026-03-22T03:27:36.0114842Z Temporarily overriding HOME='D:\a\_temp\de3e7784-2970-4a33-b087-75add4a5758c' before making global git config changes
+build	Post Checkout	2026-03-22T03:27:36.0115713Z Adding repository directory to the temporary git global config as a safe directory
+build	Post Checkout	2026-03-22T03:27:36.0126527Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\local-code-ide\local-code-ide
+build	Post Checkout	2026-03-22T03:27:36.0449419Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build	Post Checkout	2026-03-22T03:27:36.0780124Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build	Post Checkout	2026-03-22T03:27:36.6433576Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Post Checkout	2026-03-22T03:27:36.6794279Z http.https://github.com/.extraheader
+build	Post Checkout	2026-03-22T03:27:36.6852139Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+build	Post Checkout	2026-03-22T03:27:36.7184801Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build	Post Checkout	2026-03-22T03:27:37.2776286Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Post Checkout	2026-03-22T03:27:37.3095942Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build	Complete job	﻿2026-03-22T03:27:37.8905716Z Cleaning up orphan processes
+build	Complete job	2026-03-22T03:27:37.9115550Z Terminate orphan process: pid (6984) (vctip)
+build	Complete job	2026-03-22T03:27:37.9134193Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v5. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

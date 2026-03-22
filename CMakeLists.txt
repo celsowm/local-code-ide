@@ -9,8 +9,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml Network)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml QuickControls2 Network)
 qt_standard_project_setup(REQUIRES 6.5)
+qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(LocalCodeIDE
     src/main.cpp
@@ -106,6 +107,7 @@ target_link_libraries(LocalCodeIDE PRIVATE
     Qt6::Core
     Qt6::Quick
     Qt6::Qml
+    Qt6::QuickControls2
     Qt6::Network
 )
 
