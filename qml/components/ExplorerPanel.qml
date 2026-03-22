@@ -3,30 +3,33 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Item {
+    id: root
+    property var viewModel
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
 
         Label { text: "EXPLORER"; color: "#d4d4d4"; font.bold: true }
-        Label { text: mainViewModel.workspaceFileCount + " files"; color: "#808080" }
+        Label { text: root.viewModel.workspaceFileCount + " files"; color: "#808080" }
 
         Label { text: "OPEN EDITORS"; color: "#d4d4d4"; font.bold: true }
         ListView {
             Layout.fillWidth: true
             Layout.preferredHeight: 120
             clip: true
-            model: mainViewModel.openEditorsModel
+            model: root.viewModel.openEditorsModel
             delegate: Rectangle {
                 width: ListView.view.width
                 height: 28
                 color: active ? "#2a2d2e" : (mouseArea.containsMouse ? "#222" : "transparent")
-                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; z: -1; onClicked: mainViewModel.switchOpenEditor(path) }
+                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; z: -1; onClicked: root.viewModel.switchOpenEditor(path) }
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     anchors.rightMargin: 8
                     Label { text: dirty ? title + " •" : title; color: "#d4d4d4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                    Button { text: "×"; flat: true; onClicked: mainViewModel.closeOpenEditor(path) }
+                    Button { text: "×"; flat: true; onClicked: root.viewModel.closeOpenEditor(path) }
                 }
             }
         }
@@ -38,7 +41,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: mainViewModel.workspaceTreeModel
+            model: root.viewModel.workspaceTreeModel
             delegate: Rectangle {
                 width: ListView.view.width
                 height: 28
@@ -53,7 +56,7 @@ Item {
                         flat: true
                         enabled: directory && hasChildren
                         visible: directory && hasChildren
-                        onClicked: mainViewModel.toggleWorkspaceFolder(nodeId)
+                        onClicked: root.viewModel.toggleWorkspaceFolder(nodeId)
                     }
                     Label {
                         text: directory ? "📁" : "📄"
@@ -69,7 +72,7 @@ Item {
                         visible: !directory && mouseArea.containsMouse
                         text: "Split"
                         flat: true
-                        onClicked: mainViewModel.openWorkspaceFileInSplit(path)
+                        onClicked: root.viewModel.openWorkspaceFileInSplit(path)
                     }
                 }
                 MouseArea {
@@ -79,9 +82,9 @@ Item {
                     z: -1
                     onClicked: {
                         if (directory) {
-                            mainViewModel.toggleWorkspaceFolder(nodeId)
+                            root.viewModel.toggleWorkspaceFolder(nodeId)
                         } else {
-                            mainViewModel.openWorkspaceFile(path)
+                            root.viewModel.openWorkspaceFile(path)
                         }
                     }
                 }

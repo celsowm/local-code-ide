@@ -3,26 +3,18 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Rectangle {
+    id: root
     color: "#181818"
     border.color: "#2d2d30"
+    property var viewModel: mainViewModel
 
     StackLayout {
         anchors.fill: parent
         anchors.margins: 8
-        currentIndex: mainViewModel.primaryViewIndex
+        currentIndex: root.viewModel.primaryViewIndex
 
-        ExplorerPanel { }
-        SearchPanel { }
-        SourceControlPanel { }
-        Rectangle {
-            color: "transparent"
-            border.color: "transparent"
-            ColumnLayout {
-                anchors.fill: parent
-                Label { text: "ASSISTANT"; color: "#d4d4d4"; font.bold: true }
-                Label { text: "O painel completo fica à direita."; color: "#808080" }
-                Label { text: mainViewModel.toolCatalogSummary; color: "#9cdcfe"; wrapMode: Text.Wrap }
-            }
-        }
+        ExplorerPanel { viewModel: root.viewModel }
+        SearchPanel { viewModel: root.viewModel }
+        SourceControlPanel { viewModel: root.viewModel }
     }
 }

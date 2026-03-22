@@ -87,6 +87,8 @@ qt_add_qml_module(LocalCodeIDE
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/components/IconButton.qml
+        qml/components/IconRegistry.js
         qml/components/AssistantTab.qml
         qml/components/BottomPanel.qml
         qml/components/ChatPanel.qml
@@ -99,6 +101,29 @@ qt_add_qml_module(LocalCodeIDE
         qml/components/SearchPanel.qml
         qml/components/Sidebar.qml
         qml/components/SourceControlPanel.qml
+    RESOURCES
+        qml/assets/icons/explorer.svg
+        qml/assets/icons/search.svg
+        qml/assets/icons/git.svg
+        qml/assets/icons/assistant.svg
+        qml/assets/icons/scan.svg
+        qml/assets/icons/split.svg
+        qml/assets/icons/diff.svg
+        qml/assets/icons/analyze.svg
+        qml/assets/icons/complete.svg
+        qml/assets/icons/hover.svg
+        qml/assets/icons/definition.svg
+        qml/assets/icons/apply_patch.svg
+        qml/assets/icons/refresh.svg
+        qml/assets/icons/auto_profile.svg
+        qml/assets/icons/start.svg
+        qml/assets/icons/stop.svg
+        qml/assets/icons/probe.svg
+        qml/assets/icons/clear_logs.svg
+        qml/assets/icons/suggest.svg
+        qml/assets/icons/download.svg
+        qml/assets/icons/use_active.svg
+        qml/assets/icons/LICENSE.txt
 )
 
 target_include_directories(LocalCodeIDE PRIVATE src)

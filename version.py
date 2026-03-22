@@ -73,10 +73,10 @@ def main():
     # Push tag
     result = subprocess.run(["git", "push", "origin", tag], capture_output=True, text=True)
     if result.returncode == 0:
-        print(f"✓ Tag pushed to GitHub")
+        print("✓ Tag pushed to GitHub")
         print()
         print("CI/CD will now build and create a release!")
-        print(f"Watch: https://github.com/celsowm/local-code-ide/actions")
+        print("Watch: https://github.com/celsowm/local-code-ide/actions")
     else:
         print(f"✗ Failed to push: {result.stderr}")
         sys.exit(1)

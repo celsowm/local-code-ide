@@ -50,6 +50,23 @@ def find_qt():
                         return str(compiler)
     return None
 
+def find_qmllint():
+    qt_path = find_qt()
+    if qt_path:
+        candidate = Path(qt_path) / "bin" / "qmllint.exe"
+        if candidate.exists():
+            return str(candidate)
+
+    direct = shutil.which("qmllint")
+    if direct:
+        return direct
+
+    qt_base = Path(r"C:\Qt")
+    if qt_base.exists():
+        for candidate in qt_base.rglob("qmllint.exe"):
+            return str(candidate)
+    return None
+
 def find_vcpkg():
     if os.environ.get('VCPKG_ROOT'):
         return os.environ['VCPKG_ROOT']
@@ -207,6 +224,91 @@ def run():
     subprocess.run([str(exe)])
     return 0
 
+def lint():
+    """Run project lint checks (QML + Python)."""
+    log("\n" + "=" * 60, GREEN)
+    log("LocalCodeIDE - Lint", GREEN)
+    log("=" * 60, GREEN)
+
+    # Python lint (ruff)
+    log("\n[1/3] Python lint (ruff)...", BLUE)
+    try:
+        subprocess.run([sys.executable, "-m", "ruff", "--version"], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        log("ruff not found. Installing...", YELLOW)
+        subprocess.run([sys.executable, "-m", "pip", "install", "ruff"], check=True)
+    subprocess.run([sys.executable, "-m", "ruff", "check", "setup.py", "version.py"], check=True)
+    log("ruff: OK", GREEN)
+
+    # QML lint (qmllint module mode)
+    log("\n[2/3] QML lint (qmllint)...", BLUE)
+    qmllint_path = find_qmllint()
+    if not qmllint_path:
+        log("ERROR: qmllint not found. Install Qt first.", RED)
+        return 1
+
+    qt_path = find_qt()
+    if qt_path:
+        os.environ['CMAKE_PREFIX_PATH'] = qt_path
+        os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
+
+    build_dir = Path("build")
+    build_dir.mkdir(exist_ok=True)
+    if not (build_dir / "CMakeCache.txt").exists():
+        log("Configuring CMake (required for module lint)...", BLUE)
+        subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
+
+    subprocess.run([
+        qmllint_path,
+        "-M",
+        "-I", "build",
+        "LocalCodeIDE",
+        "--unqualified", "info",
+        "--with", "info",
+        "--unused-imports", "warning",
+        "--multiline-strings", "warning",
+        "--max-warnings", "0",
+    ], check=True)
+    log("qmllint: OK", GREEN)
+
+    # Incremental strict checks for selected components
+    log("\n[3/4] QML strict components...", BLUE)
+    strict_qml_files = [
+        "qml/components/Sidebar.qml",
+        "qml/components/SearchPanel.qml",
+    ]
+    for qml_file in strict_qml_files:
+        subprocess.run([
+            qmllint_path,
+            "--unqualified", "warning",
+            "--max-warnings", "0",
+            qml_file,
+        ], check=True)
+    log("strict components: OK", GREEN)
+
+    log("\n[4/4] Lint summary", BLUE)
+    log("All lint checks passed.", GREEN)
+    return 0
+
+def screenshot(output_path=""):
+    """Capture a screenshot for LocalCodeIDE window (or desktop fallback)."""
+    script_path = Path("scripts/capture-localcodeide-screenshot.ps1")
+    if not script_path.exists():
+        log("ERROR: Screenshot script not found", RED)
+        return 1
+
+    command = [
+        "powershell",
+        "-ExecutionPolicy", "Bypass",
+        "-File", str(script_path),
+    ]
+    if output_path:
+        command.extend(["-OutputPath", output_path])
+    command.extend(["-LaunchIfMissing", "-FallbackToFullScreen"])
+
+    subprocess.run(command, check=True)
+    return 0
+
 
 def build_installer():
     """Build WiX installer"""
@@ -256,6 +358,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "run":
             sys.exit(run())
+        elif sys.argv[1] == "lint":
+            sys.exit(lint())
+        elif sys.argv[1] == "screenshot":
+            output = sys.argv[2] if len(sys.argv) > 2 else ""
+            sys.exit(screenshot(output))
         elif sys.argv[1] == "installer":
             sys.exit(build_installer())
         else:
@@ -263,6 +370,8 @@ if __name__ == "__main__":
             log("Usage:", YELLOW)
             log("  python setup.py           - Build the project", BLUE)
             log("  python setup.py run       - Run the application", BLUE)
+            log("  python setup.py lint      - Run lint checks", BLUE)
+            log("  python setup.py screenshot [path] - Capture app screenshot", BLUE)
             log("  python setup.py installer - Build WiX installer (.msi)", BLUE)
             sys.exit(1)
     sys.exit(main())

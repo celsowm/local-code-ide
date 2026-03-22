@@ -26,6 +26,9 @@
 # Install everything and build
 python setup.py
 
+# Lint (QML + Python)
+python setup.py lint
+
 # Run
 python setup.py run
 ```
@@ -72,6 +75,12 @@ local-code-ide/
 # Full build (installs Qt if needed)
 python setup.py
 
+# Lint
+python setup.py lint
+
+# Capture app screenshot (auto-launches if needed)
+python setup.py screenshot
+
 # Just run
 python setup.py run
 
@@ -83,6 +92,9 @@ dev.bat
 
 # Quick run
 run.bat
+
+# Direct screenshot script (more options)
+powershell -ExecutionPolicy Bypass -File scripts/capture-localcodeide-screenshot.ps1 -LaunchIfMissing
 ```
 
 ---
@@ -214,6 +226,9 @@ cmake --fresh -S . -B build
 ## 🧪 Testing
 
 ```bash
+# Run lint (required before commit/PR)
+python setup.py lint
+
 # Run tests (if available)
 ctest --test-dir build -C Release
 ```

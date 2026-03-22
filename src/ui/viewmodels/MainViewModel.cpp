@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QProcess>
 #include <QFileInfo>
+#include <QStandardPaths>
 #include <QtGlobal>
 
 #include <algorithm>
@@ -50,6 +51,15 @@ bool saveTextFile(const QString& path, const QString& text) {
     stream << text;
     return true;
 }
+
+QString uiStateSettingsPath() {
+    QString base = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (base.isEmpty()) {
+        base = QDir::homePath() + QStringLiteral("/.localcodeide");
+    }
+    QDir().mkpath(base);
+    return QDir(base).filePath(QStringLiteral("ui.ini"));
+}
 }
 
 MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> documentService,
@@ -69,8 +79,10 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     , m_gitService(std::move(gitService))
     , m_workspaceService(std::move(workspaceService))
     , m_searchService(std::move(searchService))
-    , m_terminalService(std::move(terminalService)) {
+    , m_terminalService(std::move(terminalService))
+    , m_uiSettings(uiStateSettingsPath(), QSettings::IniFormat) {
     m_workspaceRootPath = QDir::currentPath();
+    loadUiState();
     m_savedTextSnapshot = editorText();
     touchOpenEditor(currentPath());
     syncOpenEditors();
@@ -220,10 +232,34 @@ int MainViewModel::gitChangeCount() const { return m_gitChangesModel.changeCount
 int MainViewModel::gitStagedCount() const { return m_gitChangesModel.stagedCount(); }
 int MainViewModel::primaryViewIndex() const { return m_primaryViewIndex; }
 void MainViewModel::setPrimaryViewIndex(int value) {
-    const int bounded = qBound(0, value, 3);
+    const int bounded = qBound(0, value, 2);
     if (bounded == m_primaryViewIndex) return;
     m_primaryViewIndex = bounded;
+    saveUiState();
     emit primaryViewIndexChanged();
+}
+bool MainViewModel::secondaryAiVisible() const { return m_secondaryAiVisible; }
+void MainViewModel::setSecondaryAiVisible(bool value) {
+    if (value == m_secondaryAiVisible) return;
+    m_secondaryAiVisible = value;
+    saveUiState();
+    emit secondaryAiChanged();
+}
+int MainViewModel::secondaryAiTab() const { return m_secondaryAiTab; }
+void MainViewModel::setSecondaryAiTab(int value) {
+    const int bounded = qBound(0, value, 1);
+    if (bounded == m_secondaryAiTab) return;
+    m_secondaryAiTab = bounded;
+    saveUiState();
+    emit secondaryAiChanged();
+}
+int MainViewModel::secondaryAiWidth() const { return m_secondaryAiWidth; }
+void MainViewModel::setSecondaryAiWidth(int value) {
+    const int bounded = qBound(320, value, 720);
+    if (bounded == m_secondaryAiWidth) return;
+    m_secondaryAiWidth = bounded;
+    saveUiState();
+    emit secondaryAiChanged();
 }
 QString MainViewModel::scmCommitMessage() const { return m_scmCommitMessage; }
 void MainViewModel::setScmCommitMessage(const QString& value) {
@@ -525,8 +561,12 @@ void MainViewModel::runCommandPaletteCommand(const QString& commandId) {
         setPrimaryViewIndex(1);
     } else if (commandId == "workbench.view.scm") {
         setPrimaryViewIndex(2);
-    } else if (commandId == "workbench.view.ai") {
-        setPrimaryViewIndex(3);
+    } else if (commandId == "workbench.aiSidebar.toggle") {
+        toggleSecondaryAiSidebar();
+    } else if (commandId == "workbench.aiSidebar.showAssistant") {
+        showAssistantSidebar();
+    } else if (commandId == "workbench.aiSidebar.showModels") {
+        showModelsSidebar();
     } else if (commandId == "workbench.action.quickOpen") {
         updateStatusMessage("Quick Open pronto para uso (Ctrl+P). Digite um arquivo.");
     } else if (commandId == "file.save") {
@@ -655,6 +695,24 @@ void MainViewModel::commitGitChanges() {
     }
 }
 
+void MainViewModel::toggleSecondaryAiSidebar() {
+    setSecondaryAiVisible(!m_secondaryAiVisible);
+}
+
+void MainViewModel::showAssistantSidebar() {
+    if (!m_secondaryAiVisible) {
+        setSecondaryAiVisible(true);
+    }
+    setSecondaryAiTab(0);
+}
+
+void MainViewModel::showModelsSidebar() {
+    if (!m_secondaryAiVisible) {
+        setSecondaryAiVisible(true);
+    }
+    setSecondaryAiTab(1);
+}
+
 QString MainViewModel::diagnosticsSummary() const { return m_diagnosticsModel.summaryText(); }
 
 void MainViewModel::updateStatusMessage(const QString& message) {
@@ -755,7 +813,9 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
             {"workbench.view.explorer", "View: Focus Explorer", "Workbench", "Activity Bar"},
             {"workbench.view.search", "View: Focus Search", "Workbench", "Activity Bar"},
             {"workbench.view.scm", "View: Focus Source Control", "Workbench", "Activity Bar"},
-            {"workbench.view.ai", "View: Focus Assistant", "Workbench", "Activity Bar"},
+            {"workbench.aiSidebar.toggle", "View: Toggle AI Sidebar", "Workbench", "Secondary Side Bar"},
+            {"workbench.aiSidebar.showAssistant", "View: Show Assistant", "Workbench", "Secondary Side Bar"},
+            {"workbench.aiSidebar.showModels", "View: Show Models", "Workbench", "Secondary Side Bar"},
             {"workbench.action.quickOpen", "Go to File", "Workbench", "Quick Open"},
             {"workbench.action.splitEditorRight", "View: Split Editor Right", "Workbench", "Ctrl+\\"},
             {"workbench.action.closeSplitEditor", "View: Close Secondary Editor", "Workbench", "Split"},
@@ -808,6 +868,21 @@ void MainViewModel::touchOpenEditor(const QString& path) {
         m_openEditors.erase(it);
         m_openEditors.insert(m_openEditors.begin(), item);
     }
+}
+
+void MainViewModel::loadUiState() {
+    m_primaryViewIndex = qBound(0, m_uiSettings.value(QStringLiteral("workbench/primaryViewIndex"), 0).toInt(), 2);
+    m_secondaryAiVisible = m_uiSettings.value(QStringLiteral("workbench/secondaryAiVisible"), true).toBool();
+    m_secondaryAiTab = qBound(0, m_uiSettings.value(QStringLiteral("workbench/secondaryAiTab"), 0).toInt(), 1);
+    m_secondaryAiWidth = qBound(320, m_uiSettings.value(QStringLiteral("workbench/secondaryAiWidth"), 390).toInt(), 720);
+}
+
+void MainViewModel::saveUiState() {
+    m_uiSettings.setValue(QStringLiteral("workbench/primaryViewIndex"), m_primaryViewIndex);
+    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiVisible"), m_secondaryAiVisible);
+    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiTab"), m_secondaryAiTab);
+    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiWidth"), m_secondaryAiWidth);
+    m_uiSettings.sync();
 }
 
 } // namespace ide::ui::viewmodels

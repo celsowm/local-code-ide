@@ -36,8 +36,8 @@ Item {
                     Layout.fillWidth: true
                     Label { text: "LOCAL HARDWARE"; color: "#d4d4d4"; font.bold: true }
                     Item { Layout.fillWidth: true }
-                    Button { text: "Refresh"; onClicked: modelHubViewModel.refreshHardware() }
-                    Button { text: "Use auto profile"; onClicked: modelHubViewModel.applyDetectedProfile() }
+                    IconButton { text: "Refresh"; iconName: "refresh"; onClicked: modelHubViewModel.refreshHardware() }
+                    IconButton { text: "Use auto profile"; iconName: "auto_profile"; onClicked: modelHubViewModel.applyDetectedProfile() }
                 }
 
                 Label {
@@ -73,8 +73,9 @@ Item {
                     Layout.fillWidth: true
                     Label { text: "LOCAL LLAMA SERVER"; color: "#d4d4d4"; font.bold: true }
                     Item { Layout.fillWidth: true }
-                    Button {
+                    IconButton {
                         text: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting ? "Stop" : "Start"
+                        iconName: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting ? "stop" : "start"
                         enabled: modelHubViewModel.serverRunning || modelHubViewModel.serverStarting || modelHubViewModel.canStartServer
                         onClicked: {
                             if (modelHubViewModel.serverRunning || modelHubViewModel.serverStarting) {
@@ -84,8 +85,8 @@ Item {
                             }
                         }
                     }
-                    Button { text: "Probe"; onClicked: modelHubViewModel.probeServer() }
-                    Button { text: "Clear logs"; onClicked: modelHubViewModel.clearServerLogs() }
+                    IconButton { text: "Probe"; iconName: "probe"; onClicked: modelHubViewModel.probeServer() }
+                    IconButton { text: "Clear logs"; iconName: "clear_logs"; onClicked: modelHubViewModel.clearServerLogs() }
                 }
 
                 RowLayout {
@@ -198,8 +199,9 @@ Item {
                 onAccepted: modelHubViewModel.searchRepos()
             }
 
-            Button {
+            IconButton {
                 text: "Search"
+                iconName: "search"
                 onClicked: modelHubViewModel.searchRepos()
             }
         }
@@ -220,8 +222,9 @@ Item {
                 color: "#808080"
             }
 
-            Button {
+            IconButton {
                 text: "Suggest"
+                iconName: "suggest"
                 onClicked: modelHubViewModel.suggestFile()
             }
 
@@ -374,20 +377,23 @@ Item {
                             onTextChanged: modelHubViewModel.targetDownloadDir = text
                         }
 
-                        Button {
+                        IconButton {
                             text: "Download selected"
+                            iconName: "download"
                             enabled: !modelHubViewModel.downloadActive
                             onClicked: modelHubViewModel.startDownloadSelected()
                         }
 
-                        Button {
+                        IconButton {
                             text: "Download suggested"
+                            iconName: "download"
                             enabled: !modelHubViewModel.downloadActive
                             onClicked: modelHubViewModel.downloadSuggested()
                         }
 
-                        Button {
+                        IconButton {
                             text: "Cancel"
+                            iconName: "stop"
                             enabled: modelHubViewModel.downloadActive
                             onClicked: modelHubViewModel.cancelDownload()
                         }
@@ -395,13 +401,15 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Button {
+                        IconButton {
                             text: "Use selected as active"
+                            iconName: "use_active"
                             enabled: modelHubViewModel.canUseSelectedAsCurrent
                             onClicked: modelHubViewModel.useSelectedAsCurrent()
                         }
-                        Button {
+                        IconButton {
                             text: "Use downloaded as active"
+                            iconName: "use_active"
                             enabled: modelHubViewModel.downloadedPath.length > 0
                             onClicked: modelHubViewModel.useDownloadedAsCurrent()
                         }

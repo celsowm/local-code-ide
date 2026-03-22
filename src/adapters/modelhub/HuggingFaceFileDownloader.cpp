@@ -9,6 +9,19 @@
 
 namespace ide::adapters::modelhub {
 
+namespace {
+QString repoCacheDirName(const QString& repoId) {
+    QString normalized = repoId.trimmed();
+    normalized.replace('/', QStringLiteral("--"));
+    return QStringLiteral("models--") + normalized;
+}
+
+QString snapshotTargetPath(const QString& hubCacheDir, const QString& repoId, const QString& filename) {
+    const QString repoCacheDir = QDir(hubCacheDir).filePath(repoCacheDirName(repoId));
+    return QDir(repoCacheDir).filePath(QStringLiteral("snapshots/main/%1").arg(filename));
+}
+}
+
 HuggingFaceFileDownloader::HuggingFaceFileDownloader(QString token, QObject* parent)
     : QObject(parent)
     , m_token(std::move(token)) {}
@@ -48,8 +61,8 @@ void HuggingFaceFileDownloader::startDownload(const QString& repoId, const QStri
     resetState();
     emit progressChanged();
     m_repoId = repoId.trimmed();
-    m_filename = filename;
-    m_localPath = QDir(localDir).filePath(filename);
+    m_filename = filename.trimmed();
+    m_localPath = snapshotTargetPath(localDir.trimmed(), m_repoId, m_filename);
     const QFileInfo targetInfo(m_localPath);
     QDir().mkpath(targetInfo.dir().absolutePath());
     m_partialPath = m_localPath + QStringLiteral(".part");

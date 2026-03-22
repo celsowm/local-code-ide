@@ -1,8 +1,8 @@
 #include "ui/viewmodels/ModelHubViewModel.hpp"
 
 #include <QDir>
+#include <QProcessEnvironment>
 #include <QFileInfo>
-#include <QStandardPaths>
 #include <QUrl>
 #include <limits>
 #include <utility>
@@ -10,12 +10,29 @@
 namespace ide::ui::viewmodels {
 
 namespace {
-QString defaultDownloadDir() {
-    const QString base = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-    if (!base.isEmpty()) {
-        return QDir(base).filePath(QStringLiteral("models"));
+QString repoCacheDirName(const QString& repoId) {
+    QString normalized = repoId.trimmed();
+    normalized.replace('/', QStringLiteral("--"));
+    return QStringLiteral("models--") + normalized;
+}
+
+QString huggingFaceHubCacheDir() {
+    const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    const QString explicitHubCache = env.value(QStringLiteral("HF_HUB_CACHE")).trimmed();
+    if (!explicitHubCache.isEmpty()) {
+        return explicitHubCache;
     }
-    return QDir(QDir::homePath()).filePath(QStringLiteral("LocalCodeIDE/models"));
+
+    const QString hfHome = env.value(QStringLiteral("HF_HOME")).trimmed();
+    if (!hfHome.isEmpty()) {
+        return QDir(hfHome).filePath(QStringLiteral("hub"));
+    }
+
+    return QDir(QDir::homePath()).filePath(QStringLiteral(".cache/huggingface/hub"));
+}
+
+QString defaultDownloadDir() {
+    return huggingFaceHubCacheDir();
 }
 
 QString basenameFromRemotePath(const QString& remotePath) {
@@ -600,7 +617,29 @@ double ModelHubViewModel::fileSizeGiB(const ide::services::interfaces::ModelFile
 }
 
 QString ModelHubViewModel::candidateLocalPathForRemote(const QString& remotePath) const {
-    return QDir(m_targetDownloadDir).filePath(remotePath);
+    if (m_selectedRepoId.trimmed().isEmpty()) {
+        return QDir(m_targetDownloadDir).filePath(remotePath);
+    }
+
+    const QString repoRoot = QDir(m_targetDownloadDir).filePath(repoCacheDirName(m_selectedRepoId));
+    const QString snapshotsRoot = QDir(repoRoot).filePath(QStringLiteral("snapshots"));
+    const QString preferredPath = QDir(snapshotsRoot).filePath(QStringLiteral("main/%1").arg(remotePath));
+    if (QFileInfo::exists(preferredPath)) {
+        return preferredPath;
+    }
+
+    QDir snapshotsDir(snapshotsRoot);
+    if (snapshotsDir.exists()) {
+        const QFileInfoList snapshotDirs = snapshotsDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const QFileInfo& snapshotInfo : snapshotDirs) {
+            const QString candidate = QDir(snapshotInfo.absoluteFilePath()).filePath(remotePath);
+            if (QFileInfo::exists(candidate)) {
+                return candidate;
+            }
+        }
+    }
+
+    return preferredPath;
 }
 
 void ModelHubViewModel::setStatusMessage(const QString& message) {

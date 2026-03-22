@@ -203,6 +203,31 @@ double HardwareProfileService::detectSystemRamGiB() const {
 
 double HardwareProfileService::detectGpuVramGiB(QString* gpuName) const {
 #ifdef Q_OS_WIN
+    const QString nvidia = runCommand(
+        QStringLiteral("nvidia-smi"),
+        {QStringLiteral("--query-gpu=name,memory.total"), QStringLiteral("--format=csv,noheader,nounits")},
+        2000
+    );
+    double bestGiB = -1.0;
+    for (const auto& line : nvidia.split('\n', Qt::SkipEmptyParts)) {
+        const auto parts = line.split(',');
+        if (parts.size() < 2) {
+            continue;
+        }
+        const QString name = parts.at(0).trimmed();
+        const double mib = parseFirstDouble(parts.at(1));
+        const double gib = mib > 0.0 ? (mib / 1024.0) : -1.0;
+        if (gib > bestGiB) {
+            bestGiB = gib;
+            if (gpuName) {
+                *gpuName = name;
+            }
+        }
+    }
+    if (bestGiB > 0.0) {
+        return bestGiB;
+    }
+
     const QString output = runCommand(
         QStringLiteral("powershell"),
         {
@@ -212,7 +237,7 @@ double HardwareProfileService::detectGpuVramGiB(QString* gpuName) const {
         },
         2800
     );
-    double bestGiB = -1.0;
+    bestGiB = -1.0;
     for (const auto& line : output.split('\n', Qt::SkipEmptyParts)) {
         const auto parts = line.split('|');
         if (parts.size() < 2) {

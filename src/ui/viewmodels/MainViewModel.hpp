@@ -22,6 +22,7 @@
 #include "ui/models/WorkspaceTreeListModel.hpp"
 
 #include <QObject>
+#include <QSettings>
 #include <memory>
 #include <vector>
 
@@ -103,6 +104,9 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(int gitChangeCount READ gitChangeCount NOTIFY gitChanged)
     Q_PROPERTY(int gitStagedCount READ gitStagedCount NOTIFY gitChanged)
     Q_PROPERTY(int primaryViewIndex READ primaryViewIndex WRITE setPrimaryViewIndex NOTIFY primaryViewIndexChanged)
+    Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
     Q_PROPERTY(QString scmCommitMessage READ scmCommitMessage WRITE setScmCommitMessage NOTIFY scmCommitMessageChanged)
     Q_PROPERTY(bool currentDocumentDirty READ currentDocumentDirty NOTIFY openEditorsChanged)
 
@@ -221,6 +225,12 @@ public:
     int gitStagedCount() const;
     int primaryViewIndex() const;
     void setPrimaryViewIndex(int value);
+    bool secondaryAiVisible() const;
+    void setSecondaryAiVisible(bool value);
+    int secondaryAiTab() const;
+    void setSecondaryAiTab(int value);
+    int secondaryAiWidth() const;
+    void setSecondaryAiWidth(int value);
     QString scmCommitMessage() const;
     void setScmCommitMessage(const QString& value);
     bool currentDocumentDirty() const;
@@ -266,6 +276,9 @@ public:
     Q_INVOKABLE void discardGitPath(const QString& path);
     Q_INVOKABLE void openGitDiff(const QString& path);
     Q_INVOKABLE void commitGitChanges();
+    Q_INVOKABLE void toggleSecondaryAiSidebar();
+    Q_INVOKABLE void showAssistantSidebar();
+    Q_INVOKABLE void showModelsSidebar();
 
 signals:
     void editorTextChanged();
@@ -291,6 +304,7 @@ signals:
     void commandPaletteChanged();
     void gitChanged();
     void primaryViewIndexChanged();
+    void secondaryAiChanged();
     void scmCommitMessageChanged();
 
 private:
@@ -312,6 +326,8 @@ private:
     void rebuildCommandPalette(const QString& query);
     void refreshGitState();
     void touchOpenEditor(const QString& path);
+    void loadUiState();
+    void saveUiState();
 
     std::unique_ptr<ide::services::DocumentService> m_documentService;
     std::unique_ptr<ide::services::DiagnosticService> m_diagnosticService;
@@ -335,6 +351,7 @@ private:
     ide::ui::models::OpenEditorListModel m_openEditorsModel;
     ide::ui::models::CommandPaletteListModel m_commandPaletteModel;
     ide::ui::models::GitChangeListModel m_gitChangesModel;
+    QSettings m_uiSettings;
 
     QString m_chatInput;
     QString m_chatResponse;
@@ -363,6 +380,9 @@ private:
     int m_cursorLine = 1;
     int m_cursorColumn = 1;
     int m_primaryViewIndex = 0;
+    bool m_secondaryAiVisible = true;
+    int m_secondaryAiTab = 0;
+    int m_secondaryAiWidth = 390;
     bool m_splitEditorVisible = false;
     bool m_splitDiffMode = false;
 };

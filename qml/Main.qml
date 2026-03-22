@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import LocalCodeIDE 1.0
+import "components/IconRegistry.js" as IconRegistry
 
 ApplicationWindow {
     id: window
@@ -27,48 +27,55 @@ ApplicationWindow {
         sequence: "Ctrl+\\"
         onActivated: mainViewModel.openWorkspaceFileInSplit(mainViewModel.currentPath)
     }
+    Shortcut {
+        sequence: "Ctrl+Alt+A"
+        onActivated: mainViewModel.toggleSecondaryAiSidebar()
+    }
 
     menuBar: MenuBar {
         Menu {
             title: "File"
-            Action { text: "Quick Open"; onTriggered: quickOpen.open() }
-            Action { text: "Load C++ Sample"; onTriggered: mainViewModel.loadSampleCpp() }
-            Action { text: "Load Rust Sample"; onTriggered: mainViewModel.loadSampleRust() }
-            Action { text: "Save"; onTriggered: mainViewModel.saveCurrent() }
+            Action { text: "Quick Open"; icon.source: IconRegistry.source("search"); onTriggered: quickOpen.open() }
+            Action { text: "Load C++ Sample"; icon.source: IconRegistry.source("explorer"); onTriggered: mainViewModel.loadSampleCpp() }
+            Action { text: "Load Rust Sample"; icon.source: IconRegistry.source("explorer"); onTriggered: mainViewModel.loadSampleRust() }
+            Action { text: "Save"; icon.source: IconRegistry.source("apply_patch"); onTriggered: mainViewModel.saveCurrent() }
         }
         Menu {
             title: "View"
-            Action { text: "Command Palette"; onTriggered: commandPalette.open() }
-            Action { text: "Split Editor Right"; onTriggered: mainViewModel.openWorkspaceFileInSplit(mainViewModel.currentPath) }
-            Action { text: "Close Split"; onTriggered: mainViewModel.closeSplitEditor() }
-            Action { text: "Explorer"; onTriggered: mainViewModel.primaryViewIndex = 0 }
-            Action { text: "Search"; onTriggered: mainViewModel.primaryViewIndex = 1 }
-            Action { text: "Source Control"; onTriggered: mainViewModel.primaryViewIndex = 2 }
-            Action { text: "Assistant"; onTriggered: mainViewModel.primaryViewIndex = 3 }
+            Action { text: "Command Palette"; icon.source: IconRegistry.source("suggest"); onTriggered: commandPalette.open() }
+            Action { text: "Split Editor Right"; icon.source: IconRegistry.source("split"); onTriggered: mainViewModel.openWorkspaceFileInSplit(mainViewModel.currentPath) }
+            Action { text: "Close Split"; icon.source: IconRegistry.source("split"); onTriggered: mainViewModel.closeSplitEditor() }
+            Action { text: "Explorer"; icon.source: IconRegistry.source("explorer"); onTriggered: mainViewModel.primaryViewIndex = 0 }
+            Action { text: "Search"; icon.source: IconRegistry.source("search"); onTriggered: mainViewModel.primaryViewIndex = 1 }
+            Action { text: "Source Control"; icon.source: IconRegistry.source("git"); onTriggered: mainViewModel.primaryViewIndex = 2 }
+            MenuSeparator { }
+            Action { text: "Toggle AI Sidebar"; icon.source: IconRegistry.source("assistant"); onTriggered: mainViewModel.toggleSecondaryAiSidebar() }
+            Action { text: "Show Assistant"; icon.source: IconRegistry.source("assistant"); onTriggered: mainViewModel.showAssistantSidebar() }
+            Action { text: "Show Models"; icon.source: IconRegistry.source("assistant"); onTriggered: mainViewModel.showModelsSidebar() }
         }
         Menu {
             title: "Code"
-            Action { text: "Analyze"; onTriggered: mainViewModel.analyzeNow() }
-            Action { text: "Complete"; onTriggered: mainViewModel.requestCompletionsAtCursor() }
-            Action { text: "Hover"; onTriggered: mainViewModel.requestHoverAtCursor() }
-            Action { text: "Definition"; onTriggered: mainViewModel.requestDefinitionAtCursor() }
-            Action { text: "Extract patch preview"; onTriggered: mainViewModel.extractPatchPreview() }
-            Action { text: "Open patch diff"; onTriggered: mainViewModel.openPatchPreviewDiff() }
-            Action { text: "Apply assistant patch"; onTriggered: mainViewModel.applyAssistantPatch() }
+            Action { text: "Analyze"; icon.source: IconRegistry.source("analyze"); onTriggered: mainViewModel.analyzeNow() }
+            Action { text: "Complete"; icon.source: IconRegistry.source("complete"); onTriggered: mainViewModel.requestCompletionsAtCursor() }
+            Action { text: "Hover"; icon.source: IconRegistry.source("hover"); onTriggered: mainViewModel.requestHoverAtCursor() }
+            Action { text: "Definition"; icon.source: IconRegistry.source("definition"); onTriggered: mainViewModel.requestDefinitionAtCursor() }
+            Action { text: "Extract patch preview"; icon.source: IconRegistry.source("diff"); onTriggered: mainViewModel.extractPatchPreview() }
+            Action { text: "Open patch diff"; icon.source: IconRegistry.source("diff"); onTriggered: mainViewModel.openPatchPreviewDiff() }
+            Action { text: "Apply assistant patch"; icon.source: IconRegistry.source("apply_patch"); onTriggered: mainViewModel.applyAssistantPatch() }
         }
         Menu {
             title: "Git"
-            Action { text: "Refresh"; onTriggered: mainViewModel.refreshGitChanges() }
-            Action { text: "Commit"; onTriggered: mainViewModel.commitGitChanges() }
+            Action { text: "Refresh"; icon.source: IconRegistry.source("refresh"); onTriggered: mainViewModel.refreshGitChanges() }
+            Action { text: "Commit"; icon.source: IconRegistry.source("apply_patch"); onTriggered: mainViewModel.commitGitChanges() }
         }
         Menu {
             title: "Models"
-            Action { text: "Refresh hardware"; onTriggered: modelHubViewModel.refreshHardware() }
-            Action { text: "Apply auto profile"; onTriggered: modelHubViewModel.applyDetectedProfile() }
-            Action { text: "Use downloaded as active"; onTriggered: modelHubViewModel.useDownloadedAsCurrent() }
-            Action { text: "Start local server"; onTriggered: modelHubViewModel.startServer() }
-            Action { text: "Stop local server"; onTriggered: modelHubViewModel.stopServer() }
-            Action { text: "Probe local server"; onTriggered: modelHubViewModel.probeServer() }
+            Action { text: "Refresh hardware"; icon.source: IconRegistry.source("refresh"); onTriggered: modelHubViewModel.refreshHardware() }
+            Action { text: "Apply auto profile"; icon.source: IconRegistry.source("auto_profile"); onTriggered: modelHubViewModel.applyDetectedProfile() }
+            Action { text: "Use downloaded as active"; icon.source: IconRegistry.source("use_active"); onTriggered: modelHubViewModel.useDownloadedAsCurrent() }
+            Action { text: "Start local server"; icon.source: IconRegistry.source("start"); onTriggered: modelHubViewModel.startServer() }
+            Action { text: "Stop local server"; icon.source: IconRegistry.source("stop"); onTriggered: modelHubViewModel.stopServer() }
+            Action { text: "Probe local server"; icon.source: IconRegistry.source("probe"); onTriggered: modelHubViewModel.probeServer() }
         }
     }
 
@@ -98,7 +105,12 @@ ApplicationWindow {
                         background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
                         onAccepted: mainViewModel.workspaceRootPath = text
                     }
-                    Button { text: "Scan"; onClicked: mainViewModel.refreshWorkspace() }
+                    IconButton { text: "Scan"; iconName: "scan"; onClicked: mainViewModel.refreshWorkspace() }
+                    IconButton {
+                        text: mainViewModel.secondaryAiVisible ? "Hide AI" : "Show AI"
+                        iconName: "assistant"
+                        onClicked: mainViewModel.toggleSecondaryAiSidebar()
+                    }
                     Item { Layout.fillWidth: true }
                     Label { text: mainViewModel.gitSummary; color: "#9cdcfe"; elide: Text.ElideRight }
                 }
@@ -109,8 +121,8 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 orientation: Qt.Horizontal
 
-                Sidebar { SplitView.preferredWidth: 52 }
-                LeftPanel { SplitView.preferredWidth: 320; SplitView.minimumWidth: 260 }
+                Sidebar { viewModel: mainViewModel; SplitView.preferredWidth: 52 }
+                LeftPanel { viewModel: mainViewModel; SplitView.preferredWidth: 320; SplitView.minimumWidth: 260 }
 
                 SplitView {
                     SplitView.fillWidth: true
@@ -125,7 +137,19 @@ ApplicationWindow {
                         BottomPanel { SplitView.fillWidth: true; SplitView.preferredHeight: 280; SplitView.minimumHeight: 220 }
                     }
 
-                    ChatPanel { SplitView.preferredWidth: 390; SplitView.minimumWidth: 320; SplitView.fillHeight: true }
+                    ChatPanel {
+                        viewModel: mainViewModel
+                        visible: mainViewModel.secondaryAiVisible
+                        SplitView.preferredWidth: mainViewModel.secondaryAiVisible ? mainViewModel.secondaryAiWidth : 0
+                        SplitView.minimumWidth: mainViewModel.secondaryAiVisible ? 320 : 0
+                        SplitView.maximumWidth: mainViewModel.secondaryAiVisible ? 720 : 0
+                        SplitView.fillHeight: true
+                        onWidthChanged: {
+                            if (visible && width > 0) {
+                                mainViewModel.secondaryAiWidth = width
+                            }
+                        }
+                    }
                 }
             }
 

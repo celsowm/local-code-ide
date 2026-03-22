@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import LocalCodeIDE 1.0
+import LocalCodeIDE.Highlighting 1.0
 
 Rectangle {
     color: "#1e1e1e"
@@ -70,15 +70,15 @@ Rectangle {
                 Label { text: mainViewModel.currentDocumentDirty ? "unsaved" : "saved"; color: mainViewModel.currentDocumentDirty ? "#f48771" : "#73c991" }
                 Label { text: mainViewModel.splitEditorVisible ? (mainViewModel.diffEditorVisible ? "DIFF" : "SPLIT") : "SINGLE"; color: "#9cdcfe" }
                 Item { Layout.fillWidth: true }
-                Button { text: "Split Right"; onClicked: mainViewModel.openWorkspaceFileInSplit(mainViewModel.currentPath) }
-                Button { text: "Patch Diff"; enabled: mainViewModel.hasPatchPreview; onClicked: mainViewModel.openPatchPreviewDiff() }
-                Button { text: "Save Right"; visible: mainViewModel.splitEditorVisible && !mainViewModel.diffEditorVisible; onClicked: mainViewModel.saveSecondaryEditor() }
-                Button { text: "Close Split"; visible: mainViewModel.splitEditorVisible; onClicked: mainViewModel.closeSplitEditor() }
-                Button { text: "Analyze"; onClicked: mainViewModel.analyzeNow() }
-                Button { text: "Complete"; onClicked: mainViewModel.requestCompletionsAtCursor() }
-                Button { text: "Hover"; onClicked: mainViewModel.requestHoverAtCursor() }
-                Button { text: "Definition"; onClicked: mainViewModel.requestDefinitionAtCursor() }
-                Button { text: "Apply Patch"; enabled: mainViewModel.canApplyPatchPreview; onClicked: mainViewModel.applyAssistantPatch() }
+                IconButton { text: "Split Right"; iconName: "split"; onClicked: mainViewModel.openWorkspaceFileInSplit(mainViewModel.currentPath) }
+                IconButton { text: "Patch Diff"; iconName: "diff"; enabled: mainViewModel.hasPatchPreview; onClicked: mainViewModel.openPatchPreviewDiff() }
+                IconButton { text: "Save Right"; iconName: "apply_patch"; visible: mainViewModel.splitEditorVisible && !mainViewModel.diffEditorVisible; onClicked: mainViewModel.saveSecondaryEditor() }
+                IconButton { text: "Close Split"; iconName: "split"; visible: mainViewModel.splitEditorVisible; onClicked: mainViewModel.closeSplitEditor() }
+                IconButton { text: "Analyze"; iconName: "analyze"; onClicked: mainViewModel.analyzeNow() }
+                IconButton { text: "Complete"; iconName: "complete"; onClicked: mainViewModel.requestCompletionsAtCursor() }
+                IconButton { text: "Hover"; iconName: "hover"; onClicked: mainViewModel.requestHoverAtCursor() }
+                IconButton { text: "Definition"; iconName: "definition"; onClicked: mainViewModel.requestDefinitionAtCursor() }
+                IconButton { text: "Apply Patch"; iconName: "apply_patch"; enabled: mainViewModel.canApplyPatchPreview; onClicked: mainViewModel.applyAssistantPatch() }
             }
         }
 

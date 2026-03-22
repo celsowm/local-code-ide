@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
     }
     modelHubViewModel.searchRepos();
 
-    qmlRegisterType<ide::ui::highlighting::DocumentHighlighter>("LocalCodeIDE", 1, 0, "DocumentHighlighter");
+    qmlRegisterType<ide::ui::highlighting::DocumentHighlighter>("LocalCodeIDE.Highlighting", 1, 0, "DocumentHighlighter");
 
     engine.rootContext()->setContextProperty("mainViewModel", &mainViewModel);
     engine.rootContext()->setContextProperty("modelHubViewModel", &modelHubViewModel);
