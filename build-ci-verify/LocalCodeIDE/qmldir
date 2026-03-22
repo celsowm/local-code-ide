@@ -1,0 +1,44 @@
+module LocalCodeIDE
+typeinfo LocalCodeIDE.qmltypes
+prefer :/qt/qml/LocalCodeIDE/
+Main 1.0 qml/Main.qml
+IconButton 1.0 qml/components/IconButton.qml
+IconRegistry 1.0 qml/components/IconRegistry.js
+AssistantTab 1.0 qml/components/AssistantTab.qml
+AssistantCard 1.0 qml/components/assistant/AssistantCard.qml
+AssistantRuntimeSection 1.0 qml/components/assistant/AssistantRuntimeSection.qml
+AssistantContextSection 1.0 qml/components/assistant/AssistantContextSection.qml
+AssistantToolsSection 1.0 qml/components/assistant/AssistantToolsSection.qml
+AssistantApprovalsSection 1.0 qml/components/assistant/AssistantApprovalsSection.qml
+AssistantInputSection 1.0 qml/components/assistant/AssistantInputSection.qml
+AssistantOutputSection 1.0 qml/components/assistant/AssistantOutputSection.qml
+BottomPanel 1.0 qml/components/BottomPanel.qml
+ChatPanel 1.0 qml/components/ChatPanel.qml
+ChatTabSelector 1.0 qml/components/chat/ChatTabSelector.qml
+ChatContentStack 1.0 qml/components/chat/ChatContentStack.qml
+CommandPaletteDialog 1.0 qml/components/CommandPaletteDialog.qml
+EditorPane 1.0 qml/components/EditorPane.qml
+ExplorerPanel 1.0 qml/components/ExplorerPanel.qml
+ExplorerRootRow 1.0 qml/components/ExplorerRootRow.qml
+ExplorerSectionHeader 1.0 qml/components/ExplorerSectionHeader.qml
+ExplorerToolbarButton 1.0 qml/components/ExplorerToolbarButton.qml
+ExplorerTreeRow 1.0 qml/components/ExplorerTreeRow.qml
+LeftPanel 1.0 qml/components/LeftPanel.qml
+ModelHubPanel 1.0 qml/components/ModelHubPanel.qml
+ModelHubCard 1.0 qml/components/modelhub/ModelHubCard.qml
+ModelHubStepChip 1.0 qml/components/modelhub/ModelHubStepChip.qml
+ModelHubDiscoverStep 1.0 qml/components/modelhub/ModelHubDiscoverStep.qml
+ModelHubChooseStep 1.0 qml/components/modelhub/ModelHubChooseStep.qml
+ModelHubDownloadStep 1.0 qml/components/modelhub/ModelHubDownloadStep.qml
+ModelHubActivateServerStep 1.0 qml/components/modelhub/ModelHubActivateServerStep.qml
+QuickOpenDialog 1.0 qml/components/QuickOpenDialog.qml
+ScmChangeRow 1.0 qml/components/ScmChangeRow.qml
+ScmChangesSection 1.0 qml/components/ScmChangesSection.qml
+ScmCommitSection 1.0 qml/components/ScmCommitSection.qml
+ScmHeader 1.0 qml/components/ScmHeader.qml
+ScmHistorySection 1.0 qml/components/ScmHistorySection.qml
+ScmSectionHeader 1.0 qml/components/ScmSectionHeader.qml
+SearchPanel 1.0 qml/components/SearchPanel.qml
+Sidebar 1.0 qml/components/Sidebar.qml
+SourceControlPanel 1.0 qml/components/SourceControlPanel.qml
+

@@ -1,0 +1,15 @@
+-rootPath
+C:/Users/celso/Documents/projetos/local-code-ide
+-cmake-output
+-output-file
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify/.qt/qml_imports/LocalCodeIDE_build.cmake
+-importPath
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify/LocalCodeIDE
+-importPath
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify
+-importPath
+C:/Qt/6.8.0/msvc2022_64/qml
+-qrcFiles
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify/.qt/rcc/qmake_LocalCodeIDE.qrc
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify/.qt/rcc/LocalCodeIDE_raw_qml_0.qrc
+C:/Users/celso/Documents/projetos/local-code-ide/build-ci-verify/.qt/rcc/LocalCodeIDE_raw_qml_0_extra_qmldirs.qrc

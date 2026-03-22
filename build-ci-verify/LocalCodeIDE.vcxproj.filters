@@ -1,0 +1,720 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE_autogen\mocs_compilation_Debug.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\core\Document.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\AiService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\CodeIntelService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiagnosticService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\DocumentService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\GitService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\HardwareProfileService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\LlamaServerProcessService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\LocalModelRuntimeService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\ModelCatalogService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\SearchService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\TerminalService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\ToolCallingService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\WorkspaceContextService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\services\WorkspaceService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\ai\AdaptiveAiBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\ai\LlamaCppServerBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\ai\MockAiBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\codeintel\LspCodeIntelProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\codeintel\MockCodeIntelProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\diagnostics\HybridDiagnosticProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\diagnostics\LocalSyntaxDiagnosticProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\diagnostics\LspClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\diagnostics\LspDiagnosticProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\diagnostics\MockDiagnosticProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\search\FileSystemSearchProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\modelhub\HfCliDownloadBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\modelhub\HuggingFaceFileDownloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\modelhub\HuggingFaceModelCatalogProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\modelhub\IFileDownloadBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\modelhub\QtHttpDownloadBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\terminal\ProcessTerminalBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\workspace\FileSystemWorkspaceProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\ApplyUnifiedDiffTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\CreateFileTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\EditFileTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\ListWorkspaceFilesTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\ReadFileTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\tools\SearchWorkspaceTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\vcs\GitCliProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\adapters\vcs\MockVersionControlProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\highlighting\CppSyntaxHighlighter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\highlighting\DocumentHighlighter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\CommandPaletteListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\CompletionListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\DiagnosticListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\GitChangeListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\GitCommitListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\OpenEditorListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\PendingToolApprovalListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\ModelFileListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\ModelRepoListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\RelevantContextListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\ScmSectionListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\SearchResultListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\WorkspaceFileListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\models\WorkspaceTreeListModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\viewmodels\MainViewModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\src\ui\viewmodels\ModelHubViewModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\localcodeide_qmltyperegistrations.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\qrc_qmake_LocalCodeIDE.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qmlcache_loader.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\Main_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\IconButton_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\IconRegistry_js.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\AssistantTab_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantCard_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantRuntimeSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantContextSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantToolsSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantApprovalsSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantInputSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\assistant\AssistantOutputSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\BottomPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ChatPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\chat\ChatTabSelector_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\chat\ChatContentStack_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\CommandPaletteDialog_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\EditorPane_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ExplorerPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ExplorerRootRow_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ExplorerSectionHeader_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ExplorerToolbarButton_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ExplorerTreeRow_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\LeftPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ModelHubPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubCard_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubStepChip_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubDiscoverStep_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubChooseStep_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubDownloadStep_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\modelhub\ModelHubActivateServerStep_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\QuickOpenDialog_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmChangeRow_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmChangesSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmCommitSection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmHeader_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmHistorySection_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\ScmSectionHeader_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\SearchPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\Sidebar_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.rcc\qmlcache\LocalCodeIDE_qml\components\SourceControlPanel_qml.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\qrc_LocalCodeIDE_raw_qml_0.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\qrc_LocalCodeIDE_raw_qml_0_extra_qmldirs.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE_autogen\mocs_compilation_Release.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE_autogen\mocs_compilation_MinSizeRel.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE_autogen\mocs_compilation_RelWithDebInfo.cpp">
+      <Filter>Source Files\Generated</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\ddf_LocalCodeIDE.h">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\qmake_LocalCodeIDE.qrc">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\LocalCodeIDE_raw_qml_0.qrc">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\explorer.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\search.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\git.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\assistant.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\scan.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\split.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\diff.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\analyze.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\complete.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\hover.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\new_file.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\new_folder.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\definition.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\apply_patch.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\refresh.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\auto_profile.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\start.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\stop.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\probe.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\clear_logs.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\suggest.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\download.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\file.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\folder.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\use_active.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\collapse_all.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\LICENSE.txt" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\c.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\cmake.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\cpp.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\folder-images.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\folder-json.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\folder-scripts.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\folder-src.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\git.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\h.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\javascript.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\json.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\license.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\markdown.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\MATERIAL_ICON_THEME_LICENSE.txt" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\powershell.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\python.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\react.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\react_ts.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\readme.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\rust.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\assets\icons\filetypes\settings.svg" />
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\.qt\rcc\LocalCodeIDE_raw_qml_0_extra_qmldirs.qrc">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\chat\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\qmldir">
+      <Filter>Source Files\Generated</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\1652a58b169cf129e97622daa8a1deae\qt6localcodeide_metatypes.json.gen.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\250178f8e6868520671b6649b0f3225b\localcodeide_qmltyperegistrations.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\3b9c7426fa99803b0985e64cd0bead55\qrc_qmake_LocalCodeIDE.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8df2bff3006079a8e272af413e69f11d\LocalCodeIDE_qmlcache_loader.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\63fee31a99534fb470a9e4908eaa072e\Main_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\IconButton_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\IconRegistry_js.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\AssistantTab_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantCard_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantRuntimeSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantContextSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantToolsSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantApprovalsSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantInputSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantOutputSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\BottomPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ChatPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\72891f57b8d4c5d5e7a86da845c03518\ChatTabSelector_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\72891f57b8d4c5d5e7a86da845c03518\ChatContentStack_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\CommandPaletteDialog_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\EditorPane_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerRootRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerSectionHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerToolbarButton_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerTreeRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\LeftPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ModelHubPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubCard_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubStepChip_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubDiscoverStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubChooseStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubDownloadStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubActivateServerStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\QuickOpenDialog_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmChangeRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmChangesSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmCommitSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmHistorySection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmSectionHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\SearchPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\Sidebar_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\SourceControlPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\3b9c7426fa99803b0985e64cd0bead55\qrc_LocalCodeIDE_raw_qml_0.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\3b9c7426fa99803b0985e64cd0bead55\qrc_LocalCodeIDE_raw_qml_0_extra_qmldirs.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\meta_types\qt6localcodeide_metatypes.json.gen">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\Main.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\IconButton.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\IconRegistry.js" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\AssistantTab.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantCard.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantRuntimeSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantContextSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantToolsSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantApprovalsSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantInputSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\assistant\AssistantOutputSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\BottomPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ChatPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\chat\ChatTabSelector.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\chat\ChatContentStack.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\CommandPaletteDialog.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\EditorPane.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ExplorerPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ExplorerRootRow.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ExplorerSectionHeader.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ExplorerToolbarButton.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ExplorerTreeRow.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\LeftPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ModelHubPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubCard.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubStepChip.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubDiscoverStep.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubChooseStep.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubDownloadStep.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\modelhub\ModelHubActivateServerStep.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\QuickOpenDialog.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmChangeRow.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmChangesSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmCommitSection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmHeader.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmHistorySection.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\ScmSectionHeader.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\SearchPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\Sidebar.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\qml\components\SourceControlPanel.qml">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6core_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6qml_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6network_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6quick_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6gui_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6qmlmeta_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6qmlmodels_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6qmlworkerscript_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6opengl_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+    <None Include="C:\Qt\6.8.0\msvc2022_64\metatypes\qt6quickcontrols2_metatypes.json">
+      <Filter>Source Files\Generated</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8E059E1F-B1B0-355D-90D8-C0840658ADFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{D8011AE1-F56C-3E88-86FF-4064D274D4B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Generated">
+      <UniqueIdentifier>{4EB81BB2-FF11-387A-91FA-679C06A6AAF3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

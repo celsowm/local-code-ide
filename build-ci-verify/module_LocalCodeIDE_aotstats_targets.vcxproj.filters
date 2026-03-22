@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\63fee31a99534fb470a9e4908eaa072e\Main_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\AssistantTab_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\BottomPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ChatPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\CommandPaletteDialog_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\EditorPane_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerRootRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerSectionHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerToolbarButton_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ExplorerTreeRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\IconButton_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\LeftPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ModelHubPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\QuickOpenDialog_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmChangeRow_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmChangesSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmCommitSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmHistorySection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\ScmSectionHeader_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\SearchPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\Sidebar_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\08d248237007a9055a21933f3a5ca2c8\SourceControlPanel_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantApprovalsSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantCard_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantContextSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantInputSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantOutputSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantRuntimeSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8d080a63db0196b50f12a6476011b9c7\AssistantToolsSection_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\72891f57b8d4c5d5e7a86da845c03518\ChatContentStack_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\72891f57b8d4c5d5e7a86da845c03518\ChatTabSelector_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubActivateServerStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubCard_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubChooseStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubDiscoverStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubDownloadStep_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\391ab00f83cccafdcd2acaca227b13bd\ModelHubStepChip_qml.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\8df2bff3006079a8e272af413e69f11d\module_LocalCodeIDE.aotstats.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\cdd43c9f4eed8463a7ca9b67580c83b3\module_LocalCodeIDE_aotstats_targets.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\module_LocalCodeIDE_aotstats_targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8E059E1F-B1B0-355D-90D8-C0840658ADFF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

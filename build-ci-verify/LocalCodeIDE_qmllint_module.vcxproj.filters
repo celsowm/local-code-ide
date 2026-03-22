@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\cdd43c9f4eed8463a7ca9b67580c83b3\LocalCodeIDE_qmllint_module.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\LocalCodeIDE_qmllint_module" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8E059E1F-B1B0-355D-90D8-C0840658ADFF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<BuildType Name="MinSizeRel"/>
+		<BuildType Name="RelWithDebInfo"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Project Path="LocalCodeIDE.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="9001fdb1-aa05-3c20-bab3-285ddc6de921">
+		<BuildDependency Project="LocalCodeIDE_autogen.vcxproj"/>
+		<BuildDependency Project="LocalCodeIDE_automoc_json_extraction.vcxproj"/>
+		<BuildDependency Project="LocalCodeIDE_qmlimportscan.vcxproj"/>
+		<BuildDependency Project="LocalCodeIDE_tooling.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="all_aotstats.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="d38a971b-fcbc-3ee3-9451-b601dc453e0a">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="module_LocalCodeIDE_aotstats_targets.vcxproj"/>
+		<Build Solution="Debug|*" Project="false"/>
+		<Build Solution="Release|*" Project="false"/>
+		<Build Solution="MinSizeRel|*" Project="false"/>
+		<Build Solution="RelWithDebInfo|*" Project="false"/>
+	</Project>
+	<Project Path="module_LocalCodeIDE_aotstats_targets.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="424c0171-84d6-3e9a-81b0-fbac1d512635">
+		<BuildDependency Project="LocalCodeIDE_qmltyperegistration.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Folder Name="/CMakePredefinedTargets/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0018aec8-fa5c-3589-adcf-bb1a33261c78" DefaultStartup="true">
+			<BuildDependency Project="LocalCodeIDE.vcxproj"/>
+			<BuildDependency Project="LocalCodeIDE_tooling.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="d41dcf90-4e9b-3515-aff2-5989a2a4761c"/>
+	</Folder>
+	<Folder Name="/QtInternalTargets/">
+		<Project Path="LocalCodeIDE_autogen.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="3d208c85-2aff-32ca-846a-24e03c59840b">
+			<BuildDependency Project="LocalCodeIDE_qmlimportscan.vcxproj"/>
+			<BuildDependency Project="LocalCodeIDE_tooling.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="LocalCodeIDE_automoc_json_extraction.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7a056c52-41c3-3ae9-b7e4-4c9c357b7903">
+			<BuildDependency Project="LocalCodeIDE_autogen.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="LocalCodeIDE_qmlimportscan.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="c8c48431-8c83-3563-ad9a-3b97c5875479">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="LocalCodeIDE_qmltyperegistration.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="72c7244a-ecf8-3ad8-968b-f35d4d171aac">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="LocalCodeIDE_tooling.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="359f41be-eed1-3b19-a2f6-166c800cba17">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="all_qmltyperegistrations.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="edf69d57-5d6a-33fe-b6ba-6661a55e013b">
+			<BuildDependency Project="LocalCodeIDE_qmltyperegistration.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/QtInternalTargets/QmlLinter/">
+		<Project Path="LocalCodeIDE_qmllint.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="3a439d45-8b3e-37dd-be66-d5c3b1e06c06">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="all_qmltyperegistrations.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="LocalCodeIDE_qmllint_json.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="5738f65c-45d5-3f7f-ae22-dd409541e66d">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="all_qmltyperegistrations.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="LocalCodeIDE_qmllint_module.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="eede42dd-4a31-3d88-a088-111e25948641">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="all_qmltyperegistrations.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="all_qmllint.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="4112a69a-9529-34d1-963d-2d99e2c0d7b5">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="all_qmllint_json.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="55e20d76-82d5-37c2-baa4-5b9519f7bd49">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="all_qmllint_module.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="1cdaf9c2-4db4-3d32-b2a8-08751410ef98">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+	</Folder>
+</Solution>

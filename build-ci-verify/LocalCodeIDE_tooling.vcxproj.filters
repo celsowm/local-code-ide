@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\4de5147bbd7b6c634cb60010086cecbe\Main.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\IconButton.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\IconRegistry.js.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\AssistantTab.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantCard.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantRuntimeSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantContextSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantToolsSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantApprovalsSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantInputSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0e6e370b0cb84fcb4fa0b67196232a22\AssistantOutputSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\BottomPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ChatPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\6f0c042d2d8f42685c1bda8cf82c8755\ChatTabSelector.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\6f0c042d2d8f42685c1bda8cf82c8755\ChatContentStack.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\CommandPaletteDialog.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\EditorPane.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ExplorerPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ExplorerRootRow.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ExplorerSectionHeader.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ExplorerToolbarButton.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ExplorerTreeRow.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\LeftPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ModelHubPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubCard.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubStepChip.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubDiscoverStep.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubChooseStep.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubDownloadStep.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\f2bd764d206f79a491b34b7fd299c1ec\ModelHubActivateServerStep.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\QuickOpenDialog.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmChangeRow.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmChangesSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmCommitSection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmHeader.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmHistorySection.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\ScmSectionHeader.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\SearchPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\Sidebar.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\87f1c1c03ec3ab30872773406010eab1\SourceControlPanel.qml.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\explorer.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\search.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\git.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\assistant.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\scan.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\split.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\diff.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\analyze.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\complete.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\hover.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\new_file.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\new_folder.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\definition.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\apply_patch.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\refresh.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\auto_profile.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\start.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\stop.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\probe.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\clear_logs.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\suggest.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\download.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\file.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\folder.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\use_active.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\collapse_all.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\0f0a853e596a26b9e0dd970bb31199f0\LICENSE.txt.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\c.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\cmake.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\cpp.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\folder-images.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\folder-json.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\folder-scripts.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\folder-src.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\git.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\h.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\javascript.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\json.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\license.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\markdown.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\MATERIAL_ICON_THEME_LICENSE.txt.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\powershell.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\python.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\react.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\react_ts.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\readme.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\rust.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\CMakeFiles\acc0aa3a475fbd9972f0630feeca1ca0\settings.svg.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\celso\Documents\projetos\local-code-ide\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\Main.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\IconButton.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\IconRegistry.js" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\AssistantTab.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantCard.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantRuntimeSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantContextSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantToolsSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantApprovalsSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantInputSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\assistant\AssistantOutputSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\BottomPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ChatPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\chat\ChatTabSelector.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\chat\ChatContentStack.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\CommandPaletteDialog.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\EditorPane.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ExplorerPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ExplorerRootRow.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ExplorerSectionHeader.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ExplorerToolbarButton.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ExplorerTreeRow.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\LeftPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ModelHubPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubCard.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubStepChip.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubDiscoverStep.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubChooseStep.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubDownloadStep.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\modelhub\ModelHubActivateServerStep.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\QuickOpenDialog.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmChangeRow.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmChangesSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmCommitSection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmHeader.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmHistorySection.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\ScmSectionHeader.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\SearchPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\Sidebar.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\components\SourceControlPanel.qml" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\explorer.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\search.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\git.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\assistant.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\scan.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\split.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\diff.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\analyze.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\complete.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\hover.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\new_file.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\new_folder.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\definition.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\apply_patch.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\refresh.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\auto_profile.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\start.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\stop.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\probe.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\clear_logs.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\suggest.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\download.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\file.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\folder.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\use_active.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\collapse_all.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\LICENSE.txt" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\c.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\cmake.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\cpp.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\folder-images.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\folder-json.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\folder-scripts.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\folder-src.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\git.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\h.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\javascript.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\json.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\license.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\markdown.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\MATERIAL_ICON_THEME_LICENSE.txt" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\powershell.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\python.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\react.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\react_ts.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\readme.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\rust.svg" />
+    <None Include="C:\Users\celso\Documents\projetos\local-code-ide\build-ci-verify\LocalCodeIDE\qml\assets\icons\filetypes\settings.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8E059E1F-B1B0-355D-90D8-C0840658ADFF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
