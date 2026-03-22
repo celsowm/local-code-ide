@@ -6,12 +6,12 @@ Rectangle {
     id: root
     color: "#181818"
     border.color: "#2d2d30"
-    property var viewModel: mainViewModel
+    property var viewModel
 
     StackLayout {
         anchors.fill: parent
         anchors.margins: 8
-        currentIndex: root.viewModel.primaryViewIndex
+        currentIndex: root.viewModel ? root.viewModel.primaryViewIndex : 0
 
         ExplorerPanel { viewModel: root.viewModel }
         SearchPanel { viewModel: root.viewModel }

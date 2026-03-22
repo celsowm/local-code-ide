@@ -16,12 +16,17 @@ QVariant GitChangeListModel::data(const QModelIndex& index, int role) const {
     const auto& item = m_changes[static_cast<std::size_t>(index.row())];
     switch (role) {
     case PathRole: return item.path;
+    case FileNameRole: return item.fileName;
+    case DirectoryRole: return item.directory;
     case StatusCodeRole: return item.statusCode;
     case StatusTextRole: return item.statusText;
+    case ChangeKindRole: return item.changeKind;
     case StagedRole: return item.staged;
     case ModifiedRole: return item.modified;
     case RenamedRole: return item.renamed;
     case UntrackedRole: return item.untracked;
+    case HasIndexChangesRole: return item.hasIndexChanges;
+    case HasWorkingTreeChangesRole: return item.hasWorkingTreeChanges;
     default: return {};
     }
 }
@@ -29,12 +34,17 @@ QVariant GitChangeListModel::data(const QModelIndex& index, int role) const {
 QHash<int, QByteArray> GitChangeListModel::roleNames() const {
     return {
         {PathRole, "path"},
+        {FileNameRole, "fileName"},
+        {DirectoryRole, "directory"},
         {StatusCodeRole, "statusCode"},
         {StatusTextRole, "statusText"},
+        {ChangeKindRole, "changeKind"},
         {StagedRole, "staged"},
         {ModifiedRole, "modified"},
         {RenamedRole, "renamed"},
-        {UntrackedRole, "untracked"}
+        {UntrackedRole, "untracked"},
+        {HasIndexChangesRole, "hasIndexChanges"},
+        {HasWorkingTreeChangesRole, "hasWorkingTreeChanges"}
     };
 }
 
@@ -52,6 +62,22 @@ int GitChangeListModel::stagedCount() const {
     int total = 0;
     for (const auto& c : m_changes) {
         if (c.staged) ++total;
+    }
+    return total;
+}
+
+int GitChangeListModel::unstagedCount() const {
+    int total = 0;
+    for (const auto& c : m_changes) {
+        if (!c.untracked && c.hasWorkingTreeChanges) ++total;
+    }
+    return total;
+}
+
+int GitChangeListModel::untrackedCount() const {
+    int total = 0;
+    for (const auto& c : m_changes) {
+        if (c.untracked) ++total;
     }
     return total;
 }

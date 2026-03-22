@@ -18,23 +18,23 @@ Item {
             Layout.fillWidth: true
             TextField {
                 Layout.fillWidth: true
-                text: root.viewModel.searchPattern
+                text: root.viewModel ? root.viewModel.searchPattern : ""
                 placeholderText: "find in workspace"
                 color: "#d4d4d4"
                 background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                onTextChanged: root.viewModel.searchPattern = text
-                onAccepted: root.viewModel.runSearch()
+                onTextChanged: if (root.viewModel) root.viewModel.searchPattern = text
+                onAccepted: if (root.viewModel) root.viewModel.runSearch()
             }
-            Button { text: "Go"; onClicked: root.viewModel.runSearch() }
+            Button { text: "Go"; enabled: !!root.viewModel; onClicked: if (root.viewModel) root.viewModel.runSearch() }
         }
 
-        Label { text: root.viewModel.searchResultCount + " results"; color: "#808080" }
+        Label { text: (root.viewModel ? root.viewModel.searchResultCount : 0) + " results"; color: "#808080" }
 
         ListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: root.viewModel.searchResultsModel
+            model: root.viewModel ? root.viewModel.searchResultsModel : null
             delegate: Rectangle {
                 id: resultItem
                 required property string path
@@ -53,7 +53,7 @@ Item {
                     Label { text: resultItem.path + ":" + resultItem.line; color: "#9cdcfe"; elide: Text.ElideMiddle; Layout.fillWidth: true }
                     Label { text: resultItem.preview; color: "#d4d4d4"; elide: Text.ElideRight; Layout.fillWidth: true }
                 }
-                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; onClicked: root.viewModel.openSearchResult(resultItem.path, resultItem.line, resultItem.column) }
+                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; onClicked: if (root.viewModel) root.viewModel.openSearchResult(resultItem.path, resultItem.line, resultItem.column) }
             }
         }
     }

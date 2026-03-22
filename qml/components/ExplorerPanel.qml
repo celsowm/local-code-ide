@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -8,86 +10,57 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 10
+        spacing: 0
 
-        Label { text: "EXPLORER"; color: "#d4d4d4"; font.bold: true }
-        Label { text: root.viewModel.workspaceFileCount + " files"; color: "#808080" }
-
-        Label { text: "OPEN EDITORS"; color: "#d4d4d4"; font.bold: true }
-        ListView {
+        Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 120
-            clip: true
-            model: root.viewModel.openEditorsModel
-            delegate: Rectangle {
-                width: ListView.view.width
-                height: 28
-                color: active ? "#2a2d2e" : (mouseArea.containsMouse ? "#222" : "transparent")
-                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; z: -1; onClicked: root.viewModel.switchOpenEditor(path) }
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    Label { text: dirty ? title + " •" : title; color: "#d4d4d4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                    Button { text: "×"; flat: true; onClicked: root.viewModel.closeOpenEditor(path) }
+            Layout.preferredHeight: 32
+            color: "#181818"
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 6
+                anchors.rightMargin: 4
+                spacing: 4
+
+                Label {
+                    text: "EXPLORER"
+                    color: "#c8c8c8"
+                    font.pixelSize: 11
+                    font.bold: true
+                    Layout.fillWidth: true
+                }
+
+                Label {
+                    text: root.viewModel ? root.viewModel.workspaceFileCount + " files" : ""
+                    color: "#787878"
+                    font.pixelSize: 10
                 }
             }
         }
 
-        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#2d2d30" }
-        Label { text: "FOLDERS"; color: "#d4d4d4"; font.bold: true }
+        ExplorerRootRow {
+            Layout.fillWidth: true
+            viewModel: root.viewModel
+            workspacePath: root.viewModel ? root.viewModel.workspaceRootPath : ""
+        }
+
+        ExplorerSectionHeader {
+            Layout.fillWidth: true
+            title: "FOLDERS"
+        }
 
         ListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: root.viewModel.workspaceTreeModel
-            delegate: Rectangle {
+            model: root.viewModel ? root.viewModel.workspaceTreeModel : null
+            boundsBehavior: Flickable.StopAtBounds
+            spacing: 1
+
+            delegate: ExplorerTreeRow {
+                viewModel: root.viewModel
                 width: ListView.view.width
-                height: 28
-                color: mouseArea.containsMouse ? "#2a2d2e" : "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 6 + depth * 14
-                    anchors.rightMargin: 6
-                    spacing: 6
-                    Button {
-                        text: directory && hasChildren ? (expanded ? "▾" : "▸") : ""
-                        flat: true
-                        enabled: directory && hasChildren
-                        visible: directory && hasChildren
-                        onClicked: root.viewModel.toggleWorkspaceFolder(nodeId)
-                    }
-                    Label {
-                        text: directory ? "📁" : "📄"
-                        color: directory ? "#c5c5c5" : "#808080"
-                    }
-                    Label {
-                        text: name
-                        color: directory ? "#dcdcaa" : "#d4d4d4"
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                    }
-                    Button {
-                        visible: !directory && mouseArea.containsMouse
-                        text: "Split"
-                        flat: true
-                        onClicked: root.viewModel.openWorkspaceFileInSplit(path)
-                    }
-                }
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    z: -1
-                    onClicked: {
-                        if (directory) {
-                            root.viewModel.toggleWorkspaceFolder(nodeId)
-                        } else {
-                            root.viewModel.openWorkspaceFile(path)
-                        }
-                    }
-                }
             }
         }
     }

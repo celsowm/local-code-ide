@@ -72,11 +72,13 @@ qt_add_executable(LocalCodeIDE
     src/ui/models/CompletionListModel.cpp
     src/ui/models/DiagnosticListModel.cpp
     src/ui/models/GitChangeListModel.cpp
+    src/ui/models/GitCommitListModel.cpp
     src/ui/models/OpenEditorListModel.cpp
     src/ui/models/PendingToolApprovalListModel.cpp
     src/ui/models/ModelFileListModel.cpp
     src/ui/models/ModelRepoListModel.cpp
     src/ui/models/RelevantContextListModel.cpp
+    src/ui/models/ScmSectionListModel.cpp
     src/ui/models/SearchResultListModel.cpp
     src/ui/models/WorkspaceFileListModel.cpp
     src/ui/models/WorkspaceTreeListModel.cpp
@@ -107,6 +109,10 @@ qt_add_qml_module(LocalCodeIDE
         qml/components/CommandPaletteDialog.qml
         qml/components/EditorPane.qml
         qml/components/ExplorerPanel.qml
+        qml/components/ExplorerRootRow.qml
+        qml/components/ExplorerSectionHeader.qml
+        qml/components/ExplorerToolbarButton.qml
+        qml/components/ExplorerTreeRow.qml
         qml/components/LeftPanel.qml
         qml/components/ModelHubPanel.qml
         qml/components/modelhub/ModelHubCard.qml
@@ -116,6 +122,12 @@ qt_add_qml_module(LocalCodeIDE
         qml/components/modelhub/ModelHubDownloadStep.qml
         qml/components/modelhub/ModelHubActivateServerStep.qml
         qml/components/QuickOpenDialog.qml
+        qml/components/ScmChangeRow.qml
+        qml/components/ScmChangesSection.qml
+        qml/components/ScmCommitSection.qml
+        qml/components/ScmHeader.qml
+        qml/components/ScmHistorySection.qml
+        qml/components/ScmSectionHeader.qml
         qml/components/SearchPanel.qml
         qml/components/Sidebar.qml
         qml/components/SourceControlPanel.qml
@@ -130,6 +142,8 @@ qt_add_qml_module(LocalCodeIDE
         qml/assets/icons/analyze.svg
         qml/assets/icons/complete.svg
         qml/assets/icons/hover.svg
+        qml/assets/icons/new_file.svg
+        qml/assets/icons/new_folder.svg
         qml/assets/icons/definition.svg
         qml/assets/icons/apply_patch.svg
         qml/assets/icons/refresh.svg
@@ -140,8 +154,32 @@ qt_add_qml_module(LocalCodeIDE
         qml/assets/icons/clear_logs.svg
         qml/assets/icons/suggest.svg
         qml/assets/icons/download.svg
+        qml/assets/icons/file.svg
+        qml/assets/icons/folder.svg
         qml/assets/icons/use_active.svg
+        qml/assets/icons/collapse_all.svg
         qml/assets/icons/LICENSE.txt
+        qml/assets/icons/filetypes/c.svg
+        qml/assets/icons/filetypes/cmake.svg
+        qml/assets/icons/filetypes/cpp.svg
+        qml/assets/icons/filetypes/folder-images.svg
+        qml/assets/icons/filetypes/folder-json.svg
+        qml/assets/icons/filetypes/folder-scripts.svg
+        qml/assets/icons/filetypes/folder-src.svg
+        qml/assets/icons/filetypes/git.svg
+        qml/assets/icons/filetypes/h.svg
+        qml/assets/icons/filetypes/javascript.svg
+        qml/assets/icons/filetypes/json.svg
+        qml/assets/icons/filetypes/license.svg
+        qml/assets/icons/filetypes/markdown.svg
+        qml/assets/icons/filetypes/MATERIAL_ICON_THEME_LICENSE.txt
+        qml/assets/icons/filetypes/powershell.svg
+        qml/assets/icons/filetypes/python.svg
+        qml/assets/icons/filetypes/react.svg
+        qml/assets/icons/filetypes/react_ts.svg
+        qml/assets/icons/filetypes/readme.svg
+        qml/assets/icons/filetypes/rust.svg
+        qml/assets/icons/filetypes/settings.svg
 )
 
 target_include_directories(LocalCodeIDE PRIVATE src)

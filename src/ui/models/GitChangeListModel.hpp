@@ -12,12 +12,17 @@ class GitChangeListModel final : public QAbstractListModel {
 public:
     enum Roles {
         PathRole = Qt::UserRole + 1,
+        FileNameRole,
+        DirectoryRole,
         StatusCodeRole,
         StatusTextRole,
+        ChangeKindRole,
         StagedRole,
         ModifiedRole,
         RenamedRole,
-        UntrackedRole
+        UntrackedRole,
+        HasIndexChangesRole,
+        HasWorkingTreeChangesRole
     };
 
     explicit GitChangeListModel(QObject* parent = nullptr);
@@ -28,6 +33,8 @@ public:
     void setChanges(std::vector<ide::services::interfaces::GitChange> changes);
     int changeCount() const;
     int stagedCount() const;
+    int unstagedCount() const;
+    int untrackedCount() const;
 
 private:
     std::vector<ide::services::interfaces::GitChange> m_changes;

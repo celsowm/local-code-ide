@@ -31,8 +31,8 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
                 radius: 6
-                color: index === root.viewModel.primaryViewIndex ? "#37373d" : "transparent"
-                border.color: index === root.viewModel.primaryViewIndex ? "#007acc" : "transparent"
+                color: root.viewModel && index === root.viewModel.primaryViewIndex ? "#37373d" : "transparent"
+                border.color: root.viewModel && index === root.viewModel.primaryViewIndex ? "#007acc" : "transparent"
 
                 ToolButton {
                     id: navButton
@@ -41,10 +41,11 @@ Rectangle {
                     icon.source: IconRegistry.source(navItem.modelData.iconName)
                     icon.width: 18
                     icon.height: 18
-                    icon.color: navItem.index === root.viewModel.primaryViewIndex ? "#9cdcfe" : "#d4d4d4"
+                    icon.color: root.viewModel && navItem.index === root.viewModel.primaryViewIndex ? "#9cdcfe" : "#d4d4d4"
                     background: Rectangle { color: "transparent" }
                     hoverEnabled: true
-                    onClicked: root.viewModel.primaryViewIndex = navItem.index
+                    enabled: !!root.viewModel
+                    onClicked: if (root.viewModel) root.viewModel.primaryViewIndex = navItem.index
                 }
 
                 ToolTip.visible: navButton.hovered

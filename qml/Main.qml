@@ -5,6 +5,8 @@ import "components/IconRegistry.js" as IconRegistry
 
 ApplicationWindow {
     id: window
+    required property var mainViewModel
+    required property var modelHubViewModel
     visible: true
     width: 1540
     height: 940

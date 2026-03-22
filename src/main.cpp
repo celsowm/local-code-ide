@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
         envOrDefault("LOCALCODEIDE_VRAM_GIB")
     );
 
-    ide::ui::viewmodels::MainViewModel mainViewModel(
+    auto mainViewModel = std::make_unique<ide::ui::viewmodels::MainViewModel>(
         std::move(documentService),
         std::move(diagnosticService),
         std::move(codeIntelService),
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
         std::move(terminalService)
     );
 
-    ide::ui::viewmodels::ModelHubViewModel modelHubViewModel(
+    auto modelHubViewModel = std::make_unique<ide::ui::viewmodels::ModelHubViewModel>(
         std::move(modelCatalogService),
         std::move(modelDownloader),
         std::move(hardwareProfileService),
@@ -190,17 +190,23 @@ int main(int argc, char* argv[]) {
     const QString workspaceFromEnv = envOrDefault("LOCALCODEIDE_WORKSPACE", QDir::currentPath());
     const QString modelHubAuthor = envOrDefault("LOCALCODEIDE_HF_AUTHOR", QStringLiteral("bartowski"));
     const QString modelHubDownloadDir = envOrDefault("LOCALCODEIDE_HF_DOWNLOAD_DIR");
-    mainViewModel.setWorkspaceRootPath(workspaceFromEnv);
-    modelHubViewModel.setAuthor(modelHubAuthor);
+    mainViewModel->setWorkspaceRootPath(workspaceFromEnv);
+    modelHubViewModel->setAuthor(modelHubAuthor);
     if (!modelHubDownloadDir.isEmpty()) {
-        modelHubViewModel.setTargetDownloadDir(modelHubDownloadDir);
+        modelHubViewModel->setTargetDownloadDir(modelHubDownloadDir);
     }
-    modelHubViewModel.searchRepos();
+    modelHubViewModel->searchRepos();
 
     qmlRegisterType<ide::ui::highlighting::DocumentHighlighter>("LocalCodeIDE.Highlighting", 1, 0, "DocumentHighlighter");
 
-    engine.rootContext()->setContextProperty("mainViewModel", &mainViewModel);
-    engine.rootContext()->setContextProperty("modelHubViewModel", &modelHubViewModel);
+    QQmlEngine::setObjectOwnership(mainViewModel.get(), QQmlEngine::CppOwnership);
+    QQmlEngine::setObjectOwnership(modelHubViewModel.get(), QQmlEngine::CppOwnership);
+    engine.rootContext()->setContextProperty("mainViewModel", mainViewModel.get());
+    engine.rootContext()->setContextProperty("modelHubViewModel", modelHubViewModel.get());
+    engine.setInitialProperties({
+        {QStringLiteral("mainViewModel"), QVariant::fromValue(mainViewModel.get())},
+        {QStringLiteral("modelHubViewModel"), QVariant::fromValue(modelHubViewModel.get())}
+    });
     engine.loadFromModule("LocalCodeIDE", "Main");
 
     if (engine.rootObjects().isEmpty()) {

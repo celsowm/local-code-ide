@@ -14,9 +14,11 @@
 #include "ui/models/CompletionListModel.hpp"
 #include "ui/models/DiagnosticListModel.hpp"
 #include "ui/models/GitChangeListModel.hpp"
+#include "ui/models/GitCommitListModel.hpp"
 #include "ui/models/OpenEditorListModel.hpp"
 #include "ui/models/PendingToolApprovalListModel.hpp"
 #include "ui/models/RelevantContextListModel.hpp"
+#include "ui/models/ScmSectionListModel.hpp"
 #include "ui/models/SearchResultListModel.hpp"
 #include "ui/models/WorkspaceFileListModel.hpp"
 #include "ui/models/WorkspaceTreeListModel.hpp"
@@ -36,6 +38,7 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString chatInput READ chatInput WRITE setChatInput NOTIFY chatInputChanged)
     Q_PROPERTY(QString chatResponse READ chatResponse NOTIFY chatResponseChanged)
     Q_PROPERTY(QString gitSummary READ gitSummary NOTIFY gitSummaryChanged)
+    Q_PROPERTY(QString gitBranchLabel READ gitBranchLabel NOTIFY gitSummaryChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
     Q_PROPERTY(QString diagnosticsProviderName READ diagnosticsProviderName CONSTANT)
     Q_PROPERTY(QString codeIntelProviderName READ codeIntelProviderName CONSTANT)
@@ -99,10 +102,15 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QObject* openEditorsModel READ openEditorsModel CONSTANT)
     Q_PROPERTY(QObject* commandPaletteModel READ commandPaletteModel CONSTANT)
     Q_PROPERTY(QObject* gitChangesModel READ gitChangesModel CONSTANT)
+    Q_PROPERTY(QObject* scmSectionsModel READ scmSectionsModel CONSTANT)
+    Q_PROPERTY(QObject* gitRecentCommitsModel READ gitRecentCommitsModel CONSTANT)
     Q_PROPERTY(int openEditorCount READ openEditorCount NOTIFY openEditorsChanged)
     Q_PROPERTY(int commandPaletteCount READ commandPaletteCount NOTIFY commandPaletteChanged)
     Q_PROPERTY(int gitChangeCount READ gitChangeCount NOTIFY gitChanged)
     Q_PROPERTY(int gitStagedCount READ gitStagedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitUnstagedCount READ gitUnstagedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitUntrackedCount READ gitUntrackedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitRecentCommitCount READ gitRecentCommitCount NOTIFY gitChanged)
     Q_PROPERTY(int primaryViewIndex READ primaryViewIndex WRITE setPrimaryViewIndex NOTIFY primaryViewIndexChanged)
     Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
     Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
@@ -133,6 +141,7 @@ public:
 
     QString chatResponse() const;
     QString gitSummary() const;
+    QString gitBranchLabel() const;
     QString statusMessage() const;
     QString diagnosticsProviderName() const;
     QString codeIntelProviderName() const;
@@ -219,10 +228,15 @@ public:
     QObject* openEditorsModel();
     QObject* commandPaletteModel();
     QObject* gitChangesModel();
+    QObject* scmSectionsModel();
+    QObject* gitRecentCommitsModel();
     int openEditorCount() const;
     int commandPaletteCount() const;
     int gitChangeCount() const;
     int gitStagedCount() const;
+    int gitUnstagedCount() const;
+    int gitUntrackedCount() const;
+    int gitRecentCommitCount() const;
     int primaryViewIndex() const;
     void setPrimaryViewIndex(int value);
     bool secondaryAiVisible() const;
@@ -244,7 +258,10 @@ public:
     Q_INVOKABLE void refreshWorkspace();
     Q_INVOKABLE void openWorkspaceFile(const QString& path);
     Q_INVOKABLE void openWorkspaceFileInSplit(const QString& path);
+    Q_INVOKABLE void createWorkspaceFile();
+    Q_INVOKABLE void createWorkspaceFolder();
     Q_INVOKABLE void toggleWorkspaceFolder(const QString& id);
+    Q_INVOKABLE void collapseWorkspaceFolders();
     Q_INVOKABLE void runSearch();
     Q_INVOKABLE void openSearchResult(const QString& path, int line, int column);
     Q_INVOKABLE void setCursorPosition(int line, int column);
@@ -325,6 +342,9 @@ private:
     bool loadFileIntoSecondaryEditor(const QString& path);
     void rebuildCommandPalette(const QString& query);
     void refreshGitState();
+    void rebuildWorkspaceModels();
+    void syncActiveDocumentState(const QString& path, bool expandTreePath);
+    QString uniqueWorkspaceChildPath(const QString& preferredName) const;
     void touchOpenEditor(const QString& path);
     void loadUiState();
     void saveUiState();
@@ -351,11 +371,14 @@ private:
     ide::ui::models::OpenEditorListModel m_openEditorsModel;
     ide::ui::models::CommandPaletteListModel m_commandPaletteModel;
     ide::ui::models::GitChangeListModel m_gitChangesModel;
+    ide::ui::models::ScmSectionListModel m_scmSectionsModel;
+    ide::ui::models::GitCommitListModel m_gitRecentCommitsModel;
     QSettings m_uiSettings;
 
     QString m_chatInput;
     QString m_chatResponse;
     QString m_gitSummary;
+    QString m_gitBranchLabel;
     QString m_statusMessage;
     QString m_workspaceRootPath;
     QString m_searchPattern;

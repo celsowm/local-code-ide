@@ -120,6 +120,7 @@ void MainViewModel::setChatInput(const QString& text) {
 
 QString MainViewModel::chatResponse() const { return m_chatResponse; }
 QString MainViewModel::gitSummary() const { return m_gitSummary; }
+QString MainViewModel::gitBranchLabel() const { return m_gitBranchLabel; }
 QString MainViewModel::statusMessage() const { return m_statusMessage; }
 QString MainViewModel::diagnosticsProviderName() const { return m_diagnosticService->providerName(); }
 QString MainViewModel::codeIntelProviderName() const { return m_codeIntelService->providerName(); }
@@ -226,10 +227,15 @@ QString MainViewModel::diffEditorTitle() const { return m_diffEditorTitle; }
 QObject* MainViewModel::openEditorsModel() { return &m_openEditorsModel; }
 QObject* MainViewModel::commandPaletteModel() { return &m_commandPaletteModel; }
 QObject* MainViewModel::gitChangesModel() { return &m_gitChangesModel; }
+QObject* MainViewModel::scmSectionsModel() { return &m_scmSectionsModel; }
+QObject* MainViewModel::gitRecentCommitsModel() { return &m_gitRecentCommitsModel; }
 int MainViewModel::openEditorCount() const { return m_openEditorsModel.editorCount(); }
 int MainViewModel::commandPaletteCount() const { return m_commandPaletteModel.itemCount(); }
 int MainViewModel::gitChangeCount() const { return m_gitChangesModel.changeCount(); }
-int MainViewModel::gitStagedCount() const { return m_gitChangesModel.stagedCount(); }
+int MainViewModel::gitStagedCount() const { return m_scmSectionsModel.stagedCount(); }
+int MainViewModel::gitUnstagedCount() const { return m_scmSectionsModel.unstagedCount(); }
+int MainViewModel::gitUntrackedCount() const { return m_scmSectionsModel.untrackedCount(); }
+int MainViewModel::gitRecentCommitCount() const { return m_gitRecentCommitsModel.commitCount(); }
 int MainViewModel::primaryViewIndex() const { return m_primaryViewIndex; }
 void MainViewModel::setPrimaryViewIndex(int value) {
     const int bounded = qBound(0, value, 2);
@@ -305,10 +311,10 @@ void MainViewModel::saveCurrent() {
         emit currentPathChanged();
         refreshWorkspace();
         refreshGitState();
-        updateStatusMessage(QString("Arquivo salvo em %1.").arg(currentPath()));
+        updateStatusMessage(QString("Saved %1.").arg(currentPath()));
         return;
     }
-    updateStatusMessage("Falha ao salvar arquivo.");
+    updateStatusMessage("Failed to save file.");
 }
 
 void MainViewModel::refreshGitSummary() {
@@ -345,9 +351,7 @@ void MainViewModel::loadSampleRust() {
 
 void MainViewModel::refreshWorkspace() {
     m_workspaceFiles = m_workspaceService->files(m_workspaceRootPath);
-    m_workspaceFilesModel.setFiles(m_workspaceFiles);
-    m_workspaceTreeModel.setWorkspaceRoot(m_workspaceRootPath);
-    m_workspaceTreeModel.setFiles(m_workspaceFiles);
+    rebuildWorkspaceModels();
     emit workspaceChanged();
     refreshRelevantContext();
     refreshPendingApprovals();
@@ -372,8 +376,44 @@ void MainViewModel::openWorkspaceFileInSplit(const QString& path) {
     updateStatusMessage(QString("Split editor aberto para %1").arg(path));
 }
 
+void MainViewModel::createWorkspaceFile() {
+    const QString path = uniqueWorkspaceChildPath(QStringLiteral("untitled.txt"));
+    if (path.isEmpty()) {
+        updateStatusMessage(QStringLiteral("Workspace inválido para criar arquivo."));
+        return;
+    }
+    if (!saveTextFile(path, QString())) {
+        updateStatusMessage(QString("Falha ao criar arquivo em %1").arg(path));
+        return;
+    }
+    refreshWorkspace();
+    refreshGitState();
+    openWorkspaceFile(path);
+    updateStatusMessage(QString("Arquivo criado: %1").arg(QFileInfo(path).fileName()));
+}
+
+void MainViewModel::createWorkspaceFolder() {
+    const QString path = uniqueWorkspaceChildPath(QStringLiteral("NewFolder"));
+    if (path.isEmpty()) {
+        updateStatusMessage(QStringLiteral("Workspace inválido para criar pasta."));
+        return;
+    }
+    QDir root(m_workspaceRootPath);
+    if (!root.mkpath(QFileInfo(path).fileName())) {
+        updateStatusMessage(QString("Falha ao criar pasta em %1").arg(path));
+        return;
+    }
+    refreshWorkspace();
+    refreshGitState();
+    updateStatusMessage(QString("Pasta criada: %1").arg(QFileInfo(path).fileName()));
+}
+
 void MainViewModel::toggleWorkspaceFolder(const QString& id) {
     m_workspaceTreeModel.toggleExpanded(id);
+}
+
+void MainViewModel::collapseWorkspaceFolders() {
+    m_workspaceTreeModel.collapseAll();
 }
 
 void MainViewModel::runSearch() {
@@ -644,27 +684,27 @@ void MainViewModel::refreshGitChanges() { refreshGitState(); }
 void MainViewModel::stageGitPath(const QString& path) {
     if (m_gitService->stage(m_workspaceRootPath, path)) {
         refreshGitState();
-        updateStatusMessage(QString("Arquivo staged: %1").arg(path));
+        updateStatusMessage(QString("Staged %1").arg(path));
     } else {
-        updateStatusMessage(QString("Falha ao stage: %1").arg(path));
+        updateStatusMessage(QString("Failed to stage %1").arg(path));
     }
 }
 
 void MainViewModel::unstageGitPath(const QString& path) {
     if (m_gitService->unstage(m_workspaceRootPath, path)) {
         refreshGitState();
-        updateStatusMessage(QString("Arquivo unstage: %1").arg(path));
+        updateStatusMessage(QString("Unstaged %1").arg(path));
     } else {
-        updateStatusMessage(QString("Falha ao unstage: %1").arg(path));
+        updateStatusMessage(QString("Failed to unstage %1").arg(path));
     }
 }
 
 void MainViewModel::discardGitPath(const QString& path) {
     if (m_gitService->discard(m_workspaceRootPath, path)) {
         refreshGitState();
-        updateStatusMessage(QString("Mudança descartada: %1").arg(path));
+        updateStatusMessage(QString("Discarded changes in %1").arg(path));
     } else {
-        updateStatusMessage(QString("Falha ao descartar: %1").arg(path));
+        updateStatusMessage(QString("Failed to discard changes in %1").arg(path));
     }
 }
 
@@ -673,25 +713,25 @@ void MainViewModel::openGitDiff(const QString& path) {
     const QString original = m_gitService->headFileContent(m_workspaceRootPath, path);
     QString modified = QFileInfo(absolutePath).absoluteFilePath() == QFileInfo(currentPath()).absoluteFilePath() ? editorText() : loadTextFile(absolutePath);
     if (original.isEmpty() && modified.isEmpty()) {
-        updateStatusMessage(QString("Sem diff disponível para %1").arg(path));
+        updateStatusMessage(QString("No diff available for %1").arg(path));
         return;
     }
     m_splitEditorVisible = true;
     m_splitDiffMode = true;
-    m_diffOriginalText = original.isEmpty() ? QStringLiteral("<arquivo novo ou indisponível no HEAD>\n") : original;
+    m_diffOriginalText = original.isEmpty() ? QStringLiteral("<new file or unavailable in HEAD>\n") : original;
     m_diffModifiedText = modified;
     m_diffEditorTitle = displayTitleForPath(path);
     emit splitEditorChanged();
-    updateStatusMessage(QString("Diff aberto para %1").arg(path));
+    updateStatusMessage(QString("Opened diff for %1").arg(path));
 }
 
 void MainViewModel::commitGitChanges() {
     if (m_gitService->commit(m_workspaceRootPath, m_scmCommitMessage)) {
         setScmCommitMessage(QString());
         refreshGitState();
-        updateStatusMessage(QStringLiteral("Commit criado."));
+        updateStatusMessage(QStringLiteral("Commit created."));
     } else {
-        updateStatusMessage(QStringLiteral("Falha ao criar commit."));
+        updateStatusMessage(QStringLiteral("Failed to create commit."));
     }
 }
 
@@ -724,9 +764,7 @@ void MainViewModel::setDocumentSample(const QString& path, const QString& text) 
     m_documentService->setPath(path);
     m_documentService->setText(text);
     m_savedTextSnapshot = text;
-    m_workspaceTreeModel.expandToPath(path);
-    touchOpenEditor(path);
-    syncOpenEditors();
+    syncActiveDocumentState(path, true);
     emit editorTextChanged();
     emit currentPathChanged();
     emit aiSettingsChanged();
@@ -741,9 +779,7 @@ void MainViewModel::goToDocumentLocation(const QString& path, int line, int colu
         return;
     }
     m_savedTextSnapshot = editorText();
-    m_workspaceTreeModel.expandToPath(path);
-    touchOpenEditor(path);
-    syncOpenEditors();
+    syncActiveDocumentState(path, true);
     emit editorTextChanged();
     emit currentPathChanged();
     emit aiSettingsChanged();
@@ -852,8 +888,59 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
 
 void MainViewModel::refreshGitState() {
     refreshGitSummary();
-    m_gitChangesModel.setChanges(m_gitService->listChanges(m_workspaceRootPath));
+    m_gitBranchLabel = m_gitService->branchLabel(m_workspaceRootPath);
+    const auto changes = m_gitService->listChanges(m_workspaceRootPath);
+    m_gitChangesModel.setChanges(changes);
+    m_scmSectionsModel.setChanges(changes);
+    m_gitRecentCommitsModel.setCommits(m_gitService->recentCommits(m_workspaceRootPath, 8));
+    m_workspaceTreeModel.setGitChanges(changes);
     emit gitChanged();
+}
+
+void MainViewModel::rebuildWorkspaceModels() {
+    m_workspaceFilesModel.setFiles(m_workspaceFiles);
+    m_workspaceTreeModel.setWorkspaceRoot(m_workspaceRootPath);
+    m_workspaceTreeModel.setFiles(m_workspaceFiles);
+    m_workspaceTreeModel.setCurrentFilePath(currentPath());
+}
+
+void MainViewModel::syncActiveDocumentState(const QString& path, bool expandTreePath) {
+    m_workspaceTreeModel.setCurrentFilePath(path);
+    if (expandTreePath) {
+        m_workspaceTreeModel.expandToPath(path);
+    }
+    touchOpenEditor(path);
+    syncOpenEditors();
+}
+
+QString MainViewModel::uniqueWorkspaceChildPath(const QString& preferredName) const {
+    if (m_workspaceRootPath.trimmed().isEmpty()) {
+        return {};
+    }
+
+    const QFileInfo preferredInfo(preferredName);
+    const QString baseName = preferredInfo.completeBaseName().isEmpty()
+        ? preferredInfo.fileName()
+        : preferredInfo.completeBaseName();
+    const QString suffix = preferredInfo.completeSuffix();
+
+    QDir root(m_workspaceRootPath);
+    QString candidate = root.filePath(preferredName);
+    if (!QFileInfo::exists(candidate)) {
+        return candidate;
+    }
+
+    for (int index = 1; index < 1000; ++index) {
+        const QString numbered = suffix.isEmpty()
+            ? QStringLiteral("%1%2").arg(baseName, QString::number(index))
+            : QStringLiteral("%1%2.%3").arg(baseName, QString::number(index), suffix);
+        candidate = root.filePath(numbered);
+        if (!QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+    return {};
 }
 
 void MainViewModel::touchOpenEditor(const QString& path) {

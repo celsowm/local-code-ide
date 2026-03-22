@@ -12,7 +12,9 @@ public:
     explicit GitService(std::unique_ptr<interfaces::IVersionControlProvider> provider);
 
     QString summary(const QString& workspacePath) const;
+    QString branchLabel(const QString& workspacePath) const;
     std::vector<interfaces::GitChange> listChanges(const QString& workspacePath) const;
+    std::vector<interfaces::GitCommitSummary> recentCommits(const QString& workspacePath, int limit) const;
     bool stage(const QString& workspacePath, const QString& path) const;
     bool unstage(const QString& workspacePath, const QString& path) const;
     bool discard(const QString& workspacePath, const QString& path) const;

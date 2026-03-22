@@ -9,8 +9,16 @@ QString GitService::summary(const QString& workspacePath) const {
     return m_provider->summary(workspacePath);
 }
 
+QString GitService::branchLabel(const QString& workspacePath) const {
+    return m_provider->branchLabel(workspacePath);
+}
+
 std::vector<interfaces::GitChange> GitService::listChanges(const QString& workspacePath) const {
     return m_provider->listChanges(workspacePath);
+}
+
+std::vector<interfaces::GitCommitSummary> GitService::recentCommits(const QString& workspacePath, int limit) const {
+    return m_provider->recentCommits(workspacePath, limit);
 }
 
 bool GitService::stage(const QString& workspacePath, const QString& path) const {

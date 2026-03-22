@@ -8,56 +8,68 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 10
+        spacing: 0
 
-        Label { text: "SOURCE CONTROL"; color: "#d4d4d4"; font.bold: true }
-        Label { text: root.viewModel.gitSummary; color: "#9cdcfe"; wrapMode: Text.Wrap }
-        Label { text: root.viewModel.gitChangeCount + " changes · " + root.viewModel.gitStagedCount + " staged"; color: "#808080" }
-
-        RowLayout {
+        ScmHeader {
             Layout.fillWidth: true
-            TextField {
-                Layout.fillWidth: true
-                text: root.viewModel.scmCommitMessage
-                placeholderText: "Commit message"
-                color: "#d4d4d4"
-                background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                onTextChanged: root.viewModel.scmCommitMessage = text
-                onAccepted: root.viewModel.commitGitChanges()
-            }
-            Button { text: "Commit"; onClicked: root.viewModel.commitGitChanges() }
-            Button { text: "Refresh"; onClicked: root.viewModel.refreshGitChanges() }
+            viewModel: root.viewModel
         }
 
-        ListView {
+        ScmCommitSection {
+            Layout.fillWidth: true
+            viewModel: root.viewModel
+        }
+
+        ScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: root.viewModel.gitChangesModel
-            delegate: Rectangle {
-                width: ListView.view.width
-                height: 82
-                color: mouseArea.containsMouse ? "#2a2d2e" : (index % 2 === 0 ? "transparent" : "#1b1b1b")
-                MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true; z: -1; onClicked: root.viewModel.openWorkspaceFile(root.viewModel.workspaceRootPath + "/" + path) }
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    anchors.topMargin: 6
-                    anchors.bottomMargin: 6
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Label { text: statusCode; color: staged ? "#73c991" : "#f14c4c"; font.bold: true }
-                        Label { text: path; color: "#d4d4d4"; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                        Label { text: statusText; color: "#808080" }
+
+            Column {
+                width: parent.width
+                spacing: 10
+
+                Item {
+                    width: parent.width
+                    height: (!root.viewModel || root.viewModel.gitChangeCount === 0) ? 92 : 0
+                    visible: height > 0
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 4
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: "No changes"
+                            color: "#d4d4d4"
+                            font.pixelSize: 14
+                            font.bold: true
+                        }
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: "Working tree is clean."
+                            color: "#7f7f7f"
+                            font.pixelSize: 11
+                        }
                     }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Button { text: staged ? "Unstage" : "Stage"; onClicked: staged ? root.viewModel.unstageGitPath(path) : root.viewModel.stageGitPath(path) }
-                        Button { text: "Open"; onClicked: root.viewModel.openWorkspaceFile(root.viewModel.workspaceRootPath + "/" + path) }
-                        Button { text: "Diff"; onClicked: root.viewModel.openGitDiff(path) }
-                        Button { text: "Discard"; enabled: !untracked; onClicked: root.viewModel.discardGitPath(path) }
+                }
+
+                Repeater {
+                    model: root.viewModel ? root.viewModel.scmSectionsModel : null
+
+                    delegate: ScmChangesSection {
+                        width: parent.width
+                        viewModel: root.viewModel
+                        title: sectionTitle
+                        count: sectionCount
+                        sectionModel: sectionEntriesModel
                     }
+                }
+
+                ScmHistorySection {
+                    width: parent.width
+                    viewModel: root.viewModel
                 }
             }
         }
