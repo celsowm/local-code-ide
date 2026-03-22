@@ -42,12 +42,14 @@ jobs:
       run: |
         $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
         $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
+        $env:Qt6_DIR = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\lib\cmake\Qt6"
         cmake -S . -B build
 
     - name: Build
       run: |
         $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
         $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
+        $env:Qt6_DIR = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\lib\cmake\Qt6"
         cmake --build build --config Release
 
     - name: Deploy Qt
@@ -106,6 +108,7 @@ jobs:
       run: |
         $env:CMAKE_PREFIX_PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}"
         $env:PATH = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin;$env:PATH"
+        $env:Qt6_DIR = "C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\lib\cmake\Qt6"
         cmake -S . -B build
         cmake --build build --config Release
 
