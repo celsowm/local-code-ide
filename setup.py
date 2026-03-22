@@ -50,6 +50,9 @@ def find_qt():
                         return str(compiler)
     return None
 
+def qt6_cmake_dir(qt_path):
+    return str(Path(qt_path) / "lib" / "cmake" / "Qt6")
+
 def find_qmllint():
     qt_path = find_qt()
     if qt_path:
@@ -181,6 +184,7 @@ def main():
     # 7. Build
     log("\n[7/7] Building...", BLUE)
     os.environ['CMAKE_PREFIX_PATH'] = qt_path
+    os.environ['Qt6_DIR'] = qt6_cmake_dir(qt_path)
     os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
     
     build_dir = Path("build")
@@ -189,7 +193,7 @@ def main():
     # CMake configure
     if not (build_dir / "CMakeCache.txt").exists():
         log("Configuring CMake...", BLUE)
-        cmake_cmd = ["cmake", "-S", ".", "-B", "build"]
+        cmake_cmd = ["cmake", "-S", ".", "-B", "build", f"-DQt6_DIR={os.environ['Qt6_DIR']}"]
         if vcpkg_path:
             cmake_cmd.extend(["-DCMAKE_TOOLCHAIN_FILE=" + os.environ['CMAKE_TOOLCHAIN_FILE']])
         subprocess.run(cmake_cmd, check=True)
@@ -250,13 +254,14 @@ def lint():
     qt_path = find_qt()
     if qt_path:
         os.environ['CMAKE_PREFIX_PATH'] = qt_path
+        os.environ['Qt6_DIR'] = qt6_cmake_dir(qt_path)
         os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
 
     build_dir = Path("build")
     build_dir.mkdir(exist_ok=True)
     if not (build_dir / "CMakeCache.txt").exists():
         log("Configuring CMake (required for module lint)...", BLUE)
-        subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
+        subprocess.run(["cmake", "-S", ".", "-B", "build", f"-DQt6_DIR={os.environ['Qt6_DIR']}"], check=True)
 
     subprocess.run([
         qmllint_path,

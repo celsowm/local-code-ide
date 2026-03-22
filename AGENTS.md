@@ -33,6 +33,21 @@ python setup.py lint
 python setup.py run
 ```
 
+### Qt + CMake Path Rules
+
+- `aqt install-qt` uses `win64_msvc2022_64` as the package selector, but the installed directory is `C:\Qt\<version>\msvc2022_64`
+- When configuring CMake manually, prefer setting both `CMAKE_PREFIX_PATH` and `Qt6_DIR`
+- Recommended manual configure command on Windows:
+
+```bash
+cmake -S . -B build ^
+  -DCMAKE_PREFIX_PATH=C:/Qt/6.8.0/msvc2022_64 ^
+  -DQt6_DIR=C:/Qt/6.8.0/msvc2022_64/lib/cmake/Qt6
+```
+
+- If CMake says it cannot find `Qt6Config.cmake`, check the real Qt install directory first instead of assuming the aqt selector name matches the folder name
+- In CI, build before running `python setup.py lint`, because module-mode `qmllint` expects generated QML type metadata
+
 ### Manual Setup (vcpkg)
 
 If you prefer vcpkg for C++ dependencies:
@@ -202,6 +217,14 @@ Each component must have a unique GUID. Use `Guid="*"` for auto-generation or cr
 ### "Qt not found"
 ```bash
 python -m aqt install-qt windows desktop 6.8.0 win64_msvc2022_64 --outputdir C:\Qt
+```
+
+Then configure CMake with:
+
+```bash
+cmake -S . -B build ^
+  -DCMAKE_PREFIX_PATH=C:/Qt/6.8.0/msvc2022_64 ^
+  -DQt6_DIR=C:/Qt/6.8.0/msvc2022_64/lib/cmake/Qt6
 ```
 
 ### "DLL not found"
