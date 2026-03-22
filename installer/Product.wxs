@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="LocalCodeIDE"
+    Language="1033"
+    Version="$(var.Version)"
+    Manufacturer="celsowm"
+    UpgradeCode="$(var.UpgradeCode)"
+    InstallerVersion="500"
+    Compressed="yes">
+
+    <SummaryInformation
+      Description="LocalCodeIDE - Local Code IDE with AI assistance"
+      Manufacturer="celsowm" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="ARPHELPLINK" Value="https://github.com/celsowm/local-code-ide" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/celsowm/local-code-ide" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/celsowm/local-code-ide/releases" />
+
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion
+        Minimum="0.0.0"
+        Maximum="$(var.Version)"
+        IncludeMinimum="yes"
+        IncludeMaximum="no"
+        Property="PREVIOUSVERSIONSINSTALLED" />
+    </Upgrade>
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallInitialize" />
+    </InstallExecuteSequence>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="LocalCodeIDE" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="LocalCodeIDE" />
+    </StandardDirectory>
+
+    <Feature Id="MainApplication" Title="LocalCodeIDE" Level="1">
+      <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="UninstallShortcut" />
+    </Feature>
+
+    <ComponentGroup Id="ApplicationFiles" Directory="INSTALLFOLDER">
+      <!-- Main Executable -->
+      <Component Id="MainExecutable" Guid="*">
+        <File Id="LocalCodeIDE.exe" Source="$(var.ProductDir)LocalCodeIDE.exe" KeyPath="yes" />
+      </Component>
+
+      <!-- Qt Core DLLs -->
+      <Component Id="QtCore" Guid="*">
+        <File Id="Qt6Core.dll" Source="$(var.ProductDir)Qt6Core.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="QtGui" Guid="*">
+        <File Id="Qt6Gui.dll" Source="$(var.ProductDir)Qt6Gui.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="QtQml" Guid="*">
+        <File Id="Qt6Qml.dll" Source="$(var.ProductDir)Qt6Qml.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="QtQuick" Guid="*">
+        <File Id="Qt6Quick.dll" Source="$(var.ProductDir)Qt6Quick.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="QtNetwork" Guid="*">
+        <File Id="Qt6Network.dll" Source="$(var.ProductDir)Qt6Network.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- Platform plugin -->
+      <Component Id="PlatformPlugin" Guid="*">
+        <File Id="qwindows.dll" Source="$(var.ProductDir)plugins\platforms\qwindows.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- Icon engines -->
+      <Component Id="SvgIcon" Guid="*">
+        <File Id="qsvgicon.dll" Source="$(var.ProductDir)plugins\iconengines\qsvgicon.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- Image format plugins -->
+      <Component Id="JpegPlugin" Guid="*">
+        <File Id="qjpeg.dll" Source="$(var.ProductDir)plugins\imageformats\qjpeg.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="GifPlugin" Guid="*">
+        <File Id="qgif.dll" Source="$(var.ProductDir)plugins\imageformats\qgif.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="IcoPlugin" Guid="*">
+        <File Id="qico.dll" Source="$(var.ProductDir)plugins\imageformats\qico.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="SvgPlugin" Guid="*">
+        <File Id="qsvg.dll" Source="$(var.ProductDir)plugins\imageformats\qsvg.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- QML QtQuick module -->
+      <Component Id="QtQuick2Plugin" Guid="*">
+        <File Id="qtquick2plugin.dll" Source="$(var.ProductDir)qml\QtQuick\qtquick2plugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="QtQuickQmldir" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
+        <File Id="QtQuick_qmldir" Source="$(var.ProductDir)qml\QtQuick\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- QML Controls -->
+      <Component Id="ControlsPlugin" Guid="*">
+        <File Id="qtquickcontrols2plugin.dll" Source="$(var.ProductDir)qml\QtQuick\Controls\qtquickcontrols2plugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="ControlsQmldir" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+        <File Id="Controls_qmldir" Source="$(var.ProductDir)qml\QtQuick\Controls\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- QML Templates -->
+      <Component Id="TemplatesPlugin" Guid="*">
+        <File Id="qtquicktemplates2plugin.dll" Source="$(var.ProductDir)qml\QtQuick\Templates\qtquicktemplates2plugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="TemplatesQmldir" Guid="C3D4E5F6-A7B8-9012-CDEF-123456789012">
+        <File Id="Templates_qmldir" Source="$(var.ProductDir)qml\QtQuick\Templates\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- QML Layouts -->
+      <Component Id="LayoutsPlugin" Guid="*">
+        <File Id="qquicklayoutsplugin.dll" Source="$(var.ProductDir)qml\QtQuick\Layouts\qquicklayoutsplugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="LayoutsQmldir" Guid="D4E5F6A7-B8C9-0123-DEF0-234567890123">
+        <File Id="Layouts_qmldir" Source="$(var.ProductDir)qml\QtQuick\Layouts\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- QML Window -->
+      <Component Id="WindowPlugin" Guid="*">
+        <File Id="quickwindowplugin.dll" Source="$(var.ProductDir)qml\QtQuick\Window\quickwindowplugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="WindowQmldir" Guid="E5F6A7B8-C9D0-1234-EF01-345678901234">
+        <File Id="Window_qmldir" Source="$(var.ProductDir)qml\QtQuick\Window\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- QML Dialogs -->
+      <Component Id="DialogsPlugin" Guid="*">
+        <File Id="qtquickdialogsplugin.dll" Source="$(var.ProductDir)qml\QtQuick\Dialogs\qtquickdialogsplugin.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="DialogsQmldir" Guid="F6A7B8C9-D0E1-2345-F012-456789012345">
+        <File Id="Dialogs_qmldir" Source="$(var.ProductDir)qml\QtQuick\Dialogs\qmldir" KeyPath="yes" />
+      </Component>
+
+      <!-- Qt configuration -->
+      <Component Id="QtConf" Guid="*">
+        <File Id="qt.conf" Source="$(var.ProductDir)qt.conf" KeyPath="yes" />
+      </Component>
+
+      <!-- D3DCompiler -->
+      <Component Id="D3DCompiler" Guid="*">
+        <File Id="D3Dcompiler_47.dll" Source="$(var.ProductDir)D3Dcompiler_47.dll" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <Component Id="ApplicationShortcut" Guid="*" Directory="ApplicationProgramsFolder">
+      <Shortcut
+        Id="ApplicationStartMenuShortcut"
+        Name="LocalCodeIDE"
+        Description="LocalCodeIDE - Local Code IDE with AI assistance"
+        Target="[#LocalCodeIDE.exe]"
+        WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\LocalCodeIDE\LocalCodeIDE" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Component Id="UninstallShortcut" Guid="*" Directory="ApplicationProgramsFolder">
+      <Shortcut
+        Id="UninstallShortcut"
+        Name="Uninstall LocalCodeIDE"
+        Description="Uninstall LocalCodeIDE"
+        Target="[System64Folder]msiexec.exe"
+        Arguments="/x [ProductCode]" />
+      <RemoveFolder Id="UninstallShortcutFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\LocalCodeIDE\LocalCodeIDE" Name="uninstall" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Package>
+</Wix>

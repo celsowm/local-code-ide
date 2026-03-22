@@ -1,5 +1,15 @@
 # LocalCodeIDE - Developer Guide
 
+## ⚠️ Important Rules for AI Agents
+
+1. **ALWAYS use English** for all documentation, comments, and user-facing text
+2. **README.md** is for end-users only (download links, features, overview)
+3. **AGENTS.md** is for developers/contributors (build instructions, technical details)
+4. **Never use placeholders** - check the actual codebase using git, gh CLI, or file exploration
+5. **Verify before assuming** - check what files exist, what dependencies are installed, etc.
+
+---
+
 ## 🛠️ Development Setup
 
 ### Prerequisites
@@ -104,13 +114,74 @@ GitHub Actions workflow (`.github/workflows/ci-cd.yml`):
 
 **On release tag (`v*`):**
 - All of the above +
+- Build WiX installer (MSI)
 - Create GitHub Release
-- Attach ZIP with executable
+- Attach ZIP and MSI to release
 
 ### Create a release:
 ```bash
 python version.py patch
 ```
+
+---
+
+## 📦 WiX Installer (Windows)
+
+The project uses WiX Toolset v5 to create Windows MSI installers.
+
+### Files
+
+```
+installer/
+├── Product.wxs           # Main WiX package definition
+├── Version.wxi           # UpgradeCode and version variables
+├── build-installer.ps1   # PowerShell build script
+└── README.md             # Installer documentation
+```
+
+### Build the Installer
+
+```bash
+# 1. Install WiX Toolset (one-time)
+dotnet tool install --global wix
+
+# 2. Build the application first
+python setup.py
+
+# 3. Create the MSI installer
+python setup.py installer
+```
+
+Output: `build/installer/LocalCodeIDE-<version>.msi`
+
+### Manual Build
+
+```bash
+powershell -ExecutionPolicy Bypass -File installer/build-installer.ps1 -Version 0.10.1
+```
+
+### Configuration
+
+- **UpgradeCode**: `C957FC5D-DD7C-48C4-AC7C-8900BD9AA945`
+- **Architecture**: x64
+- **Install location**: `Program Files\LocalCodeIDE`
+
+### CI/CD Integration
+
+The GitHub Actions workflow automatically builds the MSI installer when a release is published. The installer is uploaded as a release asset alongside the portable ZIP.
+
+### Troubleshooting
+
+**"WiX not found"**
+```bash
+dotnet tool install --global wix
+```
+
+**"Missing files in staging"**
+Run `python setup.py` first to build and deploy Qt.
+
+**"Duplicate GUID" errors**
+Each component must have a unique GUID. Use `Guid="*"` for auto-generation or create explicit GUIDs.
 
 ---
 

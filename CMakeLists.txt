@@ -108,3 +108,14 @@ target_link_libraries(LocalCodeIDE PRIVATE
     Qt6::Qml
     Qt6::Network
 )
+
+# WiX Installer configuration (optional)
+if(WIN32)
+    find_program(WIX_PATH wix)
+    if(WIX_PATH)
+        message(STATUS "WiX Toolset found: ${WIX_PATH}")
+        message(STATUS "To build installer: powershell -ExecutionPolicy Bypass -File ${CMAKE_SOURCE_DIR}/installer/build-installer.ps1")
+    else()
+        message(STATUS "WiX Toolset not found. To build installer, install from: https://wixtoolset.org/")
+    endif()
+endif()

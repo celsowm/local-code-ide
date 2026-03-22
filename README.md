@@ -19,9 +19,17 @@ A VS Code-inspired IDE built with C++20 and Qt 6, featuring:
 
 ## 🚀 Download
 
-Get the latest release: **[Releases Page](https://github.com/celsowm/local-code-ide/releases)**
+### Windows Installer (Recommended)
 
-Or [build from source](AGENTS.md#development-setup).
+Download the `.msi` installer from the **[Releases Page](https://github.com/celsowm/local-code-ide/releases)**.
+
+### Portable Version
+
+Also available as a portable ZIP file on the **[Releases Page](https://github.com/celsowm/local-code-ide/releases)**.
+
+### Build from Source
+
+See [Developer Guide](AGENTS.md#development-setup).
 
 ## 📸 Features
 

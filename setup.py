@@ -198,16 +198,71 @@ def run():
     qt_path = find_qt()
     if qt_path:
         os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
-    
+
     exe = Path("build/Release/LocalCodeIDE.exe")
     if not exe.exists():
         log("ERROR: Run 'python setup.py' first", RED)
         return 1
-    
+
     subprocess.run([str(exe)])
     return 0
 
+
+def build_installer():
+    """Build WiX installer"""
+    from version import get_version
+    
+    qt_path = find_qt()
+    if not qt_path:
+        log("ERROR: Qt not found. Run 'python setup.py' first", RED)
+        return 1
+    
+    os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
+    
+    # Add WiX to PATH
+    wix_path = Path.home() / ".dotnet" / "tools"
+    os.environ['PATH'] = f"{wix_path};{os.environ['PATH']}"
+    
+    # Check if wix is installed
+    try:
+        subprocess.run(["wix", "--version"], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        log("WiX Toolset not found. Installing...", YELLOW)
+        subprocess.run(["dotnet", "tool", "install", "--global", "wix"], check=True)
+    
+    # Run installer build script
+    installer_script = Path("installer/build-installer.ps1")
+    if not installer_script.exists():
+        log("ERROR: Installer script not found", RED)
+        return 1
+    
+    version = get_version()
+    log(f"\nBuilding installer for version {version}...", BLUE)
+    
+    subprocess.run([
+        "powershell", "-ExecutionPolicy", "Bypass",
+        "-File", str(installer_script),
+        "-Version", version
+    ], check=True)
+    
+    log("\n" + "=" * 60, GREEN)
+    log("INSTALLER BUILT SUCCESSFULLY!", GREEN)
+    log("=" * 60, GREEN)
+    log(f"\nOutput: build/installer/LocalCodeIDE-{version}.msi", BLUE)
+    
+    return 0
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "run":
-        sys.exit(run())
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "run":
+            sys.exit(run())
+        elif sys.argv[1] == "installer":
+            sys.exit(build_installer())
+        else:
+            log(f"Unknown command: {sys.argv[1]}", RED)
+            log("Usage:", YELLOW)
+            log("  python setup.py           - Build the project", BLUE)
+            log("  python setup.py run       - Run the application", BLUE)
+            log("  python setup.py installer - Build WiX installer (.msi)", BLUE)
+            sys.exit(1)
     sys.exit(main())

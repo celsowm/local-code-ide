@@ -27,6 +27,12 @@ def get_current_version():
         pass
     return (0, 10, 0)  # Default if no tags
 
+
+def get_version():
+    """Get current version as string"""
+    version = get_current_version()
+    return f"{version[0]}.{version[1]}.{version[2]}"
+
 def bump_version(current, level):
     """Bump version based on level"""
     major, minor, patch = current
