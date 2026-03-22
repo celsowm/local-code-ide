@@ -36,7 +36,7 @@ jobs:
 
     - name: Install Qt
       run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --outputdir C:\Qt
+        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --modules qt5compat --outputdir C:\Qt
 
     - name: Configure CMake
       run: |
@@ -96,7 +96,7 @@ jobs:
 
     - name: Install Qt
       run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --outputdir C:\Qt
+        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --modules qt5compat --outputdir C:\Qt
 
     - name: Build Release
       run: |
