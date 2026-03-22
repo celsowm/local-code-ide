@@ -10,9 +10,9 @@ on:
 
 env:
   QT_VERSION: 6.8.0
-  QT_PLATFORM: win64_msvc2022_64
-  QT_ROOT: C:/Qt/6.8.0/win64_msvc2022_64
-  QT6_DIR: C:/Qt/6.8.0/win64_msvc2022_64/lib/cmake/Qt6
+  QT_ARCH: win64_msvc2022_64
+  QT_DIR: C:/Qt/6.8.0/msvc2022_64
+  QT6_DIR: C:/Qt/6.8.0/msvc2022_64/lib/cmake/Qt6
 
 jobs:
   build:
@@ -38,12 +38,12 @@ jobs:
 
     - name: Install Qt
       run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --modules qt5compat --outputdir C:\Qt
+        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
 
     - name: Configure CMake
       run: |
         cmake -S . -B build `
-          -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT }}" `
+          -DCMAKE_PREFIX_PATH="${{ env.QT_DIR }}" `
           -DQt6_DIR="${{ env.QT6_DIR }}"
 
     - name: Lint
@@ -56,7 +56,7 @@ jobs:
 
     - name: Deploy Qt
       run: |
-        C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
+        C:\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
 
     - name: Build WiX Installer
       run: |
@@ -104,18 +104,18 @@ jobs:
 
     - name: Install Qt
       run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_PLATFORM }} --modules qt5compat --outputdir C:\Qt
+        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
 
     - name: Build Release
       run: |
         cmake -S . -B build `
-          -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT }}" `
+          -DCMAKE_PREFIX_PATH="${{ env.QT_DIR }}" `
           -DQt6_DIR="${{ env.QT6_DIR }}"
         cmake --build build --config Release
 
     - name: Deploy Qt
       run: |
-        C:\Qt\${{ env.QT_VERSION }}\${{ env.QT_PLATFORM }}\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
+        C:\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
 
     - name: Build WiX Installer
       run: |
