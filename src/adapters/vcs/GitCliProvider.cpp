@@ -39,10 +39,9 @@ QString GitCliProvider::summary(const QString& workspacePath) {
         return "no repository or clean workspace";
     }
 
-    const QStringList lines = output.split('
-', Qt::SkipEmptyParts);
+    const QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     const QString branch = lines.isEmpty() ? QString("git") : lines.first();
-    const int changedCount = std::max(0, lines.size() - 1);
+    const int changedCount = std::max(0, static_cast<int>(lines.size()) - 1);
     return QString("%1 • %2 changed").arg(branch, QString::number(changedCount));
 }
 
@@ -54,8 +53,7 @@ std::vector<ide::services::interfaces::GitChange> GitCliProvider::listChanges(co
         return changes;
     }
 
-    const QStringList lines = output.split('
-', Qt::SkipEmptyParts);
+    const QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     for (const QString& rawLine : lines) {
         if (rawLine.size() < 4) continue;
         const QChar x = rawLine[0];

@@ -2,6 +2,7 @@
 
 #include "services/interfaces/IDiagnosticProvider.hpp"
 
+#include <QStringList>
 #include <memory>
 #include <vector>
 

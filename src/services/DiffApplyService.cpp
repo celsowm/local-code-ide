@@ -34,8 +34,7 @@ QString DiffApplyService::normalizePatchPath(QString path) const {
 
 std::vector<DiffApplyService::ParsedFilePatch> DiffApplyService::parseFilePatches(const QString& diffText) const {
     std::vector<ParsedFilePatch> patches;
-    const auto lines = diffText.split('
-');
+    const auto lines = diffText.split('\n');
     int i = 0;
     while (i < lines.size()) {
         if (!lines[i].startsWith(QStringLiteral("--- "))) {
@@ -56,8 +55,7 @@ std::vector<DiffApplyService::ParsedFilePatch> DiffApplyService::parseFilePatche
         }
 
         ParsedFilePatch patch;
-        patch.rawDiff = lines.mid(start, i - start).join('
-');
+        patch.rawDiff = lines.mid(start, i - start).join('\n');
         patch.oldPath = oldPath;
         patch.newPath = newPath;
         patch.isCreate = oldPath == QStringLiteral("/dev/null");
@@ -221,8 +219,7 @@ bool DiffApplyService::applyUnifiedDiffToText(const QString& diffText,
                                               int* deletions,
                                               int* hunks,
                                               QString* error) const {
-    QStringList lines = diffText.split('
-');
+    QStringList lines = diffText.split('\n');
     int i = 0;
     for (; i < lines.size(); ++i) {
         if (lines[i].startsWith(QStringLiteral("+++ "))) {
@@ -231,10 +228,8 @@ bool DiffApplyService::applyUnifiedDiffToText(const QString& diffText,
         }
     }
 
-    const bool hadTrailingNewline = currentText.endsWith('
-');
-    const QStringList sourceLines = currentText.split('
-');
+    const bool hadTrailingNewline = currentText.endsWith('\n');
+    const QStringList sourceLines = currentText.split('\n');
     QStringList output;
     int sourceIndex = 0;
     int addCount = 0;
@@ -311,12 +306,9 @@ bool DiffApplyService::applyUnifiedDiffToText(const QString& diffText,
         output << sourceLines[sourceIndex++];
     }
 
-    QString result = output.join('
-');
-    if (hadTrailingNewline && !result.endsWith('
-')) {
-        result += '
-';
+    QString result = output.join('\n');
+    if (hadTrailingNewline && !result.endsWith('\n')) {
+        result += '\n';
     }
     if (patchedText) {
         *patchedText = result;

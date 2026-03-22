@@ -166,7 +166,7 @@ QString WorkspaceContextService::readBestExcerpt(const QString& path,
     }
 
     const int start = std::max(0, bestIndex - 8);
-    const int end = std::min(lines.size(), bestIndex + 12);
+    const int end = std::min(static_cast<int>(lines.size()), bestIndex + 12);
     QString excerpt = lines.mid(start, end - start).join('\n').trimmed();
     if (excerpt.size() > maxChars) {
         excerpt = excerpt.left(maxChars);

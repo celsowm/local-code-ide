@@ -91,8 +91,7 @@ QString DiagnosticListModel::summaryText(int limit) const {
                      .arg(QString::number(item.line), QString::number(item.column), severity, item.message);
         ++count;
     }
-    return lines.join('
-');
+    return lines.join('\n');
 }
 
 } // namespace ide::ui::models

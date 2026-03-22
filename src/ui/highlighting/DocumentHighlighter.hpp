@@ -9,7 +9,7 @@ class QQuickTextDocument;
 
 namespace ide::ui::highlighting {
 
-class DocumentHighlighter final : public QObject {
+class DocumentHighlighter : public QObject {
     Q_OBJECT
     Q_PROPERTY(QObject* textDocument READ textDocument WRITE setTextDocument NOTIFY textDocumentChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)

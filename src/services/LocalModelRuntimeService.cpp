@@ -103,7 +103,7 @@ QString LocalModelRuntimeService::launchCommand(const QString& executable, const
     const int port = url.port(8080);
     const QString modelPath = hasActiveModel() ? m_activeLocalPath : QStringLiteral("/caminho/model.gguf");
 
-    QString command = QStringLiteral("%1 -m "%2" -c %3 --host %4 --port %5")
+    QString command = QStringLiteral("%1 -m \"%2\" -c %3 --host %4 --port %5")
         .arg(executable.trimmed().isEmpty() ? QStringLiteral("llama-server") : executable.trimmed(),
              modelPath,
              QString::number(m_contextSize),

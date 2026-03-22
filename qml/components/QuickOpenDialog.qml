@@ -8,7 +8,7 @@ Popup {
     focus: true
     width: 720
     height: 380
-    anchors.horizontalCenter: Overlay.overlay.horizontalCenter
+    x: (parent.width - width) / 2
     y: 70
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     background: Rectangle { color: "#252526"; radius: 8; border.color: "#3c3c3c" }

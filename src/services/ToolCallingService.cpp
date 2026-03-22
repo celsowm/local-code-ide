@@ -33,8 +33,7 @@ interfaces::ToolResult ToolCallingService::execute(const interfaces::AiToolCall&
         if (definition.destructive && m_requireApprovalForDestructive) {
             const auto pending = makePending(call, definition);
             m_pendingApprovals.push_back(pending);
-            m_lastLog += QStringLiteral("[%1] %2(%3) -> queued_for_approval %4
-")
+            m_lastLog += QStringLiteral("[%1] %2(%3) -> queued_for_approval %4\n")
                 .arg(QString::number(m_lastCallCount), call.name, argsText, pending.approvalId);
 
             interfaces::ToolResult result;
@@ -61,8 +60,7 @@ interfaces::ToolResult ToolCallingService::execute(const interfaces::AiToolCall&
         {QStringLiteral("error"), QStringLiteral("tool_not_found")},
         {QStringLiteral("tool"), call.name}
     };
-    m_lastLog += QStringLiteral("[%1] %2 -> tool_not_found
-")
+    m_lastLog += QStringLiteral("[%1] %2 -> tool_not_found\n")
         .arg(QString::number(m_lastCallCount), call.name);
     return missing;
 }
@@ -92,8 +90,7 @@ bool ToolCallingService::rejectPending(const QString& approvalId) {
         if (it->approvalId != approvalId) {
             continue;
         }
-        m_lastLog += QStringLiteral("[approval] rejected %1 %2
-").arg(it->toolName, approvalId);
+        m_lastLog += QStringLiteral("[approval] rejected %1 %2\n").arg(it->toolName, approvalId);
         m_pendingApprovals.erase(it);
         return true;
     }
@@ -102,8 +99,7 @@ bool ToolCallingService::rejectPending(const QString& approvalId) {
 
 void ToolCallingService::clearPendingApprovals() {
     if (!m_pendingApprovals.empty()) {
-        m_lastLog += QStringLiteral("[approval] cleared %1 pending item(s)
-")
+        m_lastLog += QStringLiteral("[approval] cleared %1 pending item(s)\n")
             .arg(QString::number(static_cast<int>(m_pendingApprovals.size())));
     }
     m_pendingApprovals.clear();
@@ -175,8 +171,7 @@ interfaces::ToolResult ToolCallingService::runTool(const interfaces::AiToolCall&
 
         auto result = tool->invoke(workspaceRoot, currentPath, call.arguments);
         const QString argsText = QString::fromUtf8(QJsonDocument(call.arguments).toJson(QJsonDocument::Compact));
-        m_lastLog += QStringLiteral("[%1] %2(%3) -> %4%5
-")
+        m_lastLog += QStringLiteral("[%1] %2(%3) -> %4%5\n")
             .arg(QString::number(m_lastCallCount),
                  call.name,
                  argsText,
@@ -235,8 +230,7 @@ QString ToolCallingService::summarizePathsFromArgs(const QJsonObject& args) cons
     for (const auto& key : keys) {
         const QString value = args.value(key).toString();
         if (value.contains(QStringLiteral("--- ")) || value.contains(QStringLiteral("+++ "))) {
-            const auto lines = value.split('
-');
+            const auto lines = value.split('\n');
             for (const auto& line : lines) {
                 if (line.startsWith(QStringLiteral("--- ")) || line.startsWith(QStringLiteral("+++ "))) {
                     hints << line.mid(4).trimmed();

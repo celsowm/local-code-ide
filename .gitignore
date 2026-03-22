@@ -1,0 +1,76 @@
+# Build
+build/
+out/
+bin/
+obj/
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.exp
+
+# Qt
+*.moc
+*.rcc
+*.ui
+*.qrc
+qmlcache/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+*.cmake
+
+# Visual Studio
+.vs/
+*.sdf
+*.ipdb
+*.idb
+*.VC.db
+*.VC.VC.opendb
+*.opensdf
+*.suo
+*.user
+*.VC.VC
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporários
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Configurações locais
+*.local
+.env
+config.local.*
+.github/workflows/*.log 
