@@ -11,8 +11,8 @@ on:
 env:
   QT_VERSION: 6.8.0
   QT_PLATFORM: win64_msvc2022_64
-  QT_ROOT: C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}
-  QT6_DIR: C:/Qt/${{ env.QT_VERSION }}/${{ env.QT_PLATFORM }}/lib/cmake/Qt6
+  QT_ROOT: C:/Qt/6.8.0/win64_msvc2022_64
+  QT6_DIR: C:/Qt/6.8.0/win64_msvc2022_64/lib/cmake/Qt6
 
 jobs:
   build:
