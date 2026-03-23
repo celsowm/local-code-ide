@@ -36,9 +36,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall ruff
 
+    - name: Validate Language Pack Manifest (Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
+
     - name: Install Qt
       run: |
         python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
+
+    - name: Fetch Bundled Language Packs (Windows)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform windows --clean
 
     - name: Configure CMake
       run: |
@@ -57,6 +65,16 @@ jobs:
     - name: Deploy Qt
       run: |
         C:\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
+
+    - name: Copy Bundled Language Packs
+      run: |
+        New-Item -ItemType Directory -Force -Path build\Release\language-packs | Out-Null
+        Copy-Item -Path resources\language-packs\* -Destination build\Release\language-packs -Recurse -Force
+        Copy-Item -Path language-packs\* -Destination build\Release\language-packs -Recurse -Force
+
+    - name: Validate Language Pack Manifest (Artifact)
+      run: |
+        python scripts/validate-language-packs.py --root . --runtime-root build/Release --platform windows --smoke-check --verify-payload
 
     - name: Build WiX Installer
       run: |
@@ -102,9 +120,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall
 
+    - name: Validate Language Pack Manifest (Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
+
     - name: Install Qt
       run: |
         python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
+
+    - name: Fetch Bundled Language Packs (Windows)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform windows --clean
 
     - name: Build Release
       run: |
@@ -116,6 +142,16 @@ jobs:
     - name: Deploy Qt
       run: |
         C:\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin\windeployqt.exe build\Release\LocalCodeIDE.exe --release --no-translations
+
+    - name: Copy Bundled Language Packs
+      run: |
+        New-Item -ItemType Directory -Force -Path build\Release\language-packs | Out-Null
+        Copy-Item -Path resources\language-packs\* -Destination build\Release\language-packs -Recurse -Force
+        Copy-Item -Path language-packs\* -Destination build\Release\language-packs -Recurse -Force
+
+    - name: Validate Language Pack Manifest (Artifact)
+      run: |
+        python scripts/validate-language-packs.py --root . --runtime-root build/Release --platform windows --smoke-check --verify-payload
 
     - name: Build WiX Installer
       run: |
@@ -132,6 +168,38 @@ jobs:
         files: LocalCodeIDE-${{ github.event.release.tag_name }}-portable.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  bundle-linux-language-packs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Linux dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y npm python3-venv qt6-declarative-dev-tools
+
+    - name: Fetch Bundled Language Packs (Linux)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform linux --clean
+
+    - name: Validate Language Pack Manifest (Linux Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform linux --smoke-check --verify-payload
+
+    - name: Upload Linux Language Pack Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LocalCodeIDE-language-packs-linux
+        path: language-packs/linux/
+        retention-days: 30
 
     - name: Upload to Release (Installer)
       uses: softprops/action-gh-release@v2

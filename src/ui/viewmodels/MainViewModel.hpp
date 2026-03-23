@@ -2,7 +2,7 @@
 
 #include "services/AiService.hpp"
 #include "services/CodeIntelService.hpp"
-#include "services/DiagnosticService.hpp"
+#include "services/DiagnosticCoordinator.hpp"
 #include "services/DocumentService.hpp"
 #include "services/DiffApplyService.hpp"
 #include "services/GitService.hpp"
@@ -25,6 +25,7 @@
 #include <QObject>
 #include <memory>
 #include <QStringList>
+#include <QVariantList>
 #include <vector>
 
 namespace ide::ui::viewmodels {
@@ -38,13 +39,17 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString chatInput READ chatInput WRITE setChatInput NOTIFY chatInputChanged)
     Q_PROPERTY(QString chatResponse READ chatResponse NOTIFY chatResponseChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
-    Q_PROPERTY(QString diagnosticsProviderName READ diagnosticsProviderName CONSTANT)
+    Q_PROPERTY(QString diagnosticsProviderName READ diagnosticsProviderName NOTIFY diagnosticsStatusChanged)
+    Q_PROPERTY(QString diagnosticsStatusLine READ diagnosticsStatusLine NOTIFY diagnosticsStatusChanged)
+    Q_PROPERTY(bool definitionAvailable READ definitionAvailable NOTIFY diagnosticsStatusChanged)
     Q_PROPERTY(QString codeIntelProviderName READ codeIntelProviderName CONSTANT)
     Q_PROPERTY(QString aiBackendName READ aiBackendName CONSTANT)
     Q_PROPERTY(QString aiBackendStatusLine READ aiBackendStatusLine NOTIFY aiSettingsChanged)
     Q_PROPERTY(QString editorTabTitle READ editorTabTitle NOTIFY currentPathChanged)
     Q_PROPERTY(int diagnosticsCount READ diagnosticsCount NOTIFY diagnosticsCountChanged)
     Q_PROPERTY(int workspaceFileCount READ workspaceFileCount NOTIFY workspaceChanged)
+    Q_PROPERTY(bool workspaceLoading READ workspaceLoading NOTIFY workspaceLoadingChanged)
+    Q_PROPERTY(QString workspaceLoadingText READ workspaceLoadingText NOTIFY workspaceLoadingChanged)
     Q_PROPERTY(int searchResultCount READ searchResultCount NOTIFY searchResultsChanged)
     Q_PROPERTY(int completionCount READ completionCount NOTIFY completionsChanged)
     Q_PROPERTY(QString workspaceRootPath READ workspaceRootPath WRITE setWorkspaceRootPath NOTIFY workspaceChanged)
@@ -76,6 +81,7 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(int pendingApprovalCount READ pendingApprovalCount NOTIFY aiSettingsChanged)
     Q_PROPERTY(QString pendingApprovalSummary READ pendingApprovalSummary NOTIFY aiSettingsChanged)
     Q_PROPERTY(QObject* diagnosticsModel READ diagnosticsModel CONSTANT)
+    Q_PROPERTY(QVariantList currentFileDiagnostics READ currentFileDiagnostics NOTIFY diagnosticsChanged)
     Q_PROPERTY(QObject* workspaceFilesModel READ workspaceFilesModel CONSTANT)
     Q_PROPERTY(QObject* workspaceTreeModel READ workspaceTreeModel CONSTANT)
     Q_PROPERTY(QObject* searchResultsModel READ searchResultsModel CONSTANT)
@@ -127,9 +133,12 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString diffModifiedText READ diffModifiedText NOTIFY splitEditorChanged)
     Q_PROPERTY(QString diffEditorTitle READ diffEditorTitle NOTIFY splitEditorChanged)
 
+    Q_PROPERTY(QString toastMessage READ toastMessage NOTIFY toastChanged)
+    Q_PROPERTY(bool toastVisible READ toastVisible NOTIFY toastChanged)
+
 public:
     MainViewModel(std::unique_ptr<ide::services::DocumentService> documentService,
-                  std::unique_ptr<ide::services::DiagnosticService> diagnosticService,
+                  std::unique_ptr<ide::services::DiagnosticCoordinator> diagnosticCoordinator,
                   std::unique_ptr<ide::services::CodeIntelService> codeIntelService,
                   std::unique_ptr<ide::services::AiService> aiService,
                   std::unique_ptr<ide::services::GitService> gitService,
@@ -151,11 +160,15 @@ public:
     QString chatResponse() const;
     QString statusMessage() const;
     QString diagnosticsProviderName() const;
+    QString diagnosticsStatusLine() const;
+    bool definitionAvailable() const;
     QString codeIntelProviderName() const;
     QString aiBackendName() const;
     QString aiBackendStatusLine() const;
     int diagnosticsCount() const;
     int workspaceFileCount() const;
+    bool workspaceLoading() const;
+    QString workspaceLoadingText() const;
     int searchResultCount() const;
     int completionCount() const;
     int relevantContextCount() const;
@@ -209,6 +222,7 @@ public:
     QString pendingApprovalSummary() const;
 
     QObject* diagnosticsModel();
+    QVariantList currentFileDiagnostics() const;
     QObject* workspaceFilesModel();
     QObject* workspaceTreeModel();
     QObject* searchResultsModel();
@@ -268,6 +282,8 @@ public:
     QString diffOriginalText() const;
     QString diffModifiedText() const;
     QString diffEditorTitle() const;
+    QString toastMessage() const;
+    bool toastVisible() const;
 
     Q_INVOKABLE void analyzeNow();
     Q_INVOKABLE void askAssistant();
@@ -295,6 +311,7 @@ public:
     Q_INVOKABLE void requestHoverAtCursor();
     Q_INVOKABLE void requestDefinitionAtCursor();
     Q_INVOKABLE void runTerminalCommand();
+    Q_INVOKABLE void dismissToast();
     Q_INVOKABLE void applyCompletionInsert(const QString& insertText);
     Q_INVOKABLE void refreshRelevantContext();
     Q_INVOKABLE void extractPatchPreview();
@@ -329,7 +346,10 @@ signals:
     void chatResponseChanged();
     void statusMessageChanged();
     void diagnosticsCountChanged();
+    void diagnosticsChanged();
+    void diagnosticsStatusChanged();
     void workspaceChanged();
+    void workspaceLoadingChanged();
     void searchPatternChanged();
     void searchResultsChanged();
     void hoverTextChanged();
@@ -351,6 +371,7 @@ signals:
     void scmCommitMessageChanged();
     void gitSummaryChanged();
     void quickOpenRequested();
+    void toastChanged();
 
 private:
     struct CommandSpec {
@@ -362,19 +383,22 @@ private:
 
     QString diagnosticsSummary() const;
     void updateStatusMessage(const QString& message);
+    void applyDiagnostics(const std::vector<ide::services::interfaces::Diagnostic>& diagnostics);
+    void showToast(const QString& message);
     void setDocumentSample(const QString& path, const QString& text);
     void goToDocumentLocation(const QString& path, int line, int column);
     void syncAfterToolRun(const QStringList& touchedPaths);
     void refreshPendingApprovals();
     void rebuildCommandPalette(const QString& query);
     void rebuildWorkspaceModels();
+    void startWorkspaceRefresh(const QString& statusHint);
     void refreshGitState();
     QString uniqueWorkspaceChildPath(const QString& preferredName) const;
     QString localPathFromUrlOrPath(const QString& rawPath) const;
     void addRecentFolder(const QString& folderPath);
 
     std::unique_ptr<ide::services::DocumentService> m_documentService;
-    std::unique_ptr<ide::services::DiagnosticService> m_diagnosticService;
+    std::unique_ptr<ide::services::DiagnosticCoordinator> m_diagnosticCoordinator;
     std::unique_ptr<ide::services::CodeIntelService> m_codeIntelService;
     std::unique_ptr<ide::services::AiService> m_aiService;
     std::unique_ptr<ide::services::GitService> m_gitService;
@@ -405,16 +429,24 @@ private:
     QString m_chatInput;
     QString m_chatResponse;
     QString m_statusMessage;
+    QString m_diagnosticsProviderName;
+    QString m_diagnosticsStatusLine;
     QString m_workspaceRootPath;
     QString m_searchPattern;
     QString m_hoverText;
     QString m_definitionText;
     QString m_terminalCommand = "pwd";
     QString m_terminalOutput;
+    QVariantList m_currentFileDiagnostics;
+    QString m_toastMessage;
+    bool m_toastVisible = false;
     QString m_renderedWorkspaceContext;
     QString m_relevantContextSummary;
     ide::services::PatchPreview m_patchPreview;
     std::vector<ide::services::interfaces::WorkspaceFile> m_workspaceFiles;
+    int m_workspaceRefreshGeneration = 0;
+    bool m_workspaceLoading = false;
+    QString m_workspaceLoadingText;
 };
 
 } // namespace ide::ui::viewmodels

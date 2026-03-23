@@ -3,6 +3,7 @@
 #include <QBrush>
 #include <QColor>
 #include <QStringList>
+#include <QtGlobal>
 
 namespace ide::ui::highlighting {
 
@@ -57,36 +58,86 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument* parent)
     m_multiLineCommentFormat = commentFormat;
 }
 
+void CppSyntaxHighlighter::setDiagnostics(std::vector<DiagnosticRange> diagnostics) {
+    m_diagnostics = std::move(diagnostics);
+    rehighlight();
+}
+
+void CppSyntaxHighlighter::setLexicalHighlightingEnabled(bool enabled) {
+    if (m_lexicalHighlightingEnabled == enabled) {
+        return;
+    }
+    m_lexicalHighlightingEnabled = enabled;
+    rehighlight();
+}
+
 void CppSyntaxHighlighter::highlightBlock(const QString& text) {
-    for (const auto& rule : m_rules) {
-        auto matchIterator = rule.pattern.globalMatch(text);
-        while (matchIterator.hasNext()) {
-            const auto match = matchIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+    if (m_lexicalHighlightingEnabled) {
+        for (const auto& rule : m_rules) {
+            auto matchIterator = rule.pattern.globalMatch(text);
+            while (matchIterator.hasNext()) {
+                const auto match = matchIterator.next();
+                setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+            }
         }
+
+        setCurrentBlockState(0);
+
+        int startIndex = 0;
+        if (previousBlockState() != 1) {
+            startIndex = text.indexOf(m_commentStart);
+        }
+
+        while (startIndex >= 0) {
+            const auto endMatch = m_commentEnd.match(text, startIndex);
+            int endIndex = endMatch.capturedStart();
+            int commentLength = 0;
+
+            if (endIndex == -1) {
+                setCurrentBlockState(1);
+                commentLength = text.length() - startIndex;
+            } else {
+                commentLength = endIndex - startIndex + endMatch.capturedLength();
+            }
+
+            setFormat(startIndex, commentLength, m_multiLineCommentFormat);
+            startIndex = text.indexOf(m_commentStart, startIndex + commentLength);
+        }
+    } else {
+        setCurrentBlockState(0);
     }
 
-    setCurrentBlockState(0);
+    const int currentLine = currentBlock().blockNumber() + 1;
+    for (const auto& diag : m_diagnostics) {
+        if (currentLine < diag.lineStart || currentLine > diag.lineEnd) {
+            continue;
+        }
 
-    int startIndex = 0;
-    if (previousBlockState() != 1) {
-        startIndex = text.indexOf(m_commentStart);
-    }
+        int startCol = 1;
+        int endCol = qMax(2, text.size() + 1);
+        if (currentLine == diag.lineStart) {
+            startCol = qMax(1, diag.columnStart);
+        }
+        if (currentLine == diag.lineEnd) {
+            endCol = qMax(startCol + 1, diag.columnEnd);
+        }
 
-    while (startIndex >= 0) {
-        const auto endMatch = m_commentEnd.match(text, startIndex);
-        int endIndex = endMatch.capturedStart();
-        int commentLength = 0;
+        const int startIndex = qMax(0, startCol - 1);
+        const int endIndex = qMin(text.size(), qMax(startIndex + 1, endCol - 1));
+        const int length = qMax(1, endIndex - startIndex);
 
-        if (endIndex == -1) {
-            setCurrentBlockState(1);
-            commentLength = text.length() - startIndex;
+        QTextCharFormat overlay = format(startIndex);
+        if (diag.severity == "error") {
+            overlay.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+            overlay.setUnderlineColor(QColor("#f14c4c"));
+        } else if (diag.severity == "warning") {
+            overlay.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+            overlay.setUnderlineColor(QColor("#d7ba7d"));
         } else {
-            commentLength = endIndex - startIndex + endMatch.capturedLength();
+            overlay.setUnderlineStyle(QTextCharFormat::DotLine);
+            overlay.setUnderlineColor(QColor("#4fc1ff"));
         }
-
-        setFormat(startIndex, commentLength, m_multiLineCommentFormat);
-        startIndex = text.indexOf(m_commentStart, startIndex + commentLength);
+        setFormat(startIndex, length, overlay);
     }
 }
 

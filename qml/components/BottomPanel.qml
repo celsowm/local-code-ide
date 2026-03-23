@@ -78,7 +78,9 @@ Rectangle {
                 Item { Layout.fillWidth: true }
 
                 Label {
-                    text: root.selectedTab === 0 ? (mainViewModel.diagnosticsCount + " diagnostics") : mainViewModel.terminalBackendName
+                    text: root.selectedTab === 0
+                        ? (mainViewModel.diagnosticsCount + " diagnostics · " + mainViewModel.diagnosticsProviderName)
+                        : mainViewModel.terminalBackendName
                     color: WorkbenchTheme.textMuted
                     font.pixelSize: 11
                 }
@@ -132,13 +134,25 @@ Rectangle {
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }
+
+                            Label {
+                                text: source
+                                color: WorkbenchTheme.textMuted
+                                font.pixelSize: 10
+                                Layout.preferredWidth: 120
+                                horizontalAlignment: Text.AlignRight
+                                elide: Text.ElideLeft
+                            }
                         }
 
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: mainViewModel.openSearchResult(mainViewModel.currentPath, line, column)
+                            onClicked: mainViewModel.openSearchResult(
+                                           filePath && filePath.length > 0 ? filePath : mainViewModel.currentPath,
+                                           line,
+                                           column)
                         }
                     }
                 }

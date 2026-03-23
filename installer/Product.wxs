@@ -42,6 +42,7 @@
 
     <Feature Id="MainApplication" Title="LocalCodeIDE" Level="1">
       <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentGroupRef Id="LanguagePackFiles" />
       <ComponentRef Id="ApplicationShortcut" />
       <ComponentRef Id="UninstallShortcut" />
     </Feature>
@@ -133,14 +134,6 @@
         <File Id="Window_qmldir" Source="$(var.ProductDir)qml\QtQuick\Window\qmldir" KeyPath="yes" />
       </Component>
 
-      <!-- QML Dialogs -->
-      <Component Id="DialogsPlugin" Guid="*">
-        <File Id="qtquickdialogsplugin.dll" Source="$(var.ProductDir)qml\QtQuick\Dialogs\qtquickdialogsplugin.dll" KeyPath="yes" />
-      </Component>
-      <Component Id="DialogsQmldir" Guid="F6A7B8C9-D0E1-2345-F012-456789012345">
-        <File Id="Dialogs_qmldir" Source="$(var.ProductDir)qml\QtQuick\Dialogs\qmldir" KeyPath="yes" />
-      </Component>
-
       <!-- Qt configuration -->
       <Component Id="QtConf" Guid="*">
         <File Id="qt.conf" Source="$(var.ProductDir)qt.conf" KeyPath="yes" />
@@ -150,6 +143,10 @@
       <Component Id="D3DCompiler" Guid="*">
         <File Id="D3Dcompiler_47.dll" Source="$(var.ProductDir)D3Dcompiler_47.dll" KeyPath="yes" />
       </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="LanguagePackFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.ProductDir)language-packs\**" />
     </ComponentGroup>
 
     <Component Id="ApplicationShortcut" Guid="*" Directory="ApplicationProgramsFolder">

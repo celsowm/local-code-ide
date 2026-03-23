@@ -60,6 +60,9 @@ $requiredFiles = @(
     "Qt6Quick.dll",
     "Qt6Network.dll",
     "plugins\platforms\qwindows.dll",
+    "language-packs\manifest.json",
+    "language-packs\windows\rust-analyzer\rust-analyzer.cmd",
+    "language-packs\linux\rust-analyzer\rust-analyzer.sh",
     "qt.conf"
 )
 

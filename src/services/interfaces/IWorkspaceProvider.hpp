@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <functional>
 #include <vector>
 
 namespace ide::services::interfaces {
@@ -13,7 +14,8 @@ struct WorkspaceFile {
 class IWorkspaceProvider {
 public:
     virtual ~IWorkspaceProvider() = default;
-    virtual std::vector<WorkspaceFile> listFiles(const QString& workspaceRoot) = 0;
+    virtual std::vector<WorkspaceFile> listFiles(const QString& workspaceRoot,
+                                                 const std::function<void(int, int)>& onProgress = {}) = 0;
     virtual QString name() const = 0;
 };
 

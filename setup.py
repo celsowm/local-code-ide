@@ -131,6 +131,21 @@ def deploy_qt(exe_path, qt_path):
     qt_conf = Path("build/Release/qt.conf")
     qt_conf.write_text("[Paths]\nPrefix = .\nPlugins = ./plugins\nQml2Imports = ./qml\n")
 
+    # Copy bundled language packs (manifest + optional binaries).
+    language_pack_src = Path("language-packs")
+    language_pack_manifest_src = Path("resources/language-packs")
+    language_pack_dst = Path("build/Release/language-packs")
+    if language_pack_manifest_src.exists():
+        language_pack_dst.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(language_pack_manifest_src, language_pack_dst, dirs_exist_ok=True)
+    if language_pack_src.exists():
+        language_pack_dst.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(language_pack_src, language_pack_dst, dirs_exist_ok=True)
+        # Keep Linux launcher scripts executable in cross-platform artifacts.
+        for launcher in (language_pack_dst / "linux").rglob("*.sh"):
+            current_mode = launcher.stat().st_mode
+            launcher.chmod(current_mode | 0o111)
+
 
 def required_qt_runtime_paths(exe_path):
     """Return required Qt runtime artifacts expected near the executable."""
@@ -142,6 +157,9 @@ def required_qt_runtime_paths(exe_path):
         release_dir / "Qt6Quick.dll",
         release_dir / "plugins" / "platforms" / "qwindows.dll",
         release_dir / "qml" / "QtQuick" / "Controls" / "qtquickcontrols2plugin.dll",
+        release_dir / "language-packs" / "manifest.json",
+        release_dir / "language-packs" / "windows" / "rust-analyzer" / "rust-analyzer.cmd",
+        release_dir / "language-packs" / "linux" / "rust-analyzer" / "rust-analyzer.sh",
         release_dir / "qt.conf",
     ]
 

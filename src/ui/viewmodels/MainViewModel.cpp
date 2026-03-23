@@ -7,8 +7,11 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QFutureWatcher>
+#include <QMetaObject>
 #include <QUrl>
 #include <QtGlobal>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include <algorithm>
 
@@ -16,11 +19,17 @@ namespace ide::ui::viewmodels {
 
 namespace {
 QString inferLanguageId(const QString& path) {
-    if (path.endsWith(".rs")) return "rust";
-    if (path.endsWith(".py")) return "python";
-    if (path.endsWith(".js") || path.endsWith(".ts") || path.endsWith(".tsx") || path.endsWith(".jsx")) return "typescript";
-    if (path.endsWith(".qml")) return "qml";
-    if (path.endsWith(".md")) return "markdown";
+    const QString lower = path.toLower();
+    if (lower.endsWith(".rs") || lower.endsWith(".ron")) return "rust";
+    if (lower.endsWith(".py")) return "python";
+    if (lower.endsWith(".js") || lower.endsWith(".ts") || lower.endsWith(".tsx") || lower.endsWith(".jsx")) return "typescript";
+    if (lower.endsWith(".qml")) return "qml";
+    if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".rst")) return "markdown";
+    if (lower.endsWith(".json") || lower.endsWith(".jsonc") || lower.endsWith(".json5")) return "json";
+    if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "yaml";
+    if (lower.endsWith(".toml")) return "toml";
+    if (lower.endsWith(".ini") || lower.endsWith(".conf")) return "ini";
+    if (lower.endsWith(".ps1") || lower.endsWith(".psm1") || lower.endsWith(".psd1")) return "powershell";
     return "cpp";
 }
 
@@ -54,6 +63,36 @@ bool saveTextFile(const QString& path, const QString& text) {
     return true;
 }
 
+QString resolveExistingFilePath(const QString& rawPath, const QString& workspaceRoot) {
+    const QString trimmed = rawPath.trimmed();
+    if (trimmed.isEmpty()) {
+        return {};
+    }
+
+    QString candidate;
+    const QUrl url(trimmed);
+    if (url.isValid() && url.isLocalFile()) {
+        candidate = QDir::cleanPath(url.toLocalFile());
+    } else {
+        candidate = QDir::cleanPath(trimmed);
+    }
+
+    QFileInfo directInfo(candidate);
+    if (directInfo.exists() && directInfo.isFile()) {
+        return directInfo.absoluteFilePath();
+    }
+
+    if (directInfo.isRelative() && !workspaceRoot.trimmed().isEmpty()) {
+        const QString rooted = QDir(workspaceRoot).filePath(candidate);
+        const QFileInfo rootedInfo(rooted);
+        if (rootedInfo.exists() && rootedInfo.isFile()) {
+            return rootedInfo.absoluteFilePath();
+        }
+    }
+
+    return {};
+}
+
 QString uiStateSettingsPath() {
     QString base = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (base.isEmpty()) {
@@ -65,7 +104,7 @@ QString uiStateSettingsPath() {
 }
 
 MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> documentService,
-                             std::unique_ptr<ide::services::DiagnosticService> diagnosticService,
+                             std::unique_ptr<ide::services::DiagnosticCoordinator> diagnosticCoordinator,
                              std::unique_ptr<ide::services::CodeIntelService> codeIntelService,
                              std::unique_ptr<ide::services::AiService> aiService,
                              std::unique_ptr<ide::services::GitService> gitService,
@@ -75,7 +114,7 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
                              QObject* parent)
     : QObject(parent)
     , m_documentService(std::move(documentService))
-    , m_diagnosticService(std::move(diagnosticService))
+    , m_diagnosticCoordinator(std::move(diagnosticCoordinator))
     , m_codeIntelService(std::move(codeIntelService))
     , m_aiService(std::move(aiService))
     , m_gitService(std::move(gitService))
@@ -105,11 +144,41 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     connect(&m_uiStateManager, &UiStateManager::bottomPanelChanged, this, &MainViewModel::bottomPanelChanged);
     connect(&m_uiStateManager, &UiStateManager::recentFoldersChanged, this, &MainViewModel::recentFoldersChanged);
 
+    connect(&m_editorManager, &EditorManager::currentPathChanged, this, [this]() {
+        if (m_diagnosticCoordinator) {
+            m_diagnosticCoordinator->setDocumentSnapshot(currentPath(), editorText(), true);
+        }
+    });
+    connect(&m_editorManager, &EditorManager::editorTextChanged, this, [this]() {
+        if (m_diagnosticCoordinator) {
+            m_diagnosticCoordinator->setDocumentSnapshot(currentPath(), editorText(), true);
+        }
+    });
+
+    if (m_diagnosticCoordinator) {
+        m_diagnosticsProviderName = m_diagnosticCoordinator->activeProviderLabel();
+        m_diagnosticsStatusLine = m_diagnosticCoordinator->statusLine();
+        connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::diagnosticsUpdated, this,
+                [this](const std::vector<ide::services::interfaces::Diagnostic>& diagnostics, int) {
+            applyDiagnostics(diagnostics);
+        });
+        connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::statusLineChanged, this,
+                [this](const QString& line) {
+            m_diagnosticsStatusLine = line;
+            emit diagnosticsStatusChanged();
+        });
+        connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::providerLabelChanged, this,
+                [this](const QString& label) {
+            m_diagnosticsProviderName = label;
+            emit diagnosticsStatusChanged();
+        });
+        connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::toastRequested, this, &MainViewModel::showToast);
+    }
+
     refreshWorkspace();
-    refreshGitState();
-    refreshRelevantContext();
     refreshPendingApprovals();
-    updateStatusMessage("LocalCodeIDE v3.3 workbench carregado.");
+    analyzeNow();
+    updateStatusMessage("LocalCodeIDE v3.3 workbench loaded.");
 }
 
 QString MainViewModel::editorText() const { return m_documentService->currentDocument().text(); }
@@ -119,6 +188,9 @@ void MainViewModel::setEditorText(const QString& text) {
         return;
     }
     m_documentService->setText(text);
+    if (m_diagnosticCoordinator) {
+        m_diagnosticCoordinator->setDocumentSnapshot(currentPath(), text, false);
+    }
     emit editorTextChanged();
     emit aiSettingsChanged();
 }
@@ -136,12 +208,20 @@ void MainViewModel::setChatInput(const QString& text) {
 
 QString MainViewModel::chatResponse() const { return m_chatResponse; }
 QString MainViewModel::statusMessage() const { return m_statusMessage; }
-QString MainViewModel::diagnosticsProviderName() const { return m_diagnosticService->providerName(); }
+QString MainViewModel::diagnosticsProviderName() const {
+    return m_diagnosticsProviderName.isEmpty() ? QStringLiteral("Local Diagnostics") : m_diagnosticsProviderName;
+}
+QString MainViewModel::diagnosticsStatusLine() const { return m_diagnosticsStatusLine; }
+bool MainViewModel::definitionAvailable() const {
+    return !m_diagnosticsStatusLine.trimmed().toLower().contains(QStringLiteral("basic mode"));
+}
 QString MainViewModel::codeIntelProviderName() const { return m_codeIntelService->providerName(); }
 QString MainViewModel::aiBackendName() const { return m_aiService->backendName(); }
 QString MainViewModel::aiBackendStatusLine() const { return m_aiService->backendStatusLine(); }
 int MainViewModel::diagnosticsCount() const { return m_diagnosticsModel.diagnosticCount(); }
 int MainViewModel::workspaceFileCount() const { return m_workspaceFilesModel.fileCount(); }
+bool MainViewModel::workspaceLoading() const { return m_workspaceLoading; }
+QString MainViewModel::workspaceLoadingText() const { return m_workspaceLoadingText; }
 int MainViewModel::searchResultCount() const { return m_searchResultsModel.resultCount(); }
 int MainViewModel::completionCount() const { return m_completionModel.itemCount(); }
 int MainViewModel::relevantContextCount() const { return m_relevantContextModel.fileCount(); }
@@ -152,8 +232,6 @@ void MainViewModel::setWorkspaceRootPath(const QString& path) {
     m_workspaceRootPath = path;
     emit workspaceChanged();
     refreshWorkspace();
-    refreshGitState();
-    refreshRelevantContext();
     emit aiSettingsChanged();
 }
 
@@ -210,6 +288,7 @@ int MainViewModel::pendingApprovalCount() const { return m_pendingApprovalModel.
 QString MainViewModel::pendingApprovalSummary() const { return m_aiService->pendingApprovalSummary(); }
 
 QObject* MainViewModel::diagnosticsModel() { return &m_diagnosticsModel; }
+QVariantList MainViewModel::currentFileDiagnostics() const { return m_currentFileDiagnostics; }
 QObject* MainViewModel::workspaceFilesModel() { return &m_workspaceFilesModel; }
 QObject* MainViewModel::workspaceTreeModel() { return &m_workspaceTreeModel; }
 QObject* MainViewModel::searchResultsModel() { return &m_searchResultsModel; }
@@ -284,13 +363,15 @@ bool MainViewModel::secondaryEditorDirty() const { return m_editorManager.second
 QString MainViewModel::diffOriginalText() const { return m_editorManager.diffOriginalText(); }
 QString MainViewModel::diffModifiedText() const { return m_editorManager.diffModifiedText(); }
 QString MainViewModel::diffEditorTitle() const { return m_editorManager.diffEditorTitle(); }
+QString MainViewModel::toastMessage() const { return m_toastMessage; }
+bool MainViewModel::toastVisible() const { return m_toastVisible; }
 
 void MainViewModel::analyzeNow() {
-    const auto diagnostics = m_diagnosticService->refresh(currentPath(), editorText());
-    m_diagnosticsModel.setDiagnostics(diagnostics);
-    emit diagnosticsCountChanged();
-    emit aiSettingsChanged();
-    updateStatusMessage(QString("%1 diagnósticos via %2.").arg(QString::number(diagnosticsCount()), diagnosticsProviderName()));
+    if (!m_diagnosticCoordinator) {
+        return;
+    }
+    m_diagnosticCoordinator->setDocumentSnapshot(currentPath(), editorText(), true);
+    updateStatusMessage(QString("Diagnostics refreshed (%1).").arg(diagnosticsProviderName()));
 }
 
 void MainViewModel::askAssistant() {
@@ -314,6 +395,7 @@ void MainViewModel::askAssistant() {
 void MainViewModel::saveCurrent() {
     if (m_documentService->saveFile()) {
         m_editorManager.saveCurrent();
+        analyzeNow();
         emit currentPathChanged();
         refreshWorkspace();
         refreshGitState();
@@ -350,18 +432,17 @@ void MainViewModel::loadSampleRust() {
 }
 
 void MainViewModel::refreshWorkspace() {
-    m_workspaceFiles = m_workspaceService->files(m_workspaceRootPath);
-    rebuildWorkspaceModels();
-    emit workspaceChanged();
-    refreshRelevantContext();
-    refreshPendingApprovals();
-    rebuildCommandPalette(QString());
-    updateStatusMessage(QString("Workspace indexado: %1 arquivos.").arg(QString::number(workspaceFileCount())));
+    startWorkspaceRefresh(QStringLiteral("Indexing workspace files..."));
 }
 
 void MainViewModel::openWorkspaceFile(const QString& path) {
-    m_workspaceTreeModel.expandToPath(path);
-    goToDocumentLocation(path, 1, 1);
+    const QString resolvedPath = resolveExistingFilePath(path, m_workspaceRootPath);
+    if (resolvedPath.isEmpty()) {
+        updateStatusMessage(QString("Failed to open file: %1").arg(path));
+        return;
+    }
+    m_workspaceTreeModel.expandToPath(resolvedPath);
+    goToDocumentLocation(resolvedPath, 1, 1);
 }
 
 void MainViewModel::triggerOpenFileDialog() {
@@ -435,9 +516,14 @@ void MainViewModel::removeRecentFolder(const QString& folderPath) {
 }
 
 void MainViewModel::openWorkspaceFileInSplit(const QString& path) {
-    m_editorManager.openFileInSplit(path);
-    m_workspaceTreeModel.expandToPath(path);
-    updateStatusMessage(QString("Split editor aberto para %1").arg(path));
+    const QString resolvedPath = resolveExistingFilePath(path, m_workspaceRootPath);
+    if (resolvedPath.isEmpty()) {
+        updateStatusMessage(QString("Failed to open split editor file: %1").arg(path));
+        return;
+    }
+    m_editorManager.openFileInSplit(resolvedPath);
+    m_workspaceTreeModel.expandToPath(resolvedPath);
+    updateStatusMessage(QString("Split editor opened for %1").arg(resolvedPath));
 }
 
 void MainViewModel::createWorkspaceFile() {
@@ -499,23 +585,30 @@ void MainViewModel::requestCompletionsAtCursor() {
     auto items = m_codeIntelService->completions(currentPath(), editorText(), position);
     m_completionModel.setItems(std::move(items));
     emit completionsChanged();
-    updateStatusMessage(QString("Completion em %1:%2 via %3.").arg(QString::number(m_cursorLine), QString::number(m_cursorColumn), codeIntelProviderName()));
+    updateStatusMessage(QString("Completion requested at %1:%2 via %3.")
+                            .arg(QString::number(m_cursorLine), QString::number(m_cursorColumn), codeIntelProviderName()));
 }
 
 void MainViewModel::requestHoverAtCursor() {
     const ide::services::interfaces::EditorPosition position{m_cursorLine, m_cursorColumn};
     m_hoverText = m_codeIntelService->hover(currentPath(), editorText(), position).contents;
     emit hoverTextChanged();
-    updateStatusMessage(QString("Hover em %1:%2.").arg(QString::number(m_cursorLine), QString::number(m_cursorColumn)));
+    updateStatusMessage(QString("Hover requested at %1:%2.").arg(QString::number(m_cursorLine), QString::number(m_cursorColumn)));
 }
 
 void MainViewModel::requestDefinitionAtCursor() {
+    if (!definitionAvailable()) {
+        m_definitionText = QStringLiteral("Go to Definition is unavailable in basic mode for this language.");
+        emit definitionTextChanged();
+        updateStatusMessage(m_definitionText);
+        return;
+    }
     const ide::services::interfaces::EditorPosition position{m_cursorLine, m_cursorColumn};
     const auto location = m_codeIntelService->definition(currentPath(), editorText(), position);
     if (!location) {
-        m_definitionText = "Definition não encontrada.";
+        m_definitionText = QStringLiteral("Definition not found at the current cursor position.");
         emit definitionTextChanged();
-        updateStatusMessage("Definition não encontrada.");
+        updateStatusMessage(m_definitionText);
         return;
     }
     m_definitionText = QString("%1:%2:%3").arg(location->path, QString::number(location->line), QString::number(location->column));
@@ -527,7 +620,11 @@ void MainViewModel::runTerminalCommand() {
     const auto result = m_terminalService->run(m_workspaceRootPath, m_terminalCommand);
     m_terminalOutput = QString("$ %1\n(exit=%2)\n%3").arg(result.command, QString::number(result.exitCode), result.output);
     emit terminalOutputChanged();
-    updateStatusMessage(QString("Comando executado via %1.").arg(terminalBackendName()));
+    updateStatusMessage(QString("Command executed via %1.").arg(terminalBackendName()));
+}
+
+void MainViewModel::dismissToast() {
+    showToast(QString());
 }
 
 void MainViewModel::applyCompletionInsert(const QString& insertText) {
@@ -672,7 +769,11 @@ void MainViewModel::runCommandPaletteCommand(const QString& commandId) {
     } else if (commandId == "code.hover") {
         requestHoverAtCursor();
     } else if (commandId == "code.definition") {
-        requestDefinitionAtCursor();
+        if (definitionAvailable()) {
+            requestDefinitionAtCursor();
+        } else {
+            updateStatusMessage(QStringLiteral("Go to Definition is unavailable in basic mode for this language."));
+        }
     } else if (commandId == "search.focus") {
         setPrimaryViewIndex(1);
     } else if (commandId == "assistant.ask") {
@@ -779,6 +880,29 @@ void MainViewModel::updateStatusMessage(const QString& message) {
     emit statusMessageChanged();
 }
 
+void MainViewModel::applyDiagnostics(const std::vector<ide::services::interfaces::Diagnostic>& diagnostics) {
+    m_diagnosticsModel.setDiagnostics(diagnostics);
+    m_currentFileDiagnostics = m_diagnosticsModel.asVariantList();
+    emit diagnosticsChanged();
+    emit diagnosticsCountChanged();
+    emit aiSettingsChanged();
+}
+
+void MainViewModel::showToast(const QString& message) {
+    if (message.trimmed().isEmpty()) {
+        if (!m_toastVisible && m_toastMessage.isEmpty()) {
+            return;
+        }
+        m_toastVisible = false;
+        m_toastMessage.clear();
+        emit toastChanged();
+        return;
+    }
+    m_toastMessage = message;
+    m_toastVisible = true;
+    emit toastChanged();
+}
+
 void MainViewModel::setDocumentSample(const QString& path, const QString& text) {
     m_editorManager.setInMemoryDocument(path, text);
     analyzeNow();
@@ -788,9 +912,10 @@ void MainViewModel::setDocumentSample(const QString& path, const QString& text) 
 }
 
 void MainViewModel::goToDocumentLocation(const QString& path, int line, int column) {
-    const QFileInfo info(path);
+    const QString resolvedPath = resolveExistingFilePath(path, m_workspaceRootPath);
+    const QFileInfo info(resolvedPath);
     if (!info.exists() || !info.isFile()) {
-        updateStatusMessage(QString("Falha ao abrir definição em %1").arg(path));
+        updateStatusMessage(QString("Failed to open target file: %1").arg(path));
         return;
     }
     const QString targetPath = info.absoluteFilePath();
@@ -881,6 +1006,68 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
 void MainViewModel::refreshGitState() {
     m_gitViewModel.refresh(m_workspaceRootPath);
     m_workspaceTreeModel.setGitChanges(m_gitService->listChanges(m_workspaceRootPath));
+}
+
+void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
+    const QString rootPath = m_workspaceRootPath;
+    if (rootPath.trimmed().isEmpty()) {
+        m_workspaceFiles.clear();
+        rebuildWorkspaceModels();
+        emit workspaceChanged();
+        m_workspaceLoading = false;
+        m_workspaceLoadingText.clear();
+        emit workspaceLoadingChanged();
+        return;
+    }
+
+    const int generation = ++m_workspaceRefreshGeneration;
+    m_workspaceLoading = true;
+    m_workspaceLoadingText = statusHint.trimmed().isEmpty()
+        ? QStringLiteral("Indexing workspace files...")
+        : statusHint.trimmed();
+    emit workspaceLoadingChanged();
+
+    auto* watcher = new QFutureWatcher<std::vector<ide::services::interfaces::WorkspaceFile>>(this);
+    connect(watcher, &QFutureWatcher<std::vector<ide::services::interfaces::WorkspaceFile>>::finished, this,
+            [this, watcher, generation]() {
+        const std::vector<ide::services::interfaces::WorkspaceFile> files = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_workspaceRefreshGeneration) {
+            return;
+        }
+
+        m_workspaceFiles = files;
+        rebuildWorkspaceModels();
+        emit workspaceChanged();
+        refreshRelevantContext();
+        refreshPendingApprovals();
+        rebuildCommandPalette(QString());
+        refreshGitState();
+        m_workspaceLoading = false;
+        m_workspaceLoadingText.clear();
+        emit workspaceLoadingChanged();
+        updateStatusMessage(QString("Workspace indexed: %1 files.").arg(QString::number(workspaceFileCount())));
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, rootPath, generation]() {
+        return m_workspaceService->files(rootPath, [this, generation](int indexedCount, int totalCount) {
+            QMetaObject::invokeMethod(this, [this, generation, indexedCount, totalCount]() {
+                if (generation != m_workspaceRefreshGeneration || !m_workspaceLoading) {
+                    return;
+                }
+                int percent = 0;
+                if (totalCount > 0) {
+                    percent = qBound(0, (indexedCount * 100) / totalCount, 100);
+                }
+                m_workspaceLoadingText = QString("Indexing workspace files... %1% (%2 / %3 files)")
+                    .arg(QString::number(percent),
+                         QString::number(indexedCount),
+                         QString::number(totalCount));
+                emit workspaceLoadingChanged();
+            }, Qt::QueuedConnection);
+        });
+    }));
 }
 
 QString MainViewModel::localPathFromUrlOrPath(const QString& rawPath) const {

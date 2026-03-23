@@ -504,11 +504,13 @@ Rectangle {
                 DocumentHighlighter {
                     textDocument: editor.textDocument
                     language: mainViewModel.languageId
+                    diagnostics: mainViewModel.currentFileDiagnostics
                 }
 
                 DocumentHighlighter {
                     textDocument: secondaryEditor.textDocument
                     language: mainViewModel.secondaryLanguageId
+                    diagnostics: []
                 }
             }
 
@@ -553,11 +555,13 @@ Rectangle {
                 DocumentHighlighter {
                     textDocument: originalArea.textDocument
                     language: mainViewModel.languageId
+                    diagnostics: []
                 }
 
                 DocumentHighlighter {
                     textDocument: modifiedArea.textDocument
                     language: mainViewModel.languageId
+                    diagnostics: []
                 }
             }
 

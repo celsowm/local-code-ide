@@ -31,11 +31,17 @@ bool saveTextFile(const QString& path, const QString& text) {
 }
 
 QString inferLanguageId(const QString& path) {
-    if (path.endsWith(".rs")) return "rust";
-    if (path.endsWith(".py")) return "python";
-    if (path.endsWith(".js") || path.endsWith(".ts") || path.endsWith(".tsx") || path.endsWith(".jsx")) return "typescript";
-    if (path.endsWith(".qml")) return "qml";
-    if (path.endsWith(".md")) return "markdown";
+    const QString lower = path.toLower();
+    if (lower.endsWith(".rs") || lower.endsWith(".ron")) return "rust";
+    if (lower.endsWith(".py")) return "python";
+    if (lower.endsWith(".js") || lower.endsWith(".ts") || lower.endsWith(".tsx") || lower.endsWith(".jsx")) return "typescript";
+    if (lower.endsWith(".qml")) return "qml";
+    if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".rst")) return "markdown";
+    if (lower.endsWith(".json") || lower.endsWith(".jsonc") || lower.endsWith(".json5")) return "json";
+    if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "yaml";
+    if (lower.endsWith(".toml")) return "toml";
+    if (lower.endsWith(".ini") || lower.endsWith(".conf")) return "ini";
+    if (lower.endsWith(".ps1") || lower.endsWith(".psm1") || lower.endsWith(".psd1")) return "powershell";
     return "cpp";
 }
 }

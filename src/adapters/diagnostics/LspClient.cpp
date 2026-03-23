@@ -70,10 +70,12 @@ bool LspClient::ensureStarted() {
 
     m_process.start(m_program, m_args);
     if (!m_process.waitForStarted(1000)) {
+        emit serverStatusChanged(statusLine());
         return false;
     }
 
     sendInitialize();
+    emit serverStatusChanged(statusLine());
     return true;
 }
 
@@ -94,9 +96,9 @@ QString LspClient::statusLine() const {
     return QString("%1 running").arg(m_program);
 }
 
-void LspClient::publishDocument(const QString& filePath, const QString& text) {
+int LspClient::publishDocument(const QString& filePath, const QString& text) {
     if (!ensureStarted()) {
-        return;
+        return -1;
     }
 
     waitUntilInitialized();
@@ -110,10 +112,15 @@ void LspClient::publishDocument(const QString& filePath, const QString& text) {
         {"textDocument", QJsonObject{{"uri", uri}, {"version", nextVersion}}},
         {"contentChanges", QJsonArray{QJsonObject{{"text", text}}}}
     });
+    return nextVersion;
 }
 
 std::vector<Diagnostic> LspClient::latestDiagnostics(const QString& filePath) const {
     return m_diagnosticsByUri.value(uriForPath(filePath));
+}
+
+int LspClient::latestDiagnosticsVersion(const QString& filePath) const {
+    return m_diagnosticVersionsByUri.value(uriForPath(filePath), -1);
 }
 
 std::vector<Diagnostic> LspClient::publishAndCollect(const QString& filePath, const QString& text, int waitMs) {
@@ -246,7 +253,11 @@ void LspClient::handleMessage(const QJsonObject& message) {
     if (method == "textDocument/publishDiagnostics") {
         const QJsonObject params = message.value("params").toObject();
         const QString uri = params.value("uri").toString();
-        m_diagnosticsByUri.insert(uri, parseDiagnostics(params.value("diagnostics").toArray()));
+        const QString filePath = locationUriToPath(uri);
+        const int version = params.contains("version") ? params.value("version").toInt(-1) : -1;
+        m_diagnosticsByUri.insert(uri, parseDiagnostics(params.value("diagnostics").toArray(), filePath, QFileInfo(m_program).baseName()));
+        m_diagnosticVersionsByUri.insert(uri, version);
+        emit diagnosticsPublished(filePath, version, QFileInfo(m_program).baseName());
         return;
     }
 
@@ -256,6 +267,7 @@ void LspClient::handleMessage(const QJsonObject& message) {
         if (!m_initialized && !message.contains("error")) {
             m_initialized = true;
             sendNotification("initialized", QJsonObject{});
+            emit serverStatusChanged(statusLine());
         }
     }
 }
@@ -336,22 +348,39 @@ QString LspClient::uriForPath(const QString& filePath) const {
 }
 
 QString LspClient::languageIdForPath(const QString& filePath) const {
-    if (filePath.endsWith(".rs")) {
+    const QString lower = filePath.toLower();
+    if (lower.endsWith(".json") || lower.endsWith(".jsonc") || lower.endsWith(".json5")) {
+        return "json";
+    }
+    if (lower.endsWith(".yaml") || lower.endsWith(".yml")) {
+        return "yaml";
+    }
+    if (lower.endsWith(".toml")) {
+        return "toml";
+    }
+    if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".rst")) {
+        return "markdown";
+    }
+    if (lower.endsWith(".ps1") || lower.endsWith(".psm1") || lower.endsWith(".psd1")) {
+        return "powershell";
+    }
+    if (lower.endsWith(".rs") || lower.endsWith(".ron")) {
         return "rust";
     }
-    if (filePath.endsWith(".py")) {
+    if (lower.endsWith(".py")) {
         return "python";
     }
-    if (filePath.endsWith(".js") || filePath.endsWith(".ts") || filePath.endsWith(".tsx") || filePath.endsWith(".jsx")) {
+    if (lower.endsWith(".js") || lower.endsWith(".ts") || lower.endsWith(".tsx") || lower.endsWith(".jsx")
+        || lower.endsWith(".mjs") || lower.endsWith(".cjs") || lower.endsWith(".cts") || lower.endsWith(".mts")) {
         return "typescript";
     }
-    if (filePath.endsWith(".qml")) {
+    if (lower.endsWith(".qml")) {
         return "qml";
     }
     return "cpp";
 }
 
-std::vector<Diagnostic> LspClient::parseDiagnostics(const QJsonArray& diagnostics) {
+std::vector<Diagnostic> LspClient::parseDiagnostics(const QJsonArray& diagnostics, const QString& filePath, const QString& source) {
     std::vector<Diagnostic> result;
     result.reserve(static_cast<std::size_t>(diagnostics.size()));
 
@@ -359,11 +388,17 @@ std::vector<Diagnostic> LspClient::parseDiagnostics(const QJsonArray& diagnostic
         const QJsonObject obj = value.toObject();
         const QJsonObject range = obj.value("range").toObject();
         const QJsonObject start = range.value("start").toObject();
+        const QJsonObject end = range.value("end").toObject();
 
         Diagnostic diag;
-        diag.line = start.value("line").toInt() + 1;
-        diag.column = start.value("character").toInt() + 1;
+        diag.filePath = filePath;
+        diag.lineStart = start.value("line").toInt() + 1;
+        diag.columnStart = start.value("character").toInt() + 1;
+        diag.lineEnd = end.value("line").toInt(diag.lineStart - 1) + 1;
+        diag.columnEnd = end.value("character").toInt(diag.columnStart) + 1;
         diag.message = obj.value("message").toString();
+        diag.source = source.isEmpty() ? QStringLiteral("lsp") : source;
+        diag.code = obj.value("code").toString();
 
         const int severity = obj.value("severity").toInt(3);
         switch (severity) {

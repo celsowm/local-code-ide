@@ -6,7 +6,9 @@ namespace ide::adapters::workspace {
 
 class FileSystemWorkspaceProvider final : public ide::services::interfaces::IWorkspaceProvider {
 public:
-    std::vector<ide::services::interfaces::WorkspaceFile> listFiles(const QString& workspaceRoot) override;
+    std::vector<ide::services::interfaces::WorkspaceFile> listFiles(
+        const QString& workspaceRoot,
+        const std::function<void(int, int)>& onProgress = {}) override;
     QString name() const override;
 };
 

@@ -3,6 +3,7 @@
 #include "services/interfaces/IDiagnosticProvider.hpp"
 
 #include <QAbstractListModel>
+#include <QVariantList>
 #include <QString>
 #include <vector>
 
@@ -14,8 +15,13 @@ public:
     enum Roles {
         LineRole = Qt::UserRole + 1,
         ColumnRole,
+        EndLineRole,
+        EndColumnRole,
+        FilePathRole,
         MessageRole,
-        SeverityRole
+        SeverityRole,
+        SourceRole,
+        CodeRole
     };
 
     explicit DiagnosticListModel(QObject* parent = nullptr);
@@ -27,6 +33,7 @@ public:
     void setDiagnostics(std::vector<ide::services::interfaces::Diagnostic> diagnostics);
     int diagnosticCount() const;
     QString summaryText(int limit = 8) const;
+    QVariantList asVariantList() const;
 
 private:
     std::vector<ide::services::interfaces::Diagnostic> m_diagnostics;

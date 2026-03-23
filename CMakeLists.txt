@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml QuickControls2 Widgets Network)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml QuickControls2 Widgets Network Concurrent)
 qt_standard_project_setup(REQUIRES 6.5)
 qt_policy(SET QTP0004 NEW)
 
@@ -19,12 +19,15 @@ qt_add_executable(LocalCodeIDE
 
     src/services/AiService.cpp
     src/services/CodeIntelService.cpp
+    src/services/DiagnosticCoordinator.cpp
     src/services/DiagnosticService.cpp
     src/services/DocumentService.cpp
     src/services/DiffApplyService.cpp
     src/services/GitService.cpp
     src/services/HardwareProfileService.cpp
     src/services/LlamaServerProcessService.cpp
+    src/services/LanguagePackService.cpp
+    src/services/LanguageServerHub.cpp
     src/services/LocalModelRuntimeService.cpp
     src/services/ModelCatalogService.cpp
     src/services/SearchService.cpp
@@ -40,6 +43,7 @@ qt_add_executable(LocalCodeIDE
     src/adapters/ai/LlamaCppServerBackend.cpp
     src/adapters/ai/MockAiBackend.cpp
 
+    src/adapters/codeintel/LanguageServerCodeIntelProvider.cpp
     src/adapters/codeintel/LspCodeIntelProvider.cpp
     src/adapters/codeintel/MockCodeIntelProvider.cpp
 
@@ -93,6 +97,8 @@ qt_add_executable(LocalCodeIDE
     src/ui/viewmodels/UiStateManager.cpp
     src/ui/viewmodels/DownloadManager.cpp
     src/ui/viewmodels/ServerRuntimeManager.cpp
+
+    resources/language-packs.qrc
 )
 
 set_source_files_properties(
@@ -205,7 +211,29 @@ target_link_libraries(LocalCodeIDE PRIVATE
     Qt6::QuickControls2
     Qt6::Widgets
     Qt6::Network
+    Qt6::Concurrent
 )
+
+if(WIN32)
+    add_custom_command(TARGET LocalCodeIDE POST_BUILD
+        COMMAND "${CMAKE_SOURCE_DIR}/scripts/copy-language-packs-with-progress.bat"
+            "${CMAKE_SOURCE_DIR}/resources/language-packs"
+            "${CMAKE_SOURCE_DIR}/language-packs"
+            "$<TARGET_FILE_DIR:LocalCodeIDE>/language-packs"
+        COMMENT "Copying bundled language packs next to LocalCodeIDE runtime"
+    )
+else()
+    add_custom_command(TARGET LocalCodeIDE POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:LocalCodeIDE>/language-packs
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/resources/language-packs
+            $<TARGET_FILE_DIR:LocalCodeIDE>/language-packs
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/language-packs
+            $<TARGET_FILE_DIR:LocalCodeIDE>/language-packs
+        COMMENT "Copying bundled language packs next to LocalCodeIDE runtime"
+    )
+endif()
 
 # WiX Installer configuration (optional)
 if(WIN32)

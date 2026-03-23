@@ -5,8 +5,9 @@ namespace ide::services {
 WorkspaceService::WorkspaceService(std::unique_ptr<interfaces::IWorkspaceProvider> provider)
     : m_provider(std::move(provider)) {}
 
-std::vector<interfaces::WorkspaceFile> WorkspaceService::files(const QString& workspaceRoot) {
-    return m_provider ? m_provider->listFiles(workspaceRoot) : std::vector<interfaces::WorkspaceFile>{};
+std::vector<interfaces::WorkspaceFile> WorkspaceService::files(const QString& workspaceRoot,
+                                                               const std::function<void(int, int)>& onProgress) {
+    return m_provider ? m_provider->listFiles(workspaceRoot, onProgress) : std::vector<interfaces::WorkspaceFile>{};
 }
 
 QString WorkspaceService::providerName() const {

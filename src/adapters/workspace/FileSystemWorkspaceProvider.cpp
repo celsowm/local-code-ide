@@ -15,7 +15,8 @@ bool shouldSkipPath(const QString& path) {
 }
 } // namespace
 
-std::vector<WorkspaceFile> FileSystemWorkspaceProvider::listFiles(const QString& workspaceRoot) {
+std::vector<WorkspaceFile> FileSystemWorkspaceProvider::listFiles(const QString& workspaceRoot,
+                                                                  const std::function<void(int, int)>& onProgress) {
     std::vector<WorkspaceFile> files;
     if (workspaceRoot.isEmpty()) {
         return files;
@@ -26,7 +27,23 @@ std::vector<WorkspaceFile> FileSystemWorkspaceProvider::listFiles(const QString&
         return files;
     }
 
+    int totalCount = 0;
+    QDirIterator preCountIterator(workspaceRoot, QDir::Files, QDirIterator::Subdirectories);
+    while (preCountIterator.hasNext()) {
+        const QString path = preCountIterator.next();
+        if (shouldSkipPath(path)) {
+            continue;
+        }
+        ++totalCount;
+    }
+
+    if (onProgress) {
+        onProgress(0, totalCount);
+    }
+
     QDirIterator it(workspaceRoot, QDir::Files, QDirIterator::Subdirectories);
+    int indexedCount = 0;
+    constexpr int kProgressStride = 200;
     while (it.hasNext()) {
         const QString path = it.next();
         if (shouldSkipPath(path)) {
@@ -37,6 +54,14 @@ std::vector<WorkspaceFile> FileSystemWorkspaceProvider::listFiles(const QString&
         file.path = path;
         file.relativePath = root.relativeFilePath(path);
         files.push_back(std::move(file));
+        ++indexedCount;
+        if (onProgress && (indexedCount % kProgressStride) == 0) {
+            onProgress(indexedCount, totalCount);
+        }
+    }
+
+    if (onProgress) {
+        onProgress(indexedCount, totalCount);
     }
 
     std::sort(files.begin(), files.end(), [](const WorkspaceFile& a, const WorkspaceFile& b) {

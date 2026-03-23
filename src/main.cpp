@@ -1,12 +1,9 @@
 #include "adapters/ai/AdaptiveAiBackend.hpp"
 #include "adapters/ai/LlamaCppServerBackend.hpp"
 #include "adapters/ai/MockAiBackend.hpp"
-#include "adapters/codeintel/LspCodeIntelProvider.hpp"
+#include "adapters/codeintel/LanguageServerCodeIntelProvider.hpp"
 #include "adapters/codeintel/MockCodeIntelProvider.hpp"
-#include "adapters/diagnostics/HybridDiagnosticProvider.hpp"
 #include "adapters/diagnostics/LocalSyntaxDiagnosticProvider.hpp"
-#include "adapters/diagnostics/LspClient.hpp"
-#include "adapters/diagnostics/LspDiagnosticProvider.hpp"
 #include "adapters/modelhub/HuggingFaceFileDownloader.hpp"
 #include "adapters/modelhub/HuggingFaceModelCatalogProvider.hpp"
 #include "adapters/search/FileSystemSearchProvider.hpp"
@@ -21,10 +18,12 @@
 #include "adapters/workspace/FileSystemWorkspaceProvider.hpp"
 #include "services/AiService.hpp"
 #include "services/CodeIntelService.hpp"
-#include "services/DiagnosticService.hpp"
+#include "services/DiagnosticCoordinator.hpp"
 #include "services/DocumentService.hpp"
 #include "services/GitService.hpp"
 #include "services/HardwareProfileService.hpp"
+#include "services/LanguagePackService.hpp"
+#include "services/LanguageServerHub.hpp"
 #include "services/LlamaServerProcessService.hpp"
 #include "services/LocalModelRuntimeService.hpp"
 #include "services/ModelCatalogService.hpp"
@@ -69,29 +68,30 @@ int main(int argc, char* argv[]) {
 
     auto documentService = std::make_unique<ide::services::DocumentService>();
 
-    std::shared_ptr<ide::adapters::diagnostics::LspClient> sharedLspClient;
     const QString lspCommand = envOrDefault("LOCALCODEIDE_LSP_COMMAND");
-    if (!lspCommand.isEmpty()) {
-        sharedLspClient = std::make_shared<ide::adapters::diagnostics::LspClient>(
-            lspCommand,
-            splitArgs(envOrDefault("LOCALCODEIDE_LSP_ARGS"))
-        );
-    }
+    const QStringList lspArgs = splitArgs(envOrDefault("LOCALCODEIDE_LSP_ARGS"));
+    const bool allowPathFallback = envOrDefault("LOCALCODEIDE_ALLOW_DEV_LSP_PATH", "0") == "1";
+    const bool allowDevInstallerPath = envOrDefault("LOCALCODEIDE_ALLOW_DEV_LSP_INSTALL", "0") == "1"
+        || envOrDefault("LOCALCODEIDE_ALLOW_EXTERNAL_PACK_INSTALL", "0") == "1";
+    const QString codeIntelProviderMode = envOrDefault("LOCALCODEIDE_CODEINTEL_PROVIDER", "hub").trimmed().toLower();
 
-    auto diagnosticProviders = std::make_unique<ide::adapters::diagnostics::HybridDiagnosticProvider>();
-    diagnosticProviders->addProvider(std::make_unique<ide::adapters::diagnostics::LocalSyntaxDiagnosticProvider>());
-    if (sharedLspClient) {
-        diagnosticProviders->addProvider(
-            std::make_unique<ide::adapters::diagnostics::LspDiagnosticProvider>(sharedLspClient)
-        );
-    }
-    auto diagnosticService = std::make_unique<ide::services::DiagnosticService>(std::move(diagnosticProviders));
+    auto languagePackService = std::make_unique<ide::services::LanguagePackService>(allowDevInstallerPath, allowPathFallback);
+    auto languageServerHub = std::make_unique<ide::services::LanguageServerHub>(
+        languagePackService.get(),
+        lspCommand,
+        lspArgs,
+        allowDevInstallerPath
+    );
+    auto diagnosticCoordinator = std::make_unique<ide::services::DiagnosticCoordinator>(
+        std::make_unique<ide::adapters::diagnostics::LocalSyntaxDiagnosticProvider>(),
+        languageServerHub.get()
+    );
 
     std::unique_ptr<ide::services::interfaces::ICodeIntelProvider> codeIntelProvider;
-    if (sharedLspClient) {
-        codeIntelProvider = std::make_unique<ide::adapters::codeintel::LspCodeIntelProvider>(sharedLspClient);
-    } else {
+    if (codeIntelProviderMode == "mock") {
         codeIntelProvider = std::make_unique<ide::adapters::codeintel::MockCodeIntelProvider>();
+    } else {
+        codeIntelProvider = std::make_unique<ide::adapters::codeintel::LanguageServerCodeIntelProvider>(languageServerHub.get());
     }
     auto codeIntelService = std::make_unique<ide::services::CodeIntelService>(std::move(codeIntelProvider));
 
@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
 
     auto mainViewModel = std::make_unique<ide::ui::viewmodels::MainViewModel>(
         std::move(documentService),
-        std::move(diagnosticService),
+        std::move(diagnosticCoordinator),
         std::move(codeIntelService),
         std::move(aiService),
         std::move(gitService),

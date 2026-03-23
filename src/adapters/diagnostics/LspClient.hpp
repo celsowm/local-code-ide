@@ -25,8 +25,9 @@ public:
     bool isRunning() const;
     QString statusLine() const;
 
-    void publishDocument(const QString& filePath, const QString& text);
+    int publishDocument(const QString& filePath, const QString& text);
     std::vector<ide::services::interfaces::Diagnostic> latestDiagnostics(const QString& filePath) const;
+    int latestDiagnosticsVersion(const QString& filePath) const;
     std::vector<ide::services::interfaces::Diagnostic> publishAndCollect(const QString& filePath,
                                                                          const QString& text,
                                                                          int waitMs = 250);
@@ -56,6 +57,10 @@ private slots:
     void onReadyReadStandardOutput();
     void onReadyReadStandardError();
 
+signals:
+    void diagnosticsPublished(const QString& filePath, int version, const QString& source);
+    void serverStatusChanged(const QString& statusLine);
+
 private:
     int sendRequest(const QString& method, const QJsonObject& params = {});
     void sendNotification(const QString& method, const QJsonObject& params = {});
@@ -73,7 +78,9 @@ private:
     QString uriForPath(const QString& filePath) const;
     QString languageIdForPath(const QString& filePath) const;
 
-    static std::vector<ide::services::interfaces::Diagnostic> parseDiagnostics(const QJsonArray& diagnostics);
+    static std::vector<ide::services::interfaces::Diagnostic> parseDiagnostics(const QJsonArray& diagnostics,
+                                                                              const QString& filePath,
+                                                                              const QString& source);
     static std::vector<ide::services::interfaces::CompletionItem> parseCompletionItems(const QJsonValue& value);
     static ide::services::interfaces::HoverInfo parseHover(const QJsonValue& value);
     static std::optional<ide::services::interfaces::DefinitionLocation> parseDefinition(const QJsonValue& value);
@@ -88,6 +95,7 @@ private:
     QSet<QString> m_openDocuments;
     QHash<QString, int> m_documentVersions;
     QHash<QString, std::vector<ide::services::interfaces::Diagnostic>> m_diagnosticsByUri;
+    QHash<QString, int> m_diagnosticVersionsByUri;
     QHash<int, QJsonObject> m_pendingResponses;
 };
 

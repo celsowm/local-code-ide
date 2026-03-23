@@ -1,0 +1,17 @@
+{
+  "checksums": {},
+  "nodeVersion": "v25.8.1",
+  "schemaVersion": 1,
+  "versions": {
+    "clangd": "21.1.8",
+    "cmake-language-server": "0.1.11",
+    "marksman": "2026-02-08",
+    "powershell-editor-services": "v4.4.0",
+    "pyright": "1.1.408",
+    "rust-analyzer": "2026-03-23",
+    "taplo": "0.10.0",
+    "typescript": "5.9.3",
+    "typescript-language-server": "5.1.3",
+    "vscode-langservers-extracted": "4.10.0"
+  }
+}

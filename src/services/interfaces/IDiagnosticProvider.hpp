@@ -12,10 +12,15 @@ struct Diagnostic {
         Error
     };
 
-    int line = 1;
-    int column = 1;
+    QString filePath;
+    int lineStart = 1;
+    int columnStart = 1;
+    int lineEnd = 1;
+    int columnEnd = 1;
     QString message;
     Severity severity = Severity::Info;
+    QString source;
+    QString code;
 };
 
 class IDiagnosticProvider {

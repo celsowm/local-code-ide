@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "releasePolicy": "pinned-per-app-release",
+  "packs": [
+    {
+      "id": "rust-analyzer",
+      "version": "2026.03.0",
+      "languages": ["rust"],
+      "bundled": {
+        "windows": "language-packs/windows/rust-analyzer/rust-analyzer.cmd",
+        "linux": "language-packs/linux/rust-analyzer/rust-analyzer.sh"
+      },
+      "args": [],
+      "pathCandidates": ["rust-analyzer.exe", "rust-analyzer"],
+      "install": {
+        "windows": "rustup component add rust-analyzer",
+        "linux": "rustup component add rust-analyzer"
+      }
+    },
+    {
+      "id": "clangd",
+      "version": "21.1.8",
+      "languages": ["cpp"],
+      "bundled": {
+        "windows": "language-packs/windows/clangd/clangd.cmd",
+        "linux": "language-packs/linux/clangd/clangd.sh"
+      },
+      "args": ["--background-index"],
+      "pathCandidates": ["clangd.exe", "clangd"],
+      "install": {
+        "windows": "winget install --id LLVM.LLVM --accept-package-agreements --accept-source-agreements",
+        "linux": "sudo apt-get update && sudo apt-get install -y clangd"
+      }
+    },
+    {
+      "id": "typescript-language-server",
+      "version": "5.1.3",
+      "languages": ["typescript"],
+      "bundled": {
+        "windows": "language-packs/windows/typescript-language-server/typescript-language-server.cmd",
+        "linux": "language-packs/linux/typescript-language-server/typescript-language-server.sh"
+      },
+      "args": ["--stdio"],
+      "pathCandidates": ["typescript-language-server.cmd", "typescript-language-server"],
+      "install": {
+        "windows": "npm install -g typescript typescript-language-server",
+        "linux": "npm install -g typescript typescript-language-server"
+      }
+    },
+    {
+      "id": "pyright",
+      "version": "1.1.408",
+      "languages": ["python"],
+      "bundled": {
+        "windows": "language-packs/windows/pyright/pyright-langserver.cmd",
+        "linux": "language-packs/linux/pyright/pyright-langserver.sh"
+      },
+      "args": ["--stdio"],
+      "pathCandidates": ["pyright-langserver.cmd", "pyright-langserver"],
+      "install": {
+        "windows": "npm install -g pyright",
+        "linux": "npm install -g pyright"
+      }
+    },
+    {
+      "id": "json-language-server",
+      "version": "4.10.0",
+      "languages": ["json"],
+      "bundled": {
+        "windows": "language-packs/windows/json-language-server/json-language-server.cmd",
+        "linux": "language-packs/linux/json-language-server/json-language-server.sh"
+      },
+      "args": ["--stdio"],
+      "pathCandidates": ["vscode-json-language-server.cmd", "vscode-json-language-server"],
+      "install": {
+        "windows": "npm install -g vscode-langservers-extracted",
+        "linux": "npm install -g vscode-langservers-extracted"
+      }
+    },
+    {
+      "id": "yaml-language-server",
+      "version": "4.10.0",
+      "languages": ["yaml"],
+      "bundled": {
+        "windows": "language-packs/windows/yaml-language-server/yaml-language-server.cmd",
+        "linux": "language-packs/linux/yaml-language-server/yaml-language-server.sh"
+      },
+      "args": ["--stdio"],
+      "pathCandidates": ["yaml-language-server.cmd", "yaml-language-server"],
+      "install": {
+        "windows": "npm install -g yaml-language-server",
+        "linux": "npm install -g yaml-language-server"
+      }
+    },
+    {
+      "id": "taplo",
+      "version": "0.10.0",
+      "languages": ["toml"],
+      "bundled": {
+        "windows": "language-packs/windows/taplo/taplo.cmd",
+        "linux": "language-packs/linux/taplo/taplo.sh"
+      },
+      "args": ["lsp", "stdio"],
+      "pathCandidates": ["taplo.exe", "taplo"],
+      "install": {
+        "windows": "cargo install taplo-cli --locked",
+        "linux": "cargo install taplo-cli --locked"
+      }
+    },
+    {
+      "id": "marksman",
+      "version": "2026-02-08",
+      "languages": ["markdown"],
+      "bundled": {
+        "windows": "language-packs/windows/marksman/marksman.cmd",
+        "linux": "language-packs/linux/marksman/marksman.sh"
+      },
+      "args": ["server"],
+      "pathCandidates": ["marksman.exe", "marksman"],
+      "install": {
+        "windows": "winget install --id ArtemVladimirov.Marksman --accept-package-agreements --accept-source-agreements",
+        "linux": "cargo install marksman"
+      }
+    },
+    {
+      "id": "powershell-editor-services",
+      "version": "4.4.0",
+      "languages": ["powershell"],
+      "bundled": {
+        "windows": "language-packs/windows/powershell-editor-services/powershell-editor-services.cmd",
+        "linux": "language-packs/linux/powershell-editor-services/powershell-editor-services.sh"
+      },
+      "args": [],
+      "pathCandidates": ["pwsh.exe", "pwsh"],
+      "install": {
+        "windows": "pwsh -NoProfile -Command \"Install-Module PowerShellEditorServices -Scope CurrentUser -Force\"",
+        "linux": "pwsh -NoProfile -Command \"Install-Module PowerShellEditorServices -Scope CurrentUser -Force\""
+      }
+    },
+    {
+      "id": "cmake-language-server",
+      "version": "0.1.11",
+      "languages": ["cmake"],
+      "bundled": {
+        "windows": "language-packs/windows/cmake-language-server/cmake-language-server.cmd",
+        "linux": "language-packs/linux/cmake-language-server/cmake-language-server.sh"
+      },
+      "args": [],
+      "pathCandidates": ["cmake-language-server.cmd", "cmake-language-server"],
+      "install": {
+        "windows": "pip install cmake-language-server",
+        "linux": "pip install cmake-language-server"
+      }
+    },
+    {
+      "id": "qmlls",
+      "version": "6.8.0",
+      "languages": ["qml"],
+      "bundled": {
+        "windows": "language-packs/windows/qmlls/qmlls.cmd",
+        "linux": "language-packs/linux/qmlls/qmlls.sh"
+      },
+      "args": ["--stdio"],
+      "pathCandidates": ["qmlls.exe", "qmlls"],
+      "install": {
+        "windows": "python -m aqt install-qt windows desktop 6.8.0 win64_msvc2022_64 --outputdir C:\\Qt",
+        "linux": "python -m aqt install-qt linux desktop 6.8.0 gcc_64 --outputdir $HOME/Qt"
+      }
+    }
+  ]
+}

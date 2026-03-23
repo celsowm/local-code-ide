@@ -67,7 +67,12 @@ ApplicationWindow {
             Action { text: "Analyze"; icon.source: IconRegistry.source("analyze"); onTriggered: mainViewModel.analyzeNow() }
             Action { text: "Complete"; icon.source: IconRegistry.source("complete"); onTriggered: mainViewModel.requestCompletionsAtCursor() }
             Action { text: "Hover"; icon.source: IconRegistry.source("hover"); onTriggered: mainViewModel.requestHoverAtCursor() }
-            Action { text: "Definition"; icon.source: IconRegistry.source("definition"); onTriggered: mainViewModel.requestDefinitionAtCursor() }
+            Action {
+                text: "Definition"
+                icon.source: IconRegistry.source("definition")
+                enabled: mainViewModel.definitionAvailable
+                onTriggered: mainViewModel.requestDefinitionAtCursor()
+            }
             Action { text: "Extract patch preview"; icon.source: IconRegistry.source("diff"); onTriggered: mainViewModel.extractPatchPreview() }
             Action { text: "Open patch diff"; icon.source: IconRegistry.source("diff"); onTriggered: mainViewModel.openPatchPreviewDiff() }
             Action { text: "Apply assistant patch"; icon.source: IconRegistry.source("apply_patch"); onTriggered: mainViewModel.applyAssistantPatch() }
@@ -155,10 +160,91 @@ ApplicationWindow {
                     Label { text: mainViewModel.statusMessage; color: "white"; elide: Text.ElideRight; Layout.fillWidth: true }
                     Label { text: mainViewModel.openEditorCount + " tabs"; color: "white" }
                     Label { text: mainViewModel.splitEditorVisible ? (mainViewModel.diffEditorVisible ? "diff" : "split") : "single"; color: "white" }
+                    Label { text: mainViewModel.diagnosticsStatusLine; color: "white"; elide: Text.ElideRight }
                     Label { text: mainViewModel.gitChangeCount + " changes"; color: "white" }
                     Label { text: modelHubViewModel.hardwareSummary; color: "white"; elide: Text.ElideRight }
                     Label { text: mainViewModel.aiBackendName + " · " + modelHubViewModel.providerName; color: "white" }
                 }
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible: mainViewModel.workspaceLoading
+            color: "#000000"
+            opacity: 0.38
+            z: 900
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+                preventStealing: true
+            }
+        }
+
+        Rectangle {
+            visible: mainViewModel.workspaceLoading
+            width: Math.min(parent.width * 0.6, 520)
+            height: 132
+            anchors.centerIn: parent
+            radius: 8
+            color: "#252526"
+            border.color: "#4a4f57"
+            z: 901
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 10
+
+                Label {
+                    text: "Opening folder"
+                    color: "#f2f2f2"
+                    font.pixelSize: 16
+                    font.bold: true
+                    Layout.fillWidth: true
+                }
+
+                Label {
+                    text: mainViewModel.workspaceLoadingText.length > 0 ? mainViewModel.workspaceLoadingText : "Indexing workspace files..."
+                    color: "#cccccc"
+                    font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+
+                BusyIndicator {
+                    running: mainViewModel.workspaceLoading
+                    visible: running
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+        }
+
+        Rectangle {
+            id: toast
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 16
+            anchors.bottomMargin: 38
+            visible: mainViewModel.toastVisible
+            color: "#2f3136"
+            border.color: "#5a5f69"
+            radius: 6
+            opacity: visible ? 0.96 : 0
+            z: 1000
+            implicitWidth: Math.min(parent.width * 0.45, toastLabel.implicitWidth + 28)
+            implicitHeight: toastLabel.implicitHeight + 18
+
+            Label {
+                id: toastLabel
+                anchors.fill: parent
+                anchors.margins: 10
+                text: mainViewModel.toastMessage
+                color: "#f2f2f2"
+                wrapMode: Text.Wrap
+                maximumLineCount: 3
+                elide: Text.ElideRight
             }
         }
     }
@@ -170,4 +256,22 @@ ApplicationWindow {
 
     CommandPaletteDialog { id: commandPalette }
     QuickOpenDialog { id: quickOpen }
+
+    Timer {
+        id: toastTimer
+        interval: 3600
+        repeat: false
+        onTriggered: mainViewModel.dismissToast()
+    }
+
+    Connections {
+        target: mainViewModel
+        function onToastChanged() {
+            if (mainViewModel.toastVisible) {
+                toastTimer.restart()
+            } else {
+                toastTimer.stop()
+            }
+        }
+    }
 }
