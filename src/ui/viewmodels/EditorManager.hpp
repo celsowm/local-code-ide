@@ -89,6 +89,8 @@ public:
     Q_INVOKABLE void switchOpenEditor(const QString& path);
     Q_INVOKABLE void closeOpenEditor(const QString& path);
     Q_INVOKABLE void saveCurrent();
+    Q_INVOKABLE void closeAllEditors();
+    void setInMemoryDocument(const QString& path, const QString& text);
 
     Q_INVOKABLE void setupDiffView(const QString& title, const QString& originalText, const QString& modifiedText);
     Q_INVOKABLE void clearDiffView();

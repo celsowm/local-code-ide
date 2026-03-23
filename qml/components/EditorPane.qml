@@ -210,6 +210,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: WorkbenchTheme.tabHeight
+            visible: !mainViewModel.showWelcomeTab
             color: WorkbenchTheme.editorHeaderBackground
             border.color: WorkbenchTheme.borderColor
 
@@ -262,7 +263,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 22
-            visible: mainViewModel.splitEditorVisible
+            visible: mainViewModel.splitEditorVisible && !mainViewModel.showWelcomeTab
             spacing: 0
 
             Rectangle {
@@ -301,7 +302,7 @@ Rectangle {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: mainViewModel.diffEditorVisible ? 1 : 0
+            currentIndex: mainViewModel.showWelcomeTab ? 2 : (mainViewModel.diffEditorVisible ? 1 : 0)
 
             Item {
                 SplitView {
@@ -557,6 +558,145 @@ Rectangle {
                 DocumentHighlighter {
                     textDocument: modifiedArea.textDocument
                     language: mainViewModel.languageId
+                }
+            }
+
+            Item {
+                Rectangle {
+                    anchors.fill: parent
+                    color: WorkbenchTheme.editorBackground
+
+                    Flickable {
+                        anchors.fill: parent
+                        contentWidth: width
+                        contentHeight: welcomeColumn.implicitHeight + 48
+                        clip: true
+
+                        ColumnLayout {
+                            id: welcomeColumn
+                            width: Math.min(parent.width - 80, 920)
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.top: parent.top
+                            anchors.topMargin: 40
+                            spacing: 16
+
+                            Label {
+                                text: "Welcome to LocalCodeIDE"
+                                color: WorkbenchTheme.textPrimary
+                                font.pixelSize: 32
+                                font.bold: true
+                                Layout.fillWidth: true
+                            }
+
+                            Label {
+                                text: "Open your project folder and start coding."
+                                color: WorkbenchTheme.textMuted
+                                font.pixelSize: 14
+                                Layout.fillWidth: true
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 10
+
+                                Button {
+                                    text: "Open Folder..."
+                                    onClicked: mainViewModel.triggerOpenFolderDialog()
+                                }
+
+                                Button {
+                                    text: "Open File..."
+                                    onClicked: mainViewModel.triggerOpenFileDialog()
+                                }
+
+                                Button {
+                                    text: "New File"
+                                    onClicked: mainViewModel.createWorkspaceFile()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 10
+
+                                Button {
+                                    text: "Quick Open"
+                                    onClicked: mainViewModel.triggerQuickOpen()
+                                }
+
+                                Button {
+                                    text: "Open Sample C++"
+                                    onClicked: mainViewModel.loadSampleCpp()
+                                }
+
+                                Button {
+                                    text: "Open Sample Rust"
+                                    onClicked: mainViewModel.loadSampleRust()
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: 1
+                                color: WorkbenchTheme.borderColor
+                            }
+
+                            Label {
+                                text: "Recent Folders"
+                                color: WorkbenchTheme.textPrimary
+                                font.pixelSize: 16
+                                font.bold: true
+                                Layout.fillWidth: true
+                            }
+
+                            Repeater {
+                                model: mainViewModel.recentFolders
+
+                                delegate: Rectangle {
+                                    required property string modelData
+                                    Layout.fillWidth: true
+                                    implicitHeight: 38
+                                    radius: 4
+                                    color: recentFolderMouse.containsMouse ? WorkbenchTheme.editorTabInactive : "transparent"
+                                    border.color: WorkbenchTheme.borderColor
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+                                        spacing: 8
+
+                                        Label {
+                                            text: modelData
+                                            color: WorkbenchTheme.textPrimary
+                                            elide: Text.ElideMiddle
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Button {
+                                            text: "Open"
+                                            onClicked: mainViewModel.reopenRecentFolder(modelData)
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: recentFolderMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        z: -1
+                                        onClicked: mainViewModel.reopenRecentFolder(modelData)
+                                    }
+                                }
+                            }
+
+                            Label {
+                                visible: mainViewModel.recentFolders.length === 0
+                                text: "No recent folders yet."
+                                color: WorkbenchTheme.textMuted
+                                font.pixelSize: 12
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QString>
+#include <QStringList>
 
 namespace ide::ui::viewmodels {
 
@@ -13,6 +14,7 @@ struct UiState {
     int secondaryAiWidth = 390;
     int bottomPanelTab = 0;
     int bottomPanelHeight = 300;
+    QStringList recentFolders;
 };
 
 class UiStateManager final : public QObject {
@@ -24,6 +26,7 @@ class UiStateManager final : public QObject {
     Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
     Q_PROPERTY(int bottomPanelTab READ bottomPanelTab WRITE setBottomPanelTab NOTIFY bottomPanelChanged)
     Q_PROPERTY(int bottomPanelHeight READ bottomPanelHeight WRITE setBottomPanelHeight NOTIFY bottomPanelChanged)
+    Q_PROPERTY(QStringList recentFolders READ recentFolders NOTIFY recentFoldersChanged)
 
 public:
     explicit UiStateManager(const QString& settingsPath, QObject* parent = nullptr);
@@ -45,6 +48,9 @@ public:
 
     int bottomPanelHeight() const;
     void setBottomPanelHeight(int value);
+    QStringList recentFolders() const;
+    void addRecentFolder(const QString& folderPath);
+    void removeRecentFolder(const QString& folderPath);
 
     Q_INVOKABLE void load();
     Q_INVOKABLE void save();
@@ -53,6 +59,7 @@ signals:
     void primaryViewIndexChanged();
     void secondaryAiChanged();
     void bottomPanelChanged();
+    void recentFoldersChanged();
 
 private:
     QSettings m_settings;

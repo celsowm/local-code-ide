@@ -86,6 +86,56 @@ void UiStateManager::setBottomPanelHeight(int value) {
     emit bottomPanelChanged();
 }
 
+QStringList UiStateManager::recentFolders() const {
+    return m_state.recentFolders;
+}
+
+void UiStateManager::addRecentFolder(const QString& folderPath) {
+    const QString normalizedPath = QDir::cleanPath(folderPath.trimmed());
+    if (normalizedPath.isEmpty()) {
+        return;
+    }
+
+    QStringList updated;
+    updated << normalizedPath;
+    for (const QString& existing : m_state.recentFolders) {
+        if (QDir::cleanPath(existing) == normalizedPath) {
+            continue;
+        }
+        if (!existing.trimmed().isEmpty()) {
+            updated << QDir::cleanPath(existing);
+        }
+        if (updated.size() >= 8) {
+            break;
+        }
+    }
+    if (updated == m_state.recentFolders) {
+        return;
+    }
+    m_state.recentFolders = updated;
+    emit recentFoldersChanged();
+}
+
+void UiStateManager::removeRecentFolder(const QString& folderPath) {
+    const QString normalizedPath = QDir::cleanPath(folderPath.trimmed());
+    if (normalizedPath.isEmpty()) {
+        return;
+    }
+
+    QStringList updated;
+    for (const QString& existing : m_state.recentFolders) {
+        if (QDir::cleanPath(existing) == normalizedPath) {
+            continue;
+        }
+        updated << QDir::cleanPath(existing);
+    }
+    if (updated == m_state.recentFolders) {
+        return;
+    }
+    m_state.recentFolders = updated;
+    emit recentFoldersChanged();
+}
+
 void UiStateManager::load() {
     m_state.primaryViewIndex = qBound(0, m_settings.value(QStringLiteral("workbench/primaryViewIndex"), 0).toInt(), 2);
     m_state.secondaryAiVisible = m_settings.value(QStringLiteral("workbench/secondaryAiVisible"), true).toBool();
@@ -93,9 +143,23 @@ void UiStateManager::load() {
     m_state.secondaryAiWidth = qBound(320, m_settings.value(QStringLiteral("workbench/secondaryAiWidth"), 390).toInt(), 720);
     m_state.bottomPanelTab = qBound(0, m_settings.value(QStringLiteral("workbench/bottomPanelTab"), 0).toInt(), 1);
     m_state.bottomPanelHeight = qBound(190, m_settings.value(QStringLiteral("workbench/bottomPanelHeight"), 300).toInt(), 560);
+    QStringList loadedRecents = m_settings.value(QStringLiteral("workbench/recentFolders")).toStringList();
+    QStringList sanitized;
+    for (const QString& item : loadedRecents) {
+        const QString cleaned = QDir::cleanPath(item.trimmed());
+        if (cleaned.isEmpty() || sanitized.contains(cleaned)) {
+            continue;
+        }
+        sanitized << cleaned;
+        if (sanitized.size() >= 8) {
+            break;
+        }
+    }
+    m_state.recentFolders = sanitized;
     emit primaryViewIndexChanged();
     emit secondaryAiChanged();
     emit bottomPanelChanged();
+    emit recentFoldersChanged();
 }
 
 void UiStateManager::save() {
@@ -105,6 +169,7 @@ void UiStateManager::save() {
     m_settings.setValue(QStringLiteral("workbench/secondaryAiWidth"), m_state.secondaryAiWidth);
     m_settings.setValue(QStringLiteral("workbench/bottomPanelTab"), m_state.bottomPanelTab);
     m_settings.setValue(QStringLiteral("workbench/bottomPanelHeight"), m_state.bottomPanelHeight);
+    m_settings.setValue(QStringLiteral("workbench/recentFolders"), m_state.recentFolders);
     m_settings.sync();
 }
 

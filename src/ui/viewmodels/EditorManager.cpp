@@ -221,6 +221,25 @@ void EditorManager::saveCurrent() {
     }
 }
 
+void EditorManager::closeAllEditors() {
+    m_openEditors.clear();
+    closeSplitEditor();
+    syncOpenEditors();
+}
+
+void EditorManager::setInMemoryDocument(const QString& path, const QString& text) {
+    if (!m_documentService) {
+        return;
+    }
+    m_documentService->setPath(path);
+    m_documentService->setText(text);
+    m_savedTextSnapshot = text;
+    touchOpenEditor(path);
+    syncOpenEditors();
+    emit currentPathChanged();
+    emit editorTextChanged();
+}
+
 void EditorManager::setupDiffView(const QString& title, const QString& originalText, const QString& modifiedText) {
     m_splitState.visible = true;
     m_splitState.diffMode = true;

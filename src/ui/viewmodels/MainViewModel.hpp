@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <memory>
+#include <QStringList>
 #include <vector>
 
 namespace ide::ui::viewmodels {
@@ -87,6 +88,9 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString patchPreviewText READ patchPreviewText NOTIFY patchPreviewChanged)
 
     Q_PROPERTY(QObject* openEditorsModel READ openEditorsModel CONSTANT)
+    Q_PROPERTY(int openEditorCount READ openEditorCount NOTIFY openEditorsChanged)
+    Q_PROPERTY(bool showWelcomeTab READ showWelcomeTab NOTIFY openEditorsChanged)
+    Q_PROPERTY(QStringList recentFolders READ recentFolders NOTIFY recentFoldersChanged)
     Q_PROPERTY(QObject* commandPaletteModel READ commandPaletteModel CONSTANT)
     Q_PROPERTY(int commandPaletteCount READ commandPaletteCount NOTIFY commandPaletteChanged)
 
@@ -218,6 +222,9 @@ public:
     QString patchPreviewText() const;
 
     QObject* openEditorsModel();
+    int openEditorCount() const;
+    bool showWelcomeTab() const;
+    QStringList recentFolders() const;
     QObject* commandPaletteModel();
     int commandPaletteCount() const;
 
@@ -269,6 +276,13 @@ public:
     Q_INVOKABLE void loadSampleRust();
     Q_INVOKABLE void refreshWorkspace();
     Q_INVOKABLE void openWorkspaceFile(const QString& path);
+    Q_INVOKABLE void triggerOpenFileDialog();
+    Q_INVOKABLE void triggerOpenFolderDialog();
+    Q_INVOKABLE void triggerQuickOpen();
+    Q_INVOKABLE void openFileFromDialog(const QString& filePath);
+    Q_INVOKABLE void openFolderFromDialog(const QString& folderPath);
+    Q_INVOKABLE void reopenRecentFolder(const QString& folderPath);
+    Q_INVOKABLE void removeRecentFolder(const QString& folderPath);
     Q_INVOKABLE void openWorkspaceFileInSplit(const QString& path);
     Q_INVOKABLE void createWorkspaceFile();
     Q_INVOKABLE void createWorkspaceFolder();
@@ -328,6 +342,7 @@ signals:
     void patchPreviewChanged();
     void splitEditorChanged();
     void openEditorsChanged();
+    void recentFoldersChanged();
     void commandPaletteChanged();
     void gitChanged();
     void primaryViewIndexChanged();
@@ -335,6 +350,7 @@ signals:
     void bottomPanelChanged();
     void scmCommitMessageChanged();
     void gitSummaryChanged();
+    void quickOpenRequested();
 
 private:
     struct CommandSpec {
@@ -354,6 +370,8 @@ private:
     void rebuildWorkspaceModels();
     void refreshGitState();
     QString uniqueWorkspaceChildPath(const QString& preferredName) const;
+    QString localPathFromUrlOrPath(const QString& rawPath) const;
+    void addRecentFolder(const QString& folderPath);
 
     std::unique_ptr<ide::services::DocumentService> m_documentService;
     std::unique_ptr<ide::services::DiagnosticService> m_diagnosticService;

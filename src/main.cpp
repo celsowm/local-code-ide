@@ -38,7 +38,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
         QQuickStyle::setStyle(QStringLiteral("Fusion"));
     }
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
     auto documentService = std::make_unique<ide::services::DocumentService>();

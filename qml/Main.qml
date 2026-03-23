@@ -22,6 +22,10 @@ ApplicationWindow {
         onActivated: quickOpen.open()
     }
     Shortcut {
+        sequence: StandardKey.Open
+        onActivated: mainViewModel.triggerOpenFileDialog()
+    }
+    Shortcut {
         sequence: "Ctrl+Shift+P"
         onActivated: commandPalette.open()
     }
@@ -37,6 +41,9 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: "File"
+            Action { text: "Open File..."; icon.source: IconRegistry.source("file"); onTriggered: mainViewModel.triggerOpenFileDialog() }
+            Action { text: "Open Folder..."; icon.source: IconRegistry.source("folder"); onTriggered: mainViewModel.triggerOpenFolderDialog() }
+            MenuSeparator { }
             Action { text: "Quick Open"; icon.source: IconRegistry.source("search"); onTriggered: quickOpen.open() }
             Action { text: "Load C++ Sample"; icon.source: IconRegistry.source("explorer"); onTriggered: mainViewModel.loadSampleCpp() }
             Action { text: "Load Rust Sample"; icon.source: IconRegistry.source("explorer"); onTriggered: mainViewModel.loadSampleRust() }
@@ -154,6 +161,11 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    Connections {
+        target: mainViewModel
+        function onQuickOpenRequested() { quickOpen.open() }
     }
 
     CommandPaletteDialog { id: commandPalette }

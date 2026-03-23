@@ -6,6 +6,8 @@
 #include <QProcess>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QFileDialog>
+#include <QUrl>
 #include <QtGlobal>
 
 #include <algorithm>
@@ -101,6 +103,7 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     connect(&m_uiStateManager, &UiStateManager::primaryViewIndexChanged, this, &MainViewModel::primaryViewIndexChanged);
     connect(&m_uiStateManager, &UiStateManager::secondaryAiChanged, this, &MainViewModel::secondaryAiChanged);
     connect(&m_uiStateManager, &UiStateManager::bottomPanelChanged, this, &MainViewModel::bottomPanelChanged);
+    connect(&m_uiStateManager, &UiStateManager::recentFoldersChanged, this, &MainViewModel::recentFoldersChanged);
 
     refreshWorkspace();
     refreshGitState();
@@ -220,6 +223,24 @@ QString MainViewModel::patchSummary() const { return m_patchPreview.summary; }
 QString MainViewModel::patchPreviewText() const { return m_patchPreview.diffText; }
 
 QObject* MainViewModel::openEditorsModel() { return m_editorManager.openEditorsModel(); }
+int MainViewModel::openEditorCount() const { return m_editorManager.openEditorCount(); }
+bool MainViewModel::showWelcomeTab() const { return openEditorCount() == 0; }
+QStringList MainViewModel::recentFolders() const {
+    QStringList visible;
+    const QStringList stored = m_uiStateManager.recentFolders();
+    for (const QString& path : stored) {
+        const QString cleaned = QDir::cleanPath(path.trimmed());
+        if (cleaned.isEmpty()) {
+            continue;
+        }
+        const QFileInfo info(cleaned);
+        if (!info.exists() || !info.isDir()) {
+            continue;
+        }
+        visible << info.absoluteFilePath();
+    }
+    return visible;
+}
 QObject* MainViewModel::commandPaletteModel() { return &m_commandPaletteModel; }
 int MainViewModel::commandPaletteCount() const { return m_commandPaletteModel.itemCount(); }
 
@@ -341,6 +362,76 @@ void MainViewModel::refreshWorkspace() {
 void MainViewModel::openWorkspaceFile(const QString& path) {
     m_workspaceTreeModel.expandToPath(path);
     goToDocumentLocation(path, 1, 1);
+}
+
+void MainViewModel::triggerOpenFileDialog() {
+    const QString selected = QFileDialog::getOpenFileName(
+        nullptr,
+        QStringLiteral("Open File"),
+        m_workspaceRootPath
+    );
+    if (selected.trimmed().isEmpty()) {
+        return;
+    }
+    openFileFromDialog(selected);
+}
+
+void MainViewModel::triggerOpenFolderDialog() {
+    const QString selected = QFileDialog::getExistingDirectory(
+        nullptr,
+        QStringLiteral("Open Folder"),
+        m_workspaceRootPath
+    );
+    if (selected.trimmed().isEmpty()) {
+        return;
+    }
+    openFolderFromDialog(selected);
+}
+
+void MainViewModel::triggerQuickOpen() {
+    emit quickOpenRequested();
+}
+
+void MainViewModel::openFileFromDialog(const QString& filePath) {
+    const QString localPath = localPathFromUrlOrPath(filePath);
+    const QFileInfo info(localPath);
+    if (!info.exists() || !info.isFile()) {
+        updateStatusMessage(QString("Selected file is not valid: %1").arg(localPath));
+        return;
+    }
+    openWorkspaceFile(info.absoluteFilePath());
+}
+
+void MainViewModel::openFolderFromDialog(const QString& folderPath) {
+    const QString localPath = localPathFromUrlOrPath(folderPath);
+    const QFileInfo info(localPath);
+    if (!info.exists() || !info.isDir()) {
+        updateStatusMessage(QString("Selected folder is not valid: %1").arg(localPath));
+        removeRecentFolder(localPath);
+        return;
+    }
+
+    m_editorManager.closeAllEditors();
+    setWorkspaceRootPath(info.absoluteFilePath());
+    addRecentFolder(info.absoluteFilePath());
+    clearPatchPreview();
+    updateStatusMessage(QString("Opened folder: %1").arg(info.absoluteFilePath()));
+}
+
+void MainViewModel::reopenRecentFolder(const QString& folderPath) {
+    const QString localPath = localPathFromUrlOrPath(folderPath);
+    const QFileInfo info(localPath);
+    if (!info.exists() || !info.isDir()) {
+        removeRecentFolder(localPath);
+        updateStatusMessage(QString("Recent folder no longer exists: %1").arg(localPath));
+        return;
+    }
+    openFolderFromDialog(localPath);
+}
+
+void MainViewModel::removeRecentFolder(const QString& folderPath) {
+    m_uiStateManager.removeRecentFolder(localPathFromUrlOrPath(folderPath));
+    m_uiStateManager.save();
 }
 
 void MainViewModel::openWorkspaceFileInSplit(const QString& path) {
@@ -563,7 +654,11 @@ void MainViewModel::runCommandPaletteCommand(const QString& commandId) {
     } else if (commandId == "workbench.aiSidebar.showModels") {
         showModelsSidebar();
     } else if (commandId == "workbench.action.quickOpen") {
-        updateStatusMessage("Quick Open pronto para uso (Ctrl+P). Digite um arquivo.");
+        triggerQuickOpen();
+    } else if (commandId == "file.openFile") {
+        triggerOpenFileDialog();
+    } else if (commandId == "file.openFolder") {
+        triggerOpenFolderDialog();
     } else if (commandId == "file.save") {
         saveCurrent();
     } else if (commandId == "file.openSampleCpp") {
@@ -685,29 +780,30 @@ void MainViewModel::updateStatusMessage(const QString& message) {
 }
 
 void MainViewModel::setDocumentSample(const QString& path, const QString& text) {
-    m_documentService->setPath(path);
-    m_documentService->setText(text);
-    emit editorTextChanged();
-    emit currentPathChanged();
-    emit aiSettingsChanged();
+    m_editorManager.setInMemoryDocument(path, text);
     analyzeNow();
     refreshRelevantContext();
     clearPatchPreview();
+    emit aiSettingsChanged();
 }
 
 void MainViewModel::goToDocumentLocation(const QString& path, int line, int column) {
-    if (!m_documentService->openFile(path)) {
+    const QFileInfo info(path);
+    if (!info.exists() || !info.isFile()) {
         updateStatusMessage(QString("Falha ao abrir definição em %1").arg(path));
         return;
     }
-    emit editorTextChanged();
-    emit currentPathChanged();
-    emit aiSettingsChanged();
+    const QString targetPath = info.absoluteFilePath();
+    m_editorManager.openFile(targetPath);
+    if (QFileInfo(currentPath()).absoluteFilePath() != targetPath) {
+        updateStatusMessage(QString("Failed to open file: %1").arg(targetPath));
+        return;
+    }
     analyzeNow();
     refreshRelevantContext();
     clearPatchPreview();
     refreshGitState();
-    updateStatusMessage(QString("Navegado para %1:%2:%3").arg(path, QString::number(line), QString::number(column)));
+    updateStatusMessage(QString("Navegado para %1:%2:%3").arg(targetPath, QString::number(line), QString::number(column)));
 }
 
 void MainViewModel::refreshPendingApprovals() { m_pendingApprovalModel.setApprovals(m_aiService->pendingApprovals()); }
@@ -749,6 +845,8 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
             {"workbench.action.quickOpen", "Go to File", "Workbench", "Quick Open"},
             {"workbench.action.splitEditorRight", "View: Split Editor Right", "Workbench", "Ctrl+\\"},
             {"workbench.action.closeSplitEditor", "View: Close Secondary Editor", "Workbench", "Split"},
+            {"file.openFile", "File: Open File...", "File", "Ctrl+O"},
+            {"file.openFolder", "File: Open Folder...", "File", "Workspace"},
             {"file.save", "File: Save", "File", "Ctrl+S"},
             {"file.openSampleCpp", "File: Open Sample C++", "File", "Demo"},
             {"file.openSampleRust", "File: Open Sample Rust", "File", "Demo"},
@@ -783,6 +881,28 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
 void MainViewModel::refreshGitState() {
     m_gitViewModel.refresh(m_workspaceRootPath);
     m_workspaceTreeModel.setGitChanges(m_gitService->listChanges(m_workspaceRootPath));
+}
+
+QString MainViewModel::localPathFromUrlOrPath(const QString& rawPath) const {
+    const QString trimmed = rawPath.trimmed();
+    if (trimmed.isEmpty()) {
+        return {};
+    }
+
+    const QUrl url(trimmed);
+    if (url.isValid() && url.isLocalFile()) {
+        return QDir::cleanPath(url.toLocalFile());
+    }
+    return QDir::cleanPath(trimmed);
+}
+
+void MainViewModel::addRecentFolder(const QString& folderPath) {
+    const QString localPath = localPathFromUrlOrPath(folderPath);
+    if (localPath.isEmpty()) {
+        return;
+    }
+    m_uiStateManager.addRecentFolder(localPath);
+    m_uiStateManager.save();
 }
 
 void MainViewModel::rebuildWorkspaceModels() {
