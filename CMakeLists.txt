@@ -95,10 +95,16 @@ qt_add_executable(LocalCodeIDE
     src/ui/viewmodels/ServerRuntimeManager.cpp
 )
 
+set_source_files_properties(
+    qml/WorkbenchTheme.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
 qt_add_qml_module(LocalCodeIDE
     URI LocalCodeIDE
     VERSION 1.0
     QML_FILES
+        qml/WorkbenchTheme.qml
         qml/Main.qml
         qml/components/IconButton.qml
         qml/components/IconRegistry.js

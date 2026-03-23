@@ -64,13 +64,38 @@ void UiStateManager::setSecondaryAiWidth(int value) {
     emit secondaryAiChanged();
 }
 
+int UiStateManager::bottomPanelTab() const {
+    return m_state.bottomPanelTab;
+}
+
+void UiStateManager::setBottomPanelTab(int value) {
+    const int bounded = qBound(0, value, 1);
+    if (bounded == m_state.bottomPanelTab) return;
+    m_state.bottomPanelTab = bounded;
+    emit bottomPanelChanged();
+}
+
+int UiStateManager::bottomPanelHeight() const {
+    return m_state.bottomPanelHeight;
+}
+
+void UiStateManager::setBottomPanelHeight(int value) {
+    const int bounded = qBound(190, value, 560);
+    if (bounded == m_state.bottomPanelHeight) return;
+    m_state.bottomPanelHeight = bounded;
+    emit bottomPanelChanged();
+}
+
 void UiStateManager::load() {
     m_state.primaryViewIndex = qBound(0, m_settings.value(QStringLiteral("workbench/primaryViewIndex"), 0).toInt(), 2);
     m_state.secondaryAiVisible = m_settings.value(QStringLiteral("workbench/secondaryAiVisible"), true).toBool();
     m_state.secondaryAiTab = qBound(0, m_settings.value(QStringLiteral("workbench/secondaryAiTab"), 0).toInt(), 1);
     m_state.secondaryAiWidth = qBound(320, m_settings.value(QStringLiteral("workbench/secondaryAiWidth"), 390).toInt(), 720);
+    m_state.bottomPanelTab = qBound(0, m_settings.value(QStringLiteral("workbench/bottomPanelTab"), 0).toInt(), 1);
+    m_state.bottomPanelHeight = qBound(190, m_settings.value(QStringLiteral("workbench/bottomPanelHeight"), 300).toInt(), 560);
     emit primaryViewIndexChanged();
     emit secondaryAiChanged();
+    emit bottomPanelChanged();
 }
 
 void UiStateManager::save() {
@@ -78,6 +103,8 @@ void UiStateManager::save() {
     m_settings.setValue(QStringLiteral("workbench/secondaryAiVisible"), m_state.secondaryAiVisible);
     m_settings.setValue(QStringLiteral("workbench/secondaryAiTab"), m_state.secondaryAiTab);
     m_settings.setValue(QStringLiteral("workbench/secondaryAiWidth"), m_state.secondaryAiWidth);
+    m_settings.setValue(QStringLiteral("workbench/bottomPanelTab"), m_state.bottomPanelTab);
+    m_settings.setValue(QStringLiteral("workbench/bottomPanelHeight"), m_state.bottomPanelHeight);
     m_settings.sync();
 }
 

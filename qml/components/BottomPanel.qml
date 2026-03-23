@@ -3,8 +3,29 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Rectangle {
-    color: "#181818"
-    border.color: "#2d2d30"
+    id: root
+    color: WorkbenchTheme.panelBackground
+    border.color: WorkbenchTheme.borderColor
+
+    property int selectedTab: 0
+
+    Component.onCompleted: selectedTab = mainViewModel.bottomPanelTab
+
+    Connections {
+        target: mainViewModel
+
+        function onBottomPanelChanged() {
+            if (root.selectedTab !== mainViewModel.bottomPanelTab) {
+                root.selectedTab = mainViewModel.bottomPanelTab
+            }
+        }
+    }
+
+    onSelectedTabChanged: {
+        if (mainViewModel.bottomPanelTab !== selectedTab) {
+            mainViewModel.bottomPanelTab = selectedTab
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -12,76 +33,164 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 34
-            color: "#252526"
+            Layout.preferredHeight: WorkbenchTheme.panelHeaderHeight
+            color: WorkbenchTheme.panelHeaderBackground
+            border.color: WorkbenchTheme.borderColor
+
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 12
+                anchors.leftMargin: 6
                 anchors.rightMargin: 12
-                Label { text: "PROBLEMS / TERMINAL"; color: "#d4d4d4"; font.bold: true }
-                Label { text: mainViewModel.diagnosticsCount + " diagnostics"; color: "#808080" }
+                spacing: 2
+
+                Repeater {
+                    model: [
+                        { title: "PROBLEMS", count: mainViewModel.diagnosticsCount },
+                        { title: "TERMINAL", count: -1 }
+                    ]
+
+                    delegate: ToolButton {
+                        required property int index
+                        required property var modelData
+
+                        text: modelData.count >= 0 ? (modelData.title + " (" + modelData.count + ")") : modelData.title
+                        font.pixelSize: 11
+                        padding: 8
+                        hoverEnabled: true
+                        onClicked: root.selectedTab = index
+
+                        background: Rectangle {
+                            color: root.selectedTab === index ? WorkbenchTheme.editorTabActive : (parent.hovered ? "#2b2b2d" : "transparent")
+                            border.color: root.selectedTab === index ? WorkbenchTheme.accent : "transparent"
+                            radius: 0
+                        }
+
+                        contentItem: Label {
+                            text: parent.text
+                            color: root.selectedTab === index ? WorkbenchTheme.textPrimary : WorkbenchTheme.textMuted
+                            font.pixelSize: parent.font.pixelSize
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+                }
+
                 Item { Layout.fillWidth: true }
-                Label { text: mainViewModel.terminalBackendName; color: "#808080" }
+
+                Label {
+                    text: root.selectedTab === 0 ? (mainViewModel.diagnosticsCount + " diagnostics") : mainViewModel.terminalBackendName
+                    color: WorkbenchTheme.textMuted
+                    font.pixelSize: 11
+                }
             }
         }
 
-        SplitView {
+        StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            orientation: Qt.Horizontal
+            currentIndex: root.selectedTab
 
             Rectangle {
-                SplitView.fillWidth: true
-                color: "#1e1e1e"
+                color: WorkbenchTheme.editorBackground
+
                 ListView {
                     anchors.fill: parent
                     anchors.margins: 8
+                    clip: true
                     model: mainViewModel.diagnosticsModel
+                    boundsBehavior: Flickable.StopAtBounds
+
                     delegate: Rectangle {
                         width: ListView.view.width
-                        height: 34
-                        color: index % 2 === 0 ? "#1e1e1e" : "#1a1a1a"
+                        height: 30
+                        color: mouseArea.containsMouse ? "#2a2d2e" : "transparent"
+
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 8
                             anchors.rightMargin: 8
                             spacing: 10
-                            Label { text: severity.toUpperCase(); color: severity === "error" ? "#f14c4c" : (severity === "warning" ? "#cca700" : "#75beff"); font.bold: true }
-                            Label { text: "L" + line + ":" + column; color: "#808080" }
-                            Label { text: message; color: "#d4d4d4"; Layout.fillWidth: true; elide: Text.ElideRight }
+
+                            Label {
+                                text: severity.toUpperCase()
+                                color: severity === "error" ? WorkbenchTheme.danger : (severity === "warning" ? WorkbenchTheme.warning : WorkbenchTheme.info)
+                                font.bold: true
+                                font.pixelSize: 11
+                                Layout.preferredWidth: 58
+                            }
+
+                            Label {
+                                text: "L" + line + ":" + column
+                                color: WorkbenchTheme.textMuted
+                                font.pixelSize: 11
+                            }
+
+                            Label {
+                                text: message
+                                color: WorkbenchTheme.textPrimary
+                                font.pixelSize: 11
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
                         }
-                        MouseArea { anchors.fill: parent; onClicked: mainViewModel.openSearchResult(mainViewModel.currentPath, line, column) }
+
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: mainViewModel.openSearchResult(mainViewModel.currentPath, line, column)
+                        }
                     }
                 }
             }
 
             Rectangle {
-                SplitView.fillWidth: true
-                color: "#111111"
+                color: WorkbenchTheme.terminalBackground
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 8
+                    spacing: 8
+
                     RowLayout {
                         Layout.fillWidth: true
+                        spacing: 8
+
                         TextField {
                             Layout.fillWidth: true
                             text: mainViewModel.terminalCommand
-                            color: "#d4d4d4"
-                            background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
+                            color: WorkbenchTheme.textPrimary
+                            placeholderText: "Enter a command"
                             onTextChanged: mainViewModel.terminalCommand = text
                             onAccepted: mainViewModel.runTerminalCommand()
+
+                            background: Rectangle {
+                                color: WorkbenchTheme.editorBackground
+                                border.color: WorkbenchTheme.subtleBorderColor
+                                radius: 2
+                            }
                         }
-                        Button { text: "Run"; onClicked: mainViewModel.runTerminalCommand() }
+
+                        Button {
+                            text: "Run"
+                            onClicked: mainViewModel.runTerminalCommand()
+                        }
                     }
-                    TextArea {
+
+                    ScrollView {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        readOnly: true
-                        text: mainViewModel.terminalOutput
-                        color: "#d4d4d4"
-                        font.family: "monospace"
-                        wrapMode: TextArea.Wrap
-                        background: Rectangle { color: "#111111" }
+                        clip: true
+
+                        TextArea {
+                            readOnly: true
+                            text: mainViewModel.terminalOutput
+                            color: WorkbenchTheme.textPrimary
+                            font.family: WorkbenchTheme.monoFont
+                            font.pixelSize: 12
+                            wrapMode: TextArea.Wrap
+                            background: Rectangle { color: WorkbenchTheme.terminalBackground }
+                        }
                     }
                 }
             }

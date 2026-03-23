@@ -7,8 +7,8 @@ Rectangle {
 
     property var viewModel
 
-    color: "#252526"
-    border.color: "#2d2d30"
+    color: WorkbenchTheme.elevatedBackground
+    border.color: WorkbenchTheme.borderColor
 
     readonly property int selectedTab: root.viewModel ? root.viewModel.secondaryAiTab : 0
 

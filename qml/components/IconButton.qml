@@ -11,8 +11,15 @@ Button {
     icon.source: IconRegistry.source(iconName)
     icon.width: iconSize
     icon.height: iconSize
-    icon.color: enabled ? "#d4d4d4" : "#707070"
+    icon.color: enabled ? WorkbenchTheme.textPrimary : WorkbenchTheme.textDim
     display: AbstractButton.TextBesideIcon
     spacing: 6
-}
+    padding: 6
+    flat: true
+    hoverEnabled: true
 
+    background: Rectangle {
+        radius: 3
+        color: root.hovered ? "#2a2d2e" : "transparent"
+    }
+}

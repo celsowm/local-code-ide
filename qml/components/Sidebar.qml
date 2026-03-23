@@ -8,7 +8,7 @@ import "IconRegistry.js" as IconRegistry
 Rectangle {
     id: root
     color: "#181818"
-    border.color: "#2d2d30"
+    border.color: "#2a2d2e"
     property var viewModel
 
     property var items: [
@@ -41,7 +41,7 @@ Rectangle {
                     icon.source: IconRegistry.source(navItem.modelData.iconName)
                     icon.width: 18
                     icon.height: 18
-                    icon.color: root.viewModel && navItem.index === root.viewModel.primaryViewIndex ? "#9cdcfe" : "#d4d4d4"
+                    icon.color: root.viewModel && navItem.index === root.viewModel.primaryViewIndex ? "#4fc1ff" : "#cccccc"
                     background: Rectangle { color: "transparent" }
                     hoverEnabled: true
                     enabled: !!root.viewModel

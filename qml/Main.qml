@@ -11,7 +11,7 @@ ApplicationWindow {
     width: 1540
     height: 940
     title: "LocalCodeIDE v3.3 Split + Diff"
-    color: "#1e1e1e"
+    color: WorkbenchTheme.windowBackground
 
     Shortcut {
         sequence: StandardKey.Find
@@ -83,40 +83,11 @@ ApplicationWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: "#1e1e1e"
+        color: WorkbenchTheme.windowBackground
 
         ColumnLayout {
             anchors.fill: parent
             spacing: 0
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 34
-                color: "#2d2d30"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
-                    spacing: 12
-                    Label { text: "WORKSPACE"; color: "#c5c5c5"; font.bold: true }
-                    TextField {
-                        Layout.preferredWidth: 420
-                        text: mainViewModel.workspaceRootPath
-                        color: "#d4d4d4"
-                        selectByMouse: true
-                        background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
-                        onAccepted: mainViewModel.workspaceRootPath = text
-                    }
-                    IconButton { text: "Scan"; iconName: "scan"; onClicked: mainViewModel.refreshWorkspace() }
-                    IconButton {
-                        text: mainViewModel.secondaryAiVisible ? "Hide AI" : "Show AI"
-                        iconName: "assistant"
-                        onClicked: mainViewModel.toggleSecondaryAiSidebar()
-                    }
-                    Item { Layout.fillWidth: true }
-                    Label { text: mainViewModel.gitSummary; color: "#9cdcfe"; elide: Text.ElideRight }
-                }
-            }
 
             SplitView {
                 Layout.fillWidth: true
@@ -136,7 +107,18 @@ ApplicationWindow {
                         SplitView.fillHeight: true
                         orientation: Qt.Vertical
                         EditorPane { SplitView.fillWidth: true; SplitView.fillHeight: true }
-                        BottomPanel { SplitView.fillWidth: true; SplitView.preferredHeight: 280; SplitView.minimumHeight: 220 }
+                        BottomPanel {
+                            id: bottomPanel
+                            SplitView.fillWidth: true
+                            SplitView.preferredHeight: mainViewModel.bottomPanelHeight
+                            SplitView.minimumHeight: WorkbenchTheme.minBottomPanelHeight
+                            SplitView.maximumHeight: WorkbenchTheme.maxBottomPanelHeight
+                            onHeightChanged: {
+                                if (height > 0) {
+                                    mainViewModel.bottomPanelHeight = Math.round(height)
+                                }
+                            }
+                        }
                     }
 
                     ChatPanel {
@@ -158,7 +140,7 @@ ApplicationWindow {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 26
-                color: "#007acc"
+                color: WorkbenchTheme.accent
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 12

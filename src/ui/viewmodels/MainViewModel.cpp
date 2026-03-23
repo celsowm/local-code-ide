@@ -100,6 +100,7 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     
     connect(&m_uiStateManager, &UiStateManager::primaryViewIndexChanged, this, &MainViewModel::primaryViewIndexChanged);
     connect(&m_uiStateManager, &UiStateManager::secondaryAiChanged, this, &MainViewModel::secondaryAiChanged);
+    connect(&m_uiStateManager, &UiStateManager::bottomPanelChanged, this, &MainViewModel::bottomPanelChanged);
 
     refreshWorkspace();
     refreshGitState();
@@ -230,6 +231,10 @@ int MainViewModel::secondaryAiTab() const { return m_uiStateManager.secondaryAiT
 void MainViewModel::setSecondaryAiTab(int value) { m_uiStateManager.setSecondaryAiTab(value); m_uiStateManager.save(); }
 int MainViewModel::secondaryAiWidth() const { return m_uiStateManager.secondaryAiWidth(); }
 void MainViewModel::setSecondaryAiWidth(int value) { m_uiStateManager.setSecondaryAiWidth(value); m_uiStateManager.save(); }
+int MainViewModel::bottomPanelTab() const { return m_uiStateManager.bottomPanelTab(); }
+void MainViewModel::setBottomPanelTab(int value) { m_uiStateManager.setBottomPanelTab(value); m_uiStateManager.save(); }
+int MainViewModel::bottomPanelHeight() const { return m_uiStateManager.bottomPanelHeight(); }
+void MainViewModel::setBottomPanelHeight(int value) { m_uiStateManager.setBottomPanelHeight(value); m_uiStateManager.save(); }
 
 bool MainViewModel::currentDocumentDirty() const { return editorText() != m_documentService->currentDocument().text(); }
 

@@ -4,8 +4,8 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    color: "#181818"
-    border.color: "#2d2d30"
+    color: WorkbenchTheme.sideBarBackground
+    border.color: WorkbenchTheme.borderColor
     property var viewModel
 
     StackLayout {

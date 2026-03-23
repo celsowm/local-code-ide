@@ -232,11 +232,15 @@ def doctor():
         return lint_result
 
     log("\n[3/3] Startup smoke test...", BLUE)
-    ok, details = smoke_test_startup(exe)
-    if not ok:
-        log("ERROR: " + details, RED)
-        return 1
-    log(details, GREEN)
+    skip_startup_smoke = os.environ.get("LOCALCODEIDE_DOCTOR_SKIP_STARTUP", "").strip() == "1"
+    if skip_startup_smoke:
+        log("Skipped (LOCALCODEIDE_DOCTOR_SKIP_STARTUP=1).", YELLOW)
+    else:
+        ok, details = smoke_test_startup(exe)
+        if not ok:
+            log("ERROR: " + details, RED)
+            return 1
+        log(details, GREEN)
 
     log("\nDoctor checks passed.", GREEN)
     return 0

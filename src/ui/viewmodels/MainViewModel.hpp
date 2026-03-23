@@ -94,6 +94,8 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
     Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
     Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int bottomPanelTab READ bottomPanelTab WRITE setBottomPanelTab NOTIFY bottomPanelChanged)
+    Q_PROPERTY(int bottomPanelHeight READ bottomPanelHeight WRITE setBottomPanelHeight NOTIFY bottomPanelChanged)
 
     Q_PROPERTY(bool currentDocumentDirty READ currentDocumentDirty NOTIFY openEditorsChanged)
 
@@ -227,6 +229,10 @@ public:
     void setSecondaryAiTab(int value);
     int secondaryAiWidth() const;
     void setSecondaryAiWidth(int value);
+    int bottomPanelTab() const;
+    void setBottomPanelTab(int value);
+    int bottomPanelHeight() const;
+    void setBottomPanelHeight(int value);
 
     bool currentDocumentDirty() const;
 
@@ -326,6 +332,7 @@ signals:
     void gitChanged();
     void primaryViewIndexChanged();
     void secondaryAiChanged();
+    void bottomPanelChanged();
     void scmCommitMessageChanged();
     void gitSummaryChanged();
 

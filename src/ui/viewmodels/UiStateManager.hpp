@@ -11,6 +11,8 @@ struct UiState {
     bool secondaryAiVisible = true;
     int secondaryAiTab = 0;
     int secondaryAiWidth = 390;
+    int bottomPanelTab = 0;
+    int bottomPanelHeight = 300;
 };
 
 class UiStateManager final : public QObject {
@@ -20,6 +22,8 @@ class UiStateManager final : public QObject {
     Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
     Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
     Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int bottomPanelTab READ bottomPanelTab WRITE setBottomPanelTab NOTIFY bottomPanelChanged)
+    Q_PROPERTY(int bottomPanelHeight READ bottomPanelHeight WRITE setBottomPanelHeight NOTIFY bottomPanelChanged)
 
 public:
     explicit UiStateManager(const QString& settingsPath, QObject* parent = nullptr);
@@ -36,12 +40,19 @@ public:
     int secondaryAiWidth() const;
     void setSecondaryAiWidth(int value);
 
+    int bottomPanelTab() const;
+    void setBottomPanelTab(int value);
+
+    int bottomPanelHeight() const;
+    void setBottomPanelHeight(int value);
+
     Q_INVOKABLE void load();
     Q_INVOKABLE void save();
 
 signals:
     void primaryViewIndexChanged();
     void secondaryAiChanged();
+    void bottomPanelChanged();
 
 private:
     QSettings m_settings;
