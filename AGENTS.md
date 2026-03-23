@@ -29,8 +29,17 @@ python setup.py
 # Lint (QML + Python)
 python setup.py lint
 
+# Full preflight (Qt runtime + lint + startup smoke test)
+python setup.py doctor
+
 # Run
 python setup.py run
+
+# Install test dependencies
+python setup.py testdeps
+
+# Run tests
+python setup.py test
 ```
 
 ### Qt + CMake Path Rules
@@ -93,6 +102,9 @@ python setup.py
 # Lint
 python setup.py lint
 
+# Preflight diagnostics (recommended before run/release)
+python setup.py doctor
+
 # Capture app screenshot (auto-launches if needed)
 python setup.py screenshot
 
@@ -111,6 +123,53 @@ run.bat
 # Direct screenshot script (more options)
 powershell -ExecutionPolicy Bypass -File scripts/capture-localcodeide-screenshot.ps1 -LaunchIfMissing
 ```
+
+`run.bat` now runs `python setup.py doctor` before launching the app. If preflight fails, launch is blocked.
+
+---
+
+## 🧪 Testing
+
+### Test Suite
+
+The test suite validates local model functionality:
+
+```bash
+# Install test dependencies (one-time)
+python setup.py testdeps
+
+# Run all tests
+python setup.py test
+
+# Run specific category
+python setup.py test integration   # Model detection
+python setup.py test server        # Server lifecycle
+python setup.py test inference     # Chat completion
+python setup.py test tools         # Tool calling
+
+# Or use pytest directly
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=html
+```
+
+### Test Categories
+
+| Category | Description | Speed |
+|----------|-------------|-------|
+| `integration` | Model detection, cache scanning | Fast |
+| `server` | Server startup, health, shutdown | Medium |
+| `inference` | Chat completion, sampling | Slow |
+| `tools` | Tool calling, function execution | Slow |
+
+### Prerequisites
+
+- **Model in cache**: Tests use `unsloth/Qwen3.5-0.8B-GGUF` by default
+- **Built application**: Run `python setup.py` first
+- **Test dependencies**: Run `python setup.py testdeps`
+
+See [tests/README.md](tests/README.md) for full documentation.
 
 ---
 
@@ -243,6 +302,13 @@ python setup.py
 rmdir /s /q build
 cmake --fresh -S . -B build
 ```
+
+### "App closes silently on startup"
+```bash
+python setup.py doctor
+```
+
+If the doctor check fails, inspect `build/doctor-startup.log` for the latest startup error output.
 
 ---
 

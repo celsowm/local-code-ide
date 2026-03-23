@@ -207,9 +207,12 @@ int main(int argc, char* argv[]) {
         {QStringLiteral("mainViewModel"), QVariant::fromValue(mainViewModel.get())},
         {QStringLiteral("modelHubViewModel"), QVariant::fromValue(modelHubViewModel.get())}
     });
-    engine.loadFromModule("LocalCodeIDE", "Main");
+    
+    // Load root component from the compiled QML module.
+    engine.loadFromModule(QStringLiteral("LocalCodeIDE"), QStringLiteral("Main"));
 
     if (engine.rootObjects().isEmpty()) {
+        qCritical("Failed to load QML!");
         return -1;
     }
 

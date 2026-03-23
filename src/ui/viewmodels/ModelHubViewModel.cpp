@@ -1,5 +1,6 @@
 #include "ui/viewmodels/ModelHubViewModel.hpp"
 
+#include "adapters/modelhub/HuggingFaceFileDownloader.hpp"
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QFileInfo>
@@ -69,85 +70,19 @@ ModelHubViewModel::ModelHubViewModel(std::unique_ptr<ide::services::ModelCatalog
                                      QObject* parent)
     : QObject(parent)
     , m_catalogService(std::move(catalogService))
-    , m_downloader(std::move(downloader))
     , m_hardwareService(std::move(hardwareService))
     , m_runtimeService(runtimeService)
-    , m_serverService(std::move(serverService))
     , m_uiSettings(uiStateSettingsPath(), QSettings::IniFormat)
     , m_targetDownloadDir(defaultDownloadDir()) {
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::statusChanged, this, [this]() {
-        emit downloadStatusChanged();
-        setStatusMessage(m_downloader->statusLine());
-    });
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::progressChanged, this, [this]() {
-        emit downloadProgressChanged();
-    });
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::activeChanged, this, [this]() {
-        emit downloadActiveChanged();
-    });
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::diagnosticsChanged, this, [this]() {
-        emit downloadDiagnosticsChanged();
-    });
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::finishedSuccessfully, this, [this](const QString& localPath) {
-        m_downloadedPath = localPath;
+    
+    m_downloadManager = std::make_unique<DownloadManager>(std::move(downloader), this);
+    m_serverRuntimeManager = std::make_unique<ServerRuntimeManager>(std::move(serverService), runtimeService, this);
+    
+    connect(m_downloadManager.get(), &DownloadManager::downloadedPathChanged, this, [this]() {
+        m_downloadedPath = m_downloadManager->downloadedPath();
         emit downloadedPathChanged();
         emit selectedFileChanged();
     });
-    connect(m_downloader.get(), &ide::adapters::modelhub::HuggingFaceFileDownloader::failed, this, [this](const QString&) {
-        emit downloadProgressChanged();
-    });
-
-    if (m_runtimeService) {
-        connect(m_runtimeService, &ide::services::LocalModelRuntimeService::activeModelChanged, this, [this]() {
-            emit currentLocalModelChanged();
-            emit downloadedPathChanged();
-            emit selectedFileChanged();
-            emit serverRuntimeChanged();
-            updateFileModel(m_currentFiles);
-            setStatusMessage(currentLocalModelSummary());
-        });
-        connect(m_runtimeService, &ide::services::LocalModelRuntimeService::runtimeConfigChanged, this, [this]() {
-            emit currentLocalModelChanged();
-            emit downloadedPathChanged();
-            emit selectedFileChanged();
-            emit serverRuntimeChanged();
-            setStatusMessage(currentLocalModelSummary());
-        });
-    }
-
-    if (m_serverService) {
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::statusChanged, this, [this]() {
-            emit serverRuntimeChanged();
-            setStatusMessage(serverStatusLine());
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::logsChanged, this, [this]() {
-            emit serverLogsChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::runningChanged, this, [this]() {
-            emit serverRuntimeChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::startingChanged, this, [this]() {
-            emit serverRuntimeChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::healthyChanged, this, [this]() {
-            emit serverRuntimeChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::executablePathChanged, this, [this]() {
-            emit serverRuntimeChanged();
-            emit currentLocalModelChanged();
-            emit downloadedPathChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::extraArgumentsChanged, this, [this]() {
-            emit serverRuntimeChanged();
-            emit currentLocalModelChanged();
-            emit downloadedPathChanged();
-        });
-        connect(m_serverService.get(), &ide::services::LlamaServerProcessService::baseUrlChanged, this, [this]() {
-            emit serverRuntimeChanged();
-            emit currentLocalModelChanged();
-            emit downloadedPathChanged();
-        });
-    }
 
     loadUiState();
     refreshHardware();
@@ -273,43 +208,7 @@ void ModelHubViewModel::setTargetDownloadDir(const QString& value) {
     emit targetDownloadDirChanged();
     emit selectedFileChanged();
 }
-QString ModelHubViewModel::downloadStatus() const { return m_downloader->statusLine(); }
-double ModelHubViewModel::downloadProgress() const {
-    const auto total = m_downloader->totalBytes();
-    if (total <= 0) {
-        return 0.0;
-    }
-    return static_cast<double>(m_downloader->receivedBytes()) / static_cast<double>(total);
-}
-QString ModelHubViewModel::downloadSpeedText() const {
-    const double bytesPerSec = m_downloader->speedBytesPerSec();
-    if (bytesPerSec <= 0.0) {
-        return QStringLiteral("—");
-    }
-    const double kb = bytesPerSec / 1024.0;
-    if (kb < 1024.0) {
-        return QStringLiteral("%1 KB/s").arg(QString::number(kb, 'f', kb >= 100.0 ? 0 : 1));
-    }
-    const double mb = kb / 1024.0;
-    return QStringLiteral("%1 MB/s").arg(QString::number(mb, 'f', mb >= 100.0 ? 0 : 1));
-}
-QString ModelHubViewModel::downloadEtaText() const {
-    const qint64 seconds = m_downloader->etaSeconds();
-    if (seconds < 0) {
-        return QStringLiteral("—");
-    }
-    const qint64 mins = seconds / 60;
-    const qint64 secs = seconds % 60;
-    if (mins > 0) {
-        return QStringLiteral("%1m%2s").arg(QString::number(mins), QString::number(secs).rightJustified(2, '0'));
-    }
-    return QStringLiteral("%1s").arg(QString::number(secs));
-}
-QString ModelHubViewModel::downloadProgressDetails() const { return m_downloader->progressDetails(); }
-QString ModelHubViewModel::downloadPhase() const { return m_downloader->phase(); }
-QString ModelHubViewModel::downloadDiagnostics() const { return m_downloader->diagnosticsText(); }
-bool ModelHubViewModel::downloadActive() const { return m_downloader->isActive(); }
-QString ModelHubViewModel::downloadedPath() const { return m_downloadedPath; }
+
 QString ModelHubViewModel::providerName() const { return m_catalogService->providerName(); }
 QString ModelHubViewModel::helperText() const {
     if (m_selectedRepoId.isEmpty()) {
@@ -320,58 +219,6 @@ QString ModelHubViewModel::helperText() const {
         .arg(hardwareSummary());
 }
 
-QString ModelHubViewModel::llamaLaunchHint() const {
-    const QString executable = serverExecutablePath();
-    const QString extra = serverExtraArguments();
-    const QUrl url(serverBaseUrl());
-    const QString host = url.host().isEmpty() ? QStringLiteral("127.0.0.1") : url.host();
-    const int port = url.port(8080);
-    if (!m_downloadedPath.isEmpty()) {
-        const QFileInfo info(m_downloadedPath);
-        return QStringLiteral("%1 -m \"%2\" -c %3 --host %4 --port %5%6")
-            .arg(executable,
-                 info.absoluteFilePath(),
-                 QString::number(runtimeContextSize()),
-                 host,
-                 QString::number(port),
-                 extra.trimmed().isEmpty() ? QString() : QStringLiteral(" ") + extra.trimmed());
-    }
-    if (m_runtimeService && m_runtimeService->hasActiveModel()) {
-        return m_runtimeService->launchCommand(executable, extra, serverBaseUrl());
-    }
-    return QStringLiteral("%1 -m /path/model.gguf -c %3 --host %4 --port %5%2")
-        .arg(executable,
-             extra.trimmed().isEmpty() ? QString() : QStringLiteral(" ") + extra.trimmed(),
-             QString::number(runtimeContextSize()),
-             host,
-             QString::number(port));
-}
-
-QString ModelHubViewModel::currentLocalModelSummary() const {
-    return m_runtimeService ? m_runtimeService->statusLine() : QStringLiteral("Local runtime unavailable.");
-}
-
-QString ModelHubViewModel::currentLocalLaunchCommand() const {
-    return m_runtimeService
-        ? m_runtimeService->launchCommand(serverExecutablePath(), serverExtraArguments(), serverBaseUrl())
-        : QStringLiteral("llama-server -m /path/model.gguf -c %1 --host 127.0.0.1 --port 8080").arg(QString::number(runtimeContextSize()));
-}
-
-bool ModelHubViewModel::hasCurrentLocalModel() const {
-    return m_runtimeService && m_runtimeService->hasActiveModel();
-}
-
-int ModelHubViewModel::runtimeContextSize() const {
-    return m_runtimeService ? m_runtimeService->contextSize() : 8192;
-}
-
-void ModelHubViewModel::setRuntimeContextSize(int value) {
-    if (!m_runtimeService) {
-        return;
-    }
-    m_runtimeService->setContextSize(value);
-}
-
 bool ModelHubViewModel::canUseSelectedAsCurrent() const {
     if (m_selectedRepoId.isEmpty() || m_selectedFilePath.isEmpty()) {
         return false;
@@ -380,73 +227,17 @@ bool ModelHubViewModel::canUseSelectedAsCurrent() const {
     return QFileInfo::exists(candidate);
 }
 
-QString ModelHubViewModel::serverExecutablePath() const {
-    return m_serverService ? m_serverService->executablePath() : QStringLiteral("llama-server");
-}
-
-void ModelHubViewModel::setServerExecutablePath(const QString& value) {
-    if (!m_serverService) {
-        return;
-    }
-    m_serverService->setExecutablePath(value);
-}
-
-QString ModelHubViewModel::serverExtraArguments() const {
-    return m_serverService ? m_serverService->extraArguments() : QString();
-}
-
-void ModelHubViewModel::setServerExtraArguments(const QString& value) {
-    if (!m_serverService) {
-        return;
-    }
-    m_serverService->setExtraArguments(value);
-}
-
-QString ModelHubViewModel::serverBaseUrl() const {
-    if (m_serverService) {
-        return m_serverService->baseUrl();
-    }
-    return m_runtimeService ? m_runtimeService->baseUrl() : QStringLiteral("http://127.0.0.1:8080");
-}
-
-void ModelHubViewModel::setServerBaseUrl(const QString& value) {
-    if (m_runtimeService) {
-        m_runtimeService->setBaseUrl(value);
-    }
-    if (!m_serverService) {
-        return;
-    }
-    m_serverService->setBaseUrl(value);
-}
-
-QString ModelHubViewModel::serverStatusLine() const {
-    return m_serverService ? m_serverService->statusLine() : QStringLiteral("llama-server manager unavailable.");
-}
-
-QString ModelHubViewModel::serverLogs() const {
-    return m_serverService ? m_serverService->logs() : QString();
-}
-
-bool ModelHubViewModel::serverRunning() const {
-    return m_serverService && m_serverService->isRunning();
-}
-
-bool ModelHubViewModel::serverStarting() const {
-    return m_serverService && m_serverService->isStarting();
-}
-
-bool ModelHubViewModel::serverHealthy() const {
-    return m_serverService && m_serverService->isHealthy();
-}
-
-bool ModelHubViewModel::canStartServer() const {
-    return m_serverService && m_runtimeService && m_runtimeService->hasActiveModel() && !serverRunning() && !serverStarting();
-}
-
 int ModelHubViewModel::repoCount() const { return m_reposModel.repoCount(); }
 int ModelHubViewModel::fileCount() const { return m_filesModel.fileCount(); }
 QObject* ModelHubViewModel::reposModel() { return &m_reposModel; }
 QObject* ModelHubViewModel::filesModel() { return &m_filesModel; }
+QObject* ModelHubViewModel::downloadManager() { return m_downloadManager.get(); }
+QObject* ModelHubViewModel::serverRuntimeManager() { return m_serverRuntimeManager.get(); }
+
+bool ModelHubViewModel::canStartServer() const {
+    return m_serverRuntimeManager && m_runtimeService && m_runtimeService->hasActiveModel() 
+        && !m_serverRuntimeManager->running() && !m_serverRuntimeManager->starting();
+}
 
 void ModelHubViewModel::searchRepos() {
     const auto repos = m_catalogService->searchRepos(m_author, m_searchQuery, 24);
@@ -516,8 +307,7 @@ void ModelHubViewModel::startDownloadSelected() {
         return;
     }
     QDir().mkpath(m_targetDownloadDir);
-    m_downloader->startDownload(m_selectedRepoId, m_selectedFilePath, m_targetDownloadDir);
-    emit downloadProgressChanged();
+    m_downloadManager->startDownload(m_selectedRepoId, m_selectedFilePath, m_targetDownloadDir);
 }
 
 void ModelHubViewModel::downloadSuggested() {
@@ -530,10 +320,6 @@ void ModelHubViewModel::downloadSuggested() {
     }
     setSelectedFilePath(m_recommendedFilePath);
     startDownloadSelected();
-}
-
-void ModelHubViewModel::cancelDownload() {
-    m_downloader->cancel();
 }
 
 void ModelHubViewModel::refreshHardware() {
@@ -588,37 +374,26 @@ void ModelHubViewModel::useDownloadedAsCurrent() {
 }
 
 void ModelHubViewModel::startServer() {
-    if (!m_serverService || !m_runtimeService) {
-        setStatusMessage(QStringLiteral("llama-server manager unavailable."));
-        return;
-    }
-    if (!m_runtimeService->hasActiveModel()) {
+    if (!m_runtimeService || !m_runtimeService->hasActiveModel()) {
         setStatusMessage(QStringLiteral("Choose an active GGUF file before starting the local server."));
         return;
     }
-    m_serverService->startWithModel(m_runtimeService->activeLocalPath(), m_runtimeService->contextSize());
+    m_serverRuntimeManager->startServer(m_runtimeService->activeLocalPath());
 }
 
 void ModelHubViewModel::stopServer() {
-    if (!m_serverService) {
-        setStatusMessage(QStringLiteral("llama-server manager unavailable."));
-        return;
-    }
-    m_serverService->stop();
+    m_serverRuntimeManager->stopServer();
 }
 
 void ModelHubViewModel::probeServer() {
-    if (!m_serverService) {
-        return;
-    }
-    m_serverService->probeNow();
+    m_serverRuntimeManager->probeServer();
 }
 
 void ModelHubViewModel::clearServerLogs() {
-    if (!m_serverService) {
+    if (!m_serverRuntimeManager) {
         return;
     }
-    m_serverService->clearLogs();
+    m_serverRuntimeManager->clearServerLogs();
 }
 
 QString ModelHubViewModel::chooseRecommendedFile(const std::vector<ide::services::interfaces::ModelFileEntry>& files) const {
@@ -764,7 +539,7 @@ QString ModelHubViewModel::candidateLocalPathForRemote(const QString& remotePath
 
     QDir snapshotsDir(snapshotsRoot);
     if (snapshotsDir.exists()) {
-        const QFileInfoList snapshotDirs = snapshotsDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        const QFileInfoList snapshotDirs = snapshotsDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
         for (const QFileInfo& snapshotInfo : snapshotDirs) {
             const QString candidate = QDir(snapshotInfo.absoluteFilePath()).filePath(remotePath);
             if (QFileInfo::exists(candidate)) {

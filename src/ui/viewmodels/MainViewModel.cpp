@@ -80,14 +80,27 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     , m_workspaceService(std::move(workspaceService))
     , m_searchService(std::move(searchService))
     , m_terminalService(std::move(terminalService))
-    , m_uiSettings(uiStateSettingsPath(), QSettings::IniFormat) {
+    , m_editorManager(m_documentService.get(), this)
+    , m_gitViewModel(m_gitService.get(), this)
+    , m_uiStateManager(uiStateSettingsPath(), this) {
+    
     m_workspaceRootPath = QDir::currentPath();
-    loadUiState();
-    m_savedTextSnapshot = editorText();
-    touchOpenEditor(currentPath());
-    syncOpenEditors();
-    rebuildCommandPalette(QString());
-    analyzeNow();
+    m_uiStateManager.load();
+    
+    connect(&m_editorManager, &EditorManager::editorTextChanged, this, &MainViewModel::editorTextChanged);
+    connect(&m_editorManager, &EditorManager::currentPathChanged, this, &MainViewModel::currentPathChanged);
+    connect(&m_editorManager, &EditorManager::splitEditorChanged, this, &MainViewModel::splitEditorChanged);
+    connect(&m_editorManager, &EditorManager::openEditorsChanged, this, &MainViewModel::openEditorsChanged);
+    connect(&m_editorManager, &EditorManager::workspaceChanged, this, &MainViewModel::workspaceChanged);
+    connect(&m_editorManager, &EditorManager::gitChanged, this, &MainViewModel::gitChanged);
+    
+    connect(&m_gitViewModel, &GitViewModel::gitSummaryChanged, this, &MainViewModel::gitSummaryChanged);
+    connect(&m_gitViewModel, &GitViewModel::gitChanged, this, &MainViewModel::gitChanged);
+    connect(&m_gitViewModel, &GitViewModel::scmCommitMessageChanged, this, &MainViewModel::scmCommitMessageChanged);
+    
+    connect(&m_uiStateManager, &UiStateManager::primaryViewIndexChanged, this, &MainViewModel::primaryViewIndexChanged);
+    connect(&m_uiStateManager, &UiStateManager::secondaryAiChanged, this, &MainViewModel::secondaryAiChanged);
+
     refreshWorkspace();
     refreshGitState();
     refreshRelevantContext();
@@ -103,7 +116,6 @@ void MainViewModel::setEditorText(const QString& text) {
     }
     m_documentService->setText(text);
     emit editorTextChanged();
-    syncOpenEditors();
     emit aiSettingsChanged();
 }
 
@@ -119,8 +131,6 @@ void MainViewModel::setChatInput(const QString& text) {
 }
 
 QString MainViewModel::chatResponse() const { return m_chatResponse; }
-QString MainViewModel::gitSummary() const { return m_gitSummary; }
-QString MainViewModel::gitBranchLabel() const { return m_gitBranchLabel; }
 QString MainViewModel::statusMessage() const { return m_statusMessage; }
 QString MainViewModel::diagnosticsProviderName() const { return m_diagnosticService->providerName(); }
 QString MainViewModel::codeIntelProviderName() const { return m_codeIntelService->providerName(); }
@@ -173,6 +183,8 @@ int MainViewModel::aiWorkspaceContextChars() const { return m_aiService->workspa
 void MainViewModel::setAiWorkspaceContextChars(int value) { m_aiService->setWorkspaceContextChars(value); refreshRelevantContext(); emit aiSettingsChanged(); }
 int MainViewModel::aiWorkspaceContextMaxFiles() const { return m_aiService->workspaceContextMaxFiles(); }
 void MainViewModel::setAiWorkspaceContextMaxFiles(int value) { m_aiService->setWorkspaceContextMaxFiles(value); refreshRelevantContext(); emit aiSettingsChanged(); }
+int MainViewModel::aiMaxToolRounds() const { return m_aiService->maxToolRounds(); }
+void MainViewModel::setAiMaxToolRounds(int value) { m_aiService->setMaxToolRounds(value); emit aiSettingsChanged(); }
 bool MainViewModel::aiIncludeDocument() const { return m_aiService->includeDocument(); }
 void MainViewModel::setAiIncludeDocument(bool value) { m_aiService->setIncludeDocument(value); emit aiSettingsChanged(); }
 bool MainViewModel::aiIncludeDiagnostics() const { return m_aiService->includeDiagnostics(); }
@@ -183,8 +195,6 @@ bool MainViewModel::aiIncludeWorkspaceContext() const { return m_aiService->incl
 void MainViewModel::setAiIncludeWorkspaceContext(bool value) { m_aiService->setIncludeWorkspaceContext(value); emit aiSettingsChanged(); }
 bool MainViewModel::aiEnableTools() const { return m_aiService->toolsEnabled(); }
 void MainViewModel::setAiEnableTools(bool value) { m_aiService->setToolsEnabled(value); emit aiSettingsChanged(); }
-int MainViewModel::aiMaxToolRounds() const { return m_aiService->maxToolRounds(); }
-void MainViewModel::setAiMaxToolRounds(int value) { m_aiService->setMaxToolRounds(value); emit aiSettingsChanged(); }
 bool MainViewModel::aiRequireApprovalForDestructive() const { return m_aiService->requireApprovalForDestructiveTools(); }
 void MainViewModel::setAiRequireApprovalForDestructive(bool value) { m_aiService->setRequireApprovalForDestructiveTools(value); emit aiSettingsChanged(); }
 QString MainViewModel::aiContextSummary() const { return m_aiService->contextSummary(currentPath(), editorText(), diagnosticsSummary(), gitSummary(), m_renderedWorkspaceContext); }
@@ -208,72 +218,46 @@ bool MainViewModel::canApplyPatchPreview() const { return m_patchPreview.canAppl
 QString MainViewModel::patchSummary() const { return m_patchPreview.summary; }
 QString MainViewModel::patchPreviewText() const { return m_patchPreview.diffText; }
 
-bool MainViewModel::splitEditorVisible() const { return m_splitEditorVisible; }
-bool MainViewModel::diffEditorVisible() const { return m_splitEditorVisible && m_splitDiffMode; }
-QString MainViewModel::secondaryEditorPath() const { return m_secondaryEditorPath; }
-QString MainViewModel::secondaryEditorText() const { return m_secondaryEditorText; }
-void MainViewModel::setSecondaryEditorText(const QString& text) {
-    if (text == m_secondaryEditorText) return;
-    m_secondaryEditorText = text;
-    emit splitEditorChanged();
-}
-QString MainViewModel::secondaryLanguageId() const { return inferLanguageId(m_secondaryEditorPath); }
-QString MainViewModel::secondaryEditorTitle() const { return displayTitleForPath(m_secondaryEditorPath); }
-bool MainViewModel::secondaryEditorDirty() const { return !m_secondaryEditorPath.isEmpty() && m_secondaryEditorText != m_secondarySavedTextSnapshot; }
-QString MainViewModel::diffOriginalText() const { return m_diffOriginalText; }
-QString MainViewModel::diffModifiedText() const { return m_diffModifiedText; }
-QString MainViewModel::diffEditorTitle() const { return m_diffEditorTitle; }
-
-QObject* MainViewModel::openEditorsModel() { return &m_openEditorsModel; }
+QObject* MainViewModel::openEditorsModel() { return m_editorManager.openEditorsModel(); }
 QObject* MainViewModel::commandPaletteModel() { return &m_commandPaletteModel; }
-QObject* MainViewModel::gitChangesModel() { return &m_gitChangesModel; }
-QObject* MainViewModel::scmSectionsModel() { return &m_scmSectionsModel; }
-QObject* MainViewModel::gitRecentCommitsModel() { return &m_gitRecentCommitsModel; }
-int MainViewModel::openEditorCount() const { return m_openEditorsModel.editorCount(); }
 int MainViewModel::commandPaletteCount() const { return m_commandPaletteModel.itemCount(); }
-int MainViewModel::gitChangeCount() const { return m_gitChangesModel.changeCount(); }
-int MainViewModel::gitStagedCount() const { return m_scmSectionsModel.stagedCount(); }
-int MainViewModel::gitUnstagedCount() const { return m_scmSectionsModel.unstagedCount(); }
-int MainViewModel::gitUntrackedCount() const { return m_scmSectionsModel.untrackedCount(); }
-int MainViewModel::gitRecentCommitCount() const { return m_gitRecentCommitsModel.commitCount(); }
-int MainViewModel::primaryViewIndex() const { return m_primaryViewIndex; }
-void MainViewModel::setPrimaryViewIndex(int value) {
-    const int bounded = qBound(0, value, 2);
-    if (bounded == m_primaryViewIndex) return;
-    m_primaryViewIndex = bounded;
-    saveUiState();
-    emit primaryViewIndexChanged();
-}
-bool MainViewModel::secondaryAiVisible() const { return m_secondaryAiVisible; }
-void MainViewModel::setSecondaryAiVisible(bool value) {
-    if (value == m_secondaryAiVisible) return;
-    m_secondaryAiVisible = value;
-    saveUiState();
-    emit secondaryAiChanged();
-}
-int MainViewModel::secondaryAiTab() const { return m_secondaryAiTab; }
-void MainViewModel::setSecondaryAiTab(int value) {
-    const int bounded = qBound(0, value, 1);
-    if (bounded == m_secondaryAiTab) return;
-    m_secondaryAiTab = bounded;
-    saveUiState();
-    emit secondaryAiChanged();
-}
-int MainViewModel::secondaryAiWidth() const { return m_secondaryAiWidth; }
-void MainViewModel::setSecondaryAiWidth(int value) {
-    const int bounded = qBound(320, value, 720);
-    if (bounded == m_secondaryAiWidth) return;
-    m_secondaryAiWidth = bounded;
-    saveUiState();
-    emit secondaryAiChanged();
-}
-QString MainViewModel::scmCommitMessage() const { return m_scmCommitMessage; }
-void MainViewModel::setScmCommitMessage(const QString& value) {
-    if (value == m_scmCommitMessage) return;
-    m_scmCommitMessage = value;
-    emit scmCommitMessageChanged();
-}
-bool MainViewModel::currentDocumentDirty() const { return editorText() != m_savedTextSnapshot; }
+
+int MainViewModel::primaryViewIndex() const { return m_uiStateManager.primaryViewIndex(); }
+void MainViewModel::setPrimaryViewIndex(int value) { m_uiStateManager.setPrimaryViewIndex(value); m_uiStateManager.save(); }
+bool MainViewModel::secondaryAiVisible() const { return m_uiStateManager.secondaryAiVisible(); }
+void MainViewModel::setSecondaryAiVisible(bool value) { m_uiStateManager.setSecondaryAiVisible(value); m_uiStateManager.save(); }
+int MainViewModel::secondaryAiTab() const { return m_uiStateManager.secondaryAiTab(); }
+void MainViewModel::setSecondaryAiTab(int value) { m_uiStateManager.setSecondaryAiTab(value); m_uiStateManager.save(); }
+int MainViewModel::secondaryAiWidth() const { return m_uiStateManager.secondaryAiWidth(); }
+void MainViewModel::setSecondaryAiWidth(int value) { m_uiStateManager.setSecondaryAiWidth(value); m_uiStateManager.save(); }
+
+bool MainViewModel::currentDocumentDirty() const { return editorText() != m_documentService->currentDocument().text(); }
+
+QObject* MainViewModel::gitChangesModel() { return m_gitViewModel.gitChangesModel(); }
+QObject* MainViewModel::scmSectionsModel() { return m_gitViewModel.scmSectionsModel(); }
+QObject* MainViewModel::gitRecentCommitsModel() { return m_gitViewModel.gitRecentCommitsModel(); }
+int MainViewModel::gitChangeCount() const { return m_gitViewModel.gitChangeCount(); }
+int MainViewModel::gitStagedCount() const { return m_gitViewModel.gitStagedCount(); }
+int MainViewModel::gitUnstagedCount() const { return m_gitViewModel.gitUnstagedCount(); }
+int MainViewModel::gitUntrackedCount() const { return m_gitViewModel.gitUntrackedCount(); }
+int MainViewModel::gitRecentCommitCount() const { return m_gitViewModel.gitRecentCommitCount(); }
+QString MainViewModel::scmCommitMessage() const { return m_gitViewModel.scmCommitMessage(); }
+void MainViewModel::setScmCommitMessage(const QString& value) { m_gitViewModel.setScmCommitMessage(value); }
+
+QString MainViewModel::gitSummary() const { return m_gitViewModel.gitSummary(); }
+QString MainViewModel::gitBranchLabel() const { return m_gitViewModel.gitBranchLabel(); }
+
+bool MainViewModel::splitEditorVisible() const { return m_editorManager.splitEditorVisible(); }
+bool MainViewModel::diffEditorVisible() const { return m_editorManager.diffEditorVisible(); }
+QString MainViewModel::secondaryEditorPath() const { return m_editorManager.secondaryEditorPath(); }
+QString MainViewModel::secondaryEditorText() const { return m_editorManager.secondaryEditorText(); }
+void MainViewModel::setSecondaryEditorText(const QString& text) { m_editorManager.setSecondaryEditorText(text); }
+QString MainViewModel::secondaryLanguageId() const { return m_editorManager.secondaryLanguageId(); }
+QString MainViewModel::secondaryEditorTitle() const { return m_editorManager.secondaryEditorTitle(); }
+bool MainViewModel::secondaryEditorDirty() const { return m_editorManager.secondaryEditorDirty(); }
+QString MainViewModel::diffOriginalText() const { return m_editorManager.diffOriginalText(); }
+QString MainViewModel::diffModifiedText() const { return m_editorManager.diffModifiedText(); }
+QString MainViewModel::diffEditorTitle() const { return m_editorManager.diffEditorTitle(); }
 
 void MainViewModel::analyzeNow() {
     const auto diagnostics = m_diagnosticService->refresh(currentPath(), editorText());
@@ -285,7 +269,6 @@ void MainViewModel::analyzeNow() {
 
 void MainViewModel::askAssistant() {
     refreshRelevantContext();
-    const QString originalPath = currentPath();
     m_chatResponse = m_aiService->ask(m_chatInput, m_workspaceRootPath, currentPath(), editorText(), diagnosticsSummary(), gitSummary(), m_renderedWorkspaceContext);
     emit chatResponseChanged();
     syncAfterToolRun(m_aiService->lastToolTouchedPaths());
@@ -298,16 +281,13 @@ void MainViewModel::askAssistant() {
     } else if (toolCallCount() > 0) {
         updateStatusMessage(QString("Resposta gerada via %1 com %2 tool call(s).").arg(aiBackendName(), QString::number(toolCallCount())));
     } else {
-        Q_UNUSED(originalPath);
         updateStatusMessage(QString("Resposta gerada via %1.").arg(aiBackendName()));
     }
 }
 
 void MainViewModel::saveCurrent() {
     if (m_documentService->saveFile()) {
-        m_savedTextSnapshot = editorText();
-        touchOpenEditor(currentPath());
-        syncOpenEditors();
+        m_editorManager.saveCurrent();
         emit currentPathChanged();
         refreshWorkspace();
         refreshGitState();
@@ -315,12 +295,6 @@ void MainViewModel::saveCurrent() {
         return;
     }
     updateStatusMessage("Failed to save file.");
-}
-
-void MainViewModel::refreshGitSummary() {
-    m_gitSummary = m_gitService->summary(m_workspaceRootPath);
-    emit gitSummaryChanged();
-    emit aiSettingsChanged();
 }
 
 void MainViewModel::loadSampleCpp() {
@@ -365,14 +339,8 @@ void MainViewModel::openWorkspaceFile(const QString& path) {
 }
 
 void MainViewModel::openWorkspaceFileInSplit(const QString& path) {
-    if (!loadFileIntoSecondaryEditor(path)) {
-        updateStatusMessage(QString("Falha ao abrir split em %1").arg(path));
-        return;
-    }
+    m_editorManager.openFileInSplit(path);
     m_workspaceTreeModel.expandToPath(path);
-    m_splitEditorVisible = true;
-    m_splitDiffMode = false;
-    emit splitEditorChanged();
     updateStatusMessage(QString("Split editor aberto para %1").arg(path));
 }
 
@@ -518,41 +486,23 @@ void MainViewModel::openPatchPreviewDiff() {
         updateStatusMessage(QStringLiteral("Nenhum patch disponível para diff."));
         return;
     }
-    m_splitEditorVisible = true;
-    m_splitDiffMode = true;
-    m_diffOriginalText = editorText();
-    m_diffModifiedText = m_patchPreview.patchedText.isEmpty() ? editorText() : m_patchPreview.patchedText;
-    m_diffEditorTitle = m_patchPreview.targetPath.isEmpty() ? editorTabTitle() : displayTitleForPath(m_patchPreview.targetPath);
-    emit splitEditorChanged();
-    updateStatusMessage(m_patchPreview.summary.isEmpty() ? QStringLiteral("Diff preview aberto.") : m_patchPreview.summary);
+    m_editorManager.setupDiffView(
+        m_patchPreview.targetPath.isEmpty() ? editorTabTitle() : displayTitleForPath(m_patchPreview.targetPath),
+        editorText(),
+        m_patchPreview.patchedText.isEmpty() ? editorText() : m_patchPreview.patchedText
+    );
+    updateStatusMessage(m_patchPreview.summary.isEmpty() ? QStringLiteral("Diff aberto.") : m_patchPreview.summary);
 }
 
 void MainViewModel::closeSplitEditor() {
-    m_splitEditorVisible = false;
-    m_splitDiffMode = false;
-    m_secondaryEditorPath.clear();
-    m_secondaryEditorText.clear();
-    m_secondarySavedTextSnapshot.clear();
-    m_diffOriginalText.clear();
-    m_diffModifiedText.clear();
-    m_diffEditorTitle.clear();
-    emit splitEditorChanged();
+    m_editorManager.closeSplitEditor();
 }
 
 void MainViewModel::saveSecondaryEditor() {
-    if (m_secondaryEditorPath.isEmpty() || m_splitDiffMode) {
-        updateStatusMessage(QStringLiteral("Nenhum editor secundário salvável aberto."));
-        return;
-    }
-    if (!saveTextFile(m_secondaryEditorPath, m_secondaryEditorText)) {
-        updateStatusMessage(QString("Falha ao salvar %1").arg(m_secondaryEditorPath));
-        return;
-    }
-    m_secondarySavedTextSnapshot = m_secondaryEditorText;
+    m_editorManager.saveSecondaryEditor();
     refreshWorkspace();
     refreshGitState();
-    emit splitEditorChanged();
-    updateStatusMessage(QString("Arquivo salvo no split: %1").arg(m_secondaryEditorPath));
+    updateStatusMessage(QString("Arquivo salvo no split: %1").arg(m_editorManager.secondaryEditorPath()));
 }
 
 void MainViewModel::approvePendingTool(const QString& approvalId) {
@@ -660,75 +610,44 @@ void MainViewModel::openFirstMatchingWorkspaceFile(const QString& query) {
 }
 
 void MainViewModel::switchOpenEditor(const QString& path) {
-    if (path.isEmpty() || path == currentPath()) return;
-    goToDocumentLocation(path, 1, 1);
+    m_editorManager.switchOpenEditor(path);
 }
 
 void MainViewModel::closeOpenEditor(const QString& path) {
-    if (path.isEmpty()) return;
-    const auto originalSize = m_openEditors.size();
-    m_openEditors.erase(std::remove_if(m_openEditors.begin(), m_openEditors.end(), [&](const auto& item) {
-        return item.path == path;
-    }), m_openEditors.end());
-
-    if (m_openEditors.size() == originalSize) return;
-    if (path == currentPath() && !m_openEditors.empty()) {
-        goToDocumentLocation(m_openEditors.front().path, 1, 1);
-        return;
-    }
-    syncOpenEditors();
+    m_editorManager.closeOpenEditor(path);
 }
 
-void MainViewModel::refreshGitChanges() { refreshGitState(); }
-
 void MainViewModel::stageGitPath(const QString& path) {
-    if (m_gitService->stage(m_workspaceRootPath, path)) {
-        refreshGitState();
-        updateStatusMessage(QString("Staged %1").arg(path));
-    } else {
-        updateStatusMessage(QString("Failed to stage %1").arg(path));
-    }
+    m_gitViewModel.stage(m_workspaceRootPath, path);
+    updateStatusMessage(QString("Staged %1").arg(path));
 }
 
 void MainViewModel::unstageGitPath(const QString& path) {
-    if (m_gitService->unstage(m_workspaceRootPath, path)) {
-        refreshGitState();
-        updateStatusMessage(QString("Unstaged %1").arg(path));
-    } else {
-        updateStatusMessage(QString("Failed to unstage %1").arg(path));
-    }
+    m_gitViewModel.unstage(m_workspaceRootPath, path);
+    updateStatusMessage(QString("Unstaged %1").arg(path));
 }
 
 void MainViewModel::discardGitPath(const QString& path) {
-    if (m_gitService->discard(m_workspaceRootPath, path)) {
-        refreshGitState();
-        updateStatusMessage(QString("Discarded changes in %1").arg(path));
-    } else {
-        updateStatusMessage(QString("Failed to discard changes in %1").arg(path));
-    }
+    m_gitViewModel.discard(m_workspaceRootPath, path);
+    updateStatusMessage(QString("Discarded changes in %1").arg(path));
 }
 
 void MainViewModel::openGitDiff(const QString& path) {
     const QString absolutePath = QDir(m_workspaceRootPath).filePath(path);
-    const QString original = m_gitService->headFileContent(m_workspaceRootPath, path);
+    const QString original = m_gitViewModel.headFileContent(m_workspaceRootPath, path);
     QString modified = QFileInfo(absolutePath).absoluteFilePath() == QFileInfo(currentPath()).absoluteFilePath() ? editorText() : loadTextFile(absolutePath);
     if (original.isEmpty() && modified.isEmpty()) {
         updateStatusMessage(QString("No diff available for %1").arg(path));
         return;
     }
-    m_splitEditorVisible = true;
-    m_splitDiffMode = true;
-    m_diffOriginalText = original.isEmpty() ? QStringLiteral("<new file or unavailable in HEAD>\n") : original;
-    m_diffModifiedText = modified;
-    m_diffEditorTitle = displayTitleForPath(path);
-    emit splitEditorChanged();
+    m_editorManager.setupDiffView(displayTitleForPath(path), 
+        original.isEmpty() ? QStringLiteral("<new file or unavailable in HEAD>\n") : original, 
+        modified);
     updateStatusMessage(QString("Opened diff for %1").arg(path));
 }
 
 void MainViewModel::commitGitChanges() {
-    if (m_gitService->commit(m_workspaceRootPath, m_scmCommitMessage)) {
-        setScmCommitMessage(QString());
-        refreshGitState();
+    if (m_gitViewModel.commit(m_workspaceRootPath)) {
         updateStatusMessage(QStringLiteral("Commit created."));
     } else {
         updateStatusMessage(QStringLiteral("Failed to create commit."));
@@ -736,21 +655,21 @@ void MainViewModel::commitGitChanges() {
 }
 
 void MainViewModel::toggleSecondaryAiSidebar() {
-    setSecondaryAiVisible(!m_secondaryAiVisible);
+    setSecondaryAiVisible(!m_uiStateManager.secondaryAiVisible());
 }
 
 void MainViewModel::showAssistantSidebar() {
-    if (!m_secondaryAiVisible) {
+    if (!m_uiStateManager.secondaryAiVisible()) {
         setSecondaryAiVisible(true);
     }
-    setSecondaryAiTab(0);
+    m_uiStateManager.setSecondaryAiTab(0);
 }
 
 void MainViewModel::showModelsSidebar() {
-    if (!m_secondaryAiVisible) {
+    if (!m_uiStateManager.secondaryAiVisible()) {
         setSecondaryAiVisible(true);
     }
-    setSecondaryAiTab(1);
+    m_uiStateManager.setSecondaryAiTab(1);
 }
 
 QString MainViewModel::diagnosticsSummary() const { return m_diagnosticsModel.summaryText(); }
@@ -763,8 +682,6 @@ void MainViewModel::updateStatusMessage(const QString& message) {
 void MainViewModel::setDocumentSample(const QString& path, const QString& text) {
     m_documentService->setPath(path);
     m_documentService->setText(text);
-    m_savedTextSnapshot = text;
-    syncActiveDocumentState(path, true);
     emit editorTextChanged();
     emit currentPathChanged();
     emit aiSettingsChanged();
@@ -778,8 +695,6 @@ void MainViewModel::goToDocumentLocation(const QString& path, int line, int colu
         updateStatusMessage(QString("Falha ao abrir definição em %1").arg(path));
         return;
     }
-    m_savedTextSnapshot = editorText();
-    syncActiveDocumentState(path, true);
     emit editorTextChanged();
     emit currentPathChanged();
     emit aiSettingsChanged();
@@ -797,18 +712,15 @@ void MainViewModel::syncAfterToolRun(const QStringList& touchedPaths) {
     refreshWorkspace();
 
     const QString currentAbsolute = QFileInfo(currentPath()).absoluteFilePath();
-    const QString secondaryAbsolute = QFileInfo(m_secondaryEditorPath).absoluteFilePath();
+    const QString secondaryAbsolute = QFileInfo(m_editorManager.secondaryEditorPath()).absoluteFilePath();
     for (const auto& touched : touchedPaths) {
         const QString touchedAbsolute = QFileInfo(touched).absoluteFilePath();
-        if (touchedAbsolute == secondaryAbsolute && !m_secondaryEditorPath.isEmpty()) {
-            loadFileIntoSecondaryEditor(touched);
+        if (touchedAbsolute == secondaryAbsolute && !m_editorManager.secondaryEditorPath().isEmpty()) {
+            m_editorManager.openFileInSplit(touched);
             emit splitEditorChanged();
         }
         if (touchedAbsolute == currentAbsolute) {
             m_documentService->openFile(touched);
-            m_savedTextSnapshot = editorText();
-            touchOpenEditor(currentPath());
-            syncOpenEditors();
             emit editorTextChanged();
             emit currentPathChanged();
             analyzeNow();
@@ -818,29 +730,6 @@ void MainViewModel::syncAfterToolRun(const QStringList& touchedPaths) {
         }
     }
     refreshGitState();
-}
-
-bool MainViewModel::loadFileIntoSecondaryEditor(const QString& path) {
-    const QString text = loadTextFile(path);
-    if (text.isNull()) {
-        return false;
-    }
-    m_secondaryEditorPath = path;
-    m_secondaryEditorText = text;
-    m_secondarySavedTextSnapshot = text;
-    return true;
-}
-
-void MainViewModel::syncOpenEditors() {
-    for (auto& item : m_openEditors) {
-        item.active = (item.path == currentPath());
-        if (item.path == currentPath()) {
-            item.title = displayTitleForPath(item.path);
-            item.dirty = currentDocumentDirty();
-        }
-    }
-    m_openEditorsModel.setEditors(m_openEditors);
-    emit openEditorsChanged();
 }
 
 void MainViewModel::rebuildCommandPalette(const QString& query) {
@@ -887,14 +776,8 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
 }
 
 void MainViewModel::refreshGitState() {
-    refreshGitSummary();
-    m_gitBranchLabel = m_gitService->branchLabel(m_workspaceRootPath);
-    const auto changes = m_gitService->listChanges(m_workspaceRootPath);
-    m_gitChangesModel.setChanges(changes);
-    m_scmSectionsModel.setChanges(changes);
-    m_gitRecentCommitsModel.setCommits(m_gitService->recentCommits(m_workspaceRootPath, 8));
-    m_workspaceTreeModel.setGitChanges(changes);
-    emit gitChanged();
+    m_gitViewModel.refresh(m_workspaceRootPath);
+    m_workspaceTreeModel.setGitChanges(m_gitService->listChanges(m_workspaceRootPath));
 }
 
 void MainViewModel::rebuildWorkspaceModels() {
@@ -902,15 +785,6 @@ void MainViewModel::rebuildWorkspaceModels() {
     m_workspaceTreeModel.setWorkspaceRoot(m_workspaceRootPath);
     m_workspaceTreeModel.setFiles(m_workspaceFiles);
     m_workspaceTreeModel.setCurrentFilePath(currentPath());
-}
-
-void MainViewModel::syncActiveDocumentState(const QString& path, bool expandTreePath) {
-    m_workspaceTreeModel.setCurrentFilePath(path);
-    if (expandTreePath) {
-        m_workspaceTreeModel.expandToPath(path);
-    }
-    touchOpenEditor(path);
-    syncOpenEditors();
 }
 
 QString MainViewModel::uniqueWorkspaceChildPath(const QString& preferredName) const {
@@ -941,35 +815,6 @@ QString MainViewModel::uniqueWorkspaceChildPath(const QString& preferredName) co
     }
 
     return {};
-}
-
-void MainViewModel::touchOpenEditor(const QString& path) {
-    if (path.isEmpty()) return;
-    auto it = std::find_if(m_openEditors.begin(), m_openEditors.end(), [&](const auto& item) {
-        return item.path == path;
-    });
-    if (it == m_openEditors.end()) {
-        m_openEditors.insert(m_openEditors.begin(), {path, displayTitleForPath(path), false, false});
-    } else {
-        auto item = *it;
-        m_openEditors.erase(it);
-        m_openEditors.insert(m_openEditors.begin(), item);
-    }
-}
-
-void MainViewModel::loadUiState() {
-    m_primaryViewIndex = qBound(0, m_uiSettings.value(QStringLiteral("workbench/primaryViewIndex"), 0).toInt(), 2);
-    m_secondaryAiVisible = m_uiSettings.value(QStringLiteral("workbench/secondaryAiVisible"), true).toBool();
-    m_secondaryAiTab = qBound(0, m_uiSettings.value(QStringLiteral("workbench/secondaryAiTab"), 0).toInt(), 1);
-    m_secondaryAiWidth = qBound(320, m_uiSettings.value(QStringLiteral("workbench/secondaryAiWidth"), 390).toInt(), 720);
-}
-
-void MainViewModel::saveUiState() {
-    m_uiSettings.setValue(QStringLiteral("workbench/primaryViewIndex"), m_primaryViewIndex);
-    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiVisible"), m_secondaryAiVisible);
-    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiTab"), m_secondaryAiTab);
-    m_uiSettings.setValue(QStringLiteral("workbench/secondaryAiWidth"), m_secondaryAiWidth);
-    m_uiSettings.sync();
 }
 
 } // namespace ide::ui::viewmodels

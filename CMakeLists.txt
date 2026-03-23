@@ -33,6 +33,9 @@ qt_add_executable(LocalCodeIDE
     src/services/WorkspaceContextService.cpp
     src/services/WorkspaceService.cpp
 
+    src/services/AiRequestBuilder.cpp
+    src/services/ToolCallCoordinator.cpp
+
     src/adapters/ai/AdaptiveAiBackend.cpp
     src/adapters/ai/LlamaCppServerBackend.cpp
     src/adapters/ai/MockAiBackend.cpp
@@ -85,6 +88,11 @@ qt_add_executable(LocalCodeIDE
 
     src/ui/viewmodels/MainViewModel.cpp
     src/ui/viewmodels/ModelHubViewModel.cpp
+    src/ui/viewmodels/EditorManager.cpp
+    src/ui/viewmodels/GitViewModel.cpp
+    src/ui/viewmodels/UiStateManager.cpp
+    src/ui/viewmodels/DownloadManager.cpp
+    src/ui/viewmodels/ServerRuntimeManager.cpp
 )
 
 qt_add_qml_module(LocalCodeIDE

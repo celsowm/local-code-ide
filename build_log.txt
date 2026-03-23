@@ -1,40 +1,137 @@
-build	Configure CMake	﻿2026-03-22T03:12:33.8149572Z ##[group]Run $env:CMAKE_PREFIX_PATH = "C:\Qt\6.8.0\win64_msvc2022_64"
-build	Configure CMake	2026-03-22T03:12:33.8150099Z [36;1m$env:CMAKE_PREFIX_PATH = "C:\Qt\6.8.0\win64_msvc2022_64"[0m
-build	Configure CMake	2026-03-22T03:12:33.8150491Z [36;1m$env:PATH = "C:\Qt\6.8.0\win64_msvc2022_64\bin;$env:PATH"[0m
-build	Configure CMake	2026-03-22T03:12:33.8150815Z [36;1mcmake -S . -B build[0m
-build	Configure CMake	2026-03-22T03:12:33.8209714Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
-build	Configure CMake	2026-03-22T03:12:33.8210028Z env:
-build	Configure CMake	2026-03-22T03:12:33.8210175Z   QT_VERSION: 6.8.0
-build	Configure CMake	2026-03-22T03:12:33.8210357Z   QT_PLATFORM: win64_msvc2022_64
-build	Configure CMake	2026-03-22T03:12:33.8210643Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
-build	Configure CMake	2026-03-22T03:12:33.8211077Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
-build	Configure CMake	2026-03-22T03:12:33.8211508Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
-build	Configure CMake	2026-03-22T03:12:33.8211884Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
-build	Configure CMake	2026-03-22T03:12:33.8212253Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
-build	Configure CMake	2026-03-22T03:12:33.8212675Z   Qt6_DIR: C:\Qt\6.8.0\win64_msvc2022_64\lib\cmake\Qt6
-build	Configure CMake	2026-03-22T03:12:33.8212927Z ##[endgroup]
-build	Configure CMake	2026-03-22T03:12:34.7101076Z -- Building for: Visual Studio 17 2022
-build	Configure CMake	2026-03-22T03:12:42.6380261Z -- The CXX compiler identification is MSVC 19.44.35223.0
-build	Configure CMake	2026-03-22T03:12:42.7633466Z -- Detecting CXX compiler ABI info
-build	Configure CMake	2026-03-22T03:12:43.8365448Z -- Detecting CXX compiler ABI info - done
-build	Configure CMake	2026-03-22T03:12:43.8529500Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
-build	Configure CMake	2026-03-22T03:12:43.8544262Z -- Detecting CXX compile features
-build	Configure CMake	2026-03-22T03:12:43.8592205Z -- Detecting CXX compile features - done
-build	Configure CMake	2026-03-22T03:12:44.3220681Z CMake Error at CMakeLists.txt:12 (find_package):
-build	Configure CMake	2026-03-22T03:12:44.3221477Z   By not providing "FindQt6.cmake" in CMAKE_MODULE_PATH this project has
-build	Configure CMake	2026-03-22T03:12:44.3222705Z   asked CMake to find a package configuration file provided by "Qt6", but
-build	Configure CMake	2026-03-22T03:12:44.3223459Z   CMake did not find one.
-build	Configure CMake	2026-03-22T03:12:44.3223712Z 
-build	Configure CMake	2026-03-22T03:12:44.3224460Z   Could not find a package configuration file provided by "Qt6" (requested
-build	Configure CMake	2026-03-22T03:12:44.3225709Z   version 6.5) with any of the following names:
-build	Configure CMake	2026-03-22T03:12:44.3226094Z 
-build	Configure CMake	2026-03-22T03:12:44.3226207Z     Qt6Config.cmake
-build	Configure CMake	2026-03-22T03:12:44.3226490Z     qt6-config.cmake
-build	Configure CMake	2026-03-22T03:12:44.3226683Z 
-build	Configure CMake	2026-03-22T03:12:44.3227007Z   Add the installation prefix of "Qt6" to CMAKE_PREFIX_PATH or set "Qt6_DIR"
-build	Configure CMake	2026-03-22T03:12:44.3227798Z   to a directory containing one of the above files.  If "Qt6" provides a
-build	Configure CMake	2026-03-22T03:12:44.3228551Z   separate development package or SDK, be sure it has been installed.
-build	Configure CMake	2026-03-22T03:12:44.3229042Z 
-build	Configure CMake	2026-03-22T03:12:44.3229054Z 
-build	Configure CMake	2026-03-22T03:12:44.3229255Z -- Configuring incomplete, errors occurred!
-build	Configure CMake	2026-03-22T03:12:44.4551852Z ##[error]Process completed with exit code 1.
+Versão do MSBuild 18.3.0-release-26070-10+3972042b7 para .NET Framework
+
+  1>Automatic MOC and UIC for target LocalCodeIDE
+  Running AUTOMOC file extraction for target LocalCodeIDE
+  Running moc --collect-json for target LocalCodeIDE
+  main.cpp
+  Document.cpp
+  AiService.cpp
+  CodeIntelService.cpp
+  DiagnosticService.cpp
+  DocumentService.cpp
+  DiffApplyService.cpp
+C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp(14,37): warning C4129: "s": sequência de escape de caracteres não reconhecida [C:\Users\celso\Documents\projetos\local-code-ide\build\LocalCodeIDE.vcxproj]
+C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp(14,37): warning C4129: "S": sequência de escape de caracteres não reconhecida [C:\Users\celso\Documents\projetos\local-code-ide\build\LocalCodeIDE.vcxproj]
+C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp(239,41): warning C4129: "d": sequência de escape de caracteres não reconhecida [C:\Users\celso\Documents\projetos\local-code-ide\build\LocalCodeIDE.vcxproj]
+C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp(239,41): warning C4129: "+": sequência de escape de caracteres não reconhecida [C:\Users\celso\Documents\projetos\local-code-ide\build\LocalCodeIDE.vcxproj]
+C:\Users\celso\Documents\projetos\local-code-ide\src\services\DiffApplyService.cpp(262,33): warning C4129: " ": sequência de escape de caracteres não reconhecida [C:\Users\celso\Documents\projetos\local-code-ide\build\LocalCodeIDE.vcxproj]
+  GitService.cpp
+  HardwareProfileService.cpp
+  LlamaServerProcessService.cpp
+  LocalModelRuntimeService.cpp
+  ModelCatalogService.cpp
+  SearchService.cpp
+  TerminalService.cpp
+  ToolCallingService.cpp
+  WorkspaceContextService.cpp
+  WorkspaceService.cpp
+  AiRequestBuilder.cpp
+  ToolCallCoordinator.cpp
+  AdaptiveAiBackend.cpp
+  Gerando Código...
+  Compilando...
+  LlamaCppServerBackend.cpp
+  MockAiBackend.cpp
+  LspCodeIntelProvider.cpp
+  MockCodeIntelProvider.cpp
+  HybridDiagnosticProvider.cpp
+  LocalSyntaxDiagnosticProvider.cpp
+  LspClient.cpp
+  LspDiagnosticProvider.cpp
+  MockDiagnosticProvider.cpp
+  FileSystemSearchProvider.cpp
+  HfCliDownloadBackend.cpp
+  HuggingFaceFileDownloader.cpp
+  HuggingFaceModelCatalogProvider.cpp
+  IFileDownloadBackend.cpp
+  QtHttpDownloadBackend.cpp
+  ProcessTerminalBackend.cpp
+  FileSystemWorkspaceProvider.cpp
+  ApplyUnifiedDiffTool.cpp
+  CreateFileTool.cpp
+  EditFileTool.cpp
+  Gerando Código...
+  Compilando...
+  ListWorkspaceFilesTool.cpp
+  ReadFileTool.cpp
+  SearchWorkspaceTool.cpp
+  GitCliProvider.cpp
+  MockVersionControlProvider.cpp
+  CppSyntaxHighlighter.cpp
+  DocumentHighlighter.cpp
+  CommandPaletteListModel.cpp
+  CompletionListModel.cpp
+  DiagnosticListModel.cpp
+  GitChangeListModel.cpp
+  GitCommitListModel.cpp
+  OpenEditorListModel.cpp
+  PendingToolApprovalListModel.cpp
+  ModelFileListModel.cpp
+  ModelRepoListModel.cpp
+  RelevantContextListModel.cpp
+  ScmSectionListModel.cpp
+  SearchResultListModel.cpp
+  WorkspaceFileListModel.cpp
+  Gerando Código...
+  Compilando...
+  WorkspaceTreeListModel.cpp
+  MainViewModel.cpp
+  ModelHubViewModel.cpp
+  EditorManager.cpp
+  GitViewModel.cpp
+  UiStateManager.cpp
+  DownloadManager.cpp
+  ServerRuntimeManager.cpp
+  qrc_qmake_LocalCodeIDE.cpp
+  LocalCodeIDE_qmlcache_loader.cpp
+  Main_qml.cpp
+  IconButton_qml.cpp
+  IconRegistry_js.cpp
+  AssistantTab_qml.cpp
+  AssistantCard_qml.cpp
+  AssistantRuntimeSection_qml.cpp
+  AssistantContextSection_qml.cpp
+  AssistantToolsSection_qml.cpp
+  AssistantApprovalsSection_qml.cpp
+  AssistantInputSection_qml.cpp
+  Gerando Código...
+  Compilando...
+  AssistantOutputSection_qml.cpp
+  BottomPanel_qml.cpp
+  ChatPanel_qml.cpp
+  ChatTabSelector_qml.cpp
+  ChatContentStack_qml.cpp
+  CommandPaletteDialog_qml.cpp
+  EditorPane_qml.cpp
+  ExplorerPanel_qml.cpp
+  ExplorerRootRow_qml.cpp
+  ExplorerSectionHeader_qml.cpp
+  ExplorerToolbarButton_qml.cpp
+  ExplorerTreeRow_qml.cpp
+  LeftPanel_qml.cpp
+  ModelHubPanel_qml.cpp
+  ModelHubCard_qml.cpp
+  ModelHubStepChip_qml.cpp
+  ModelHubDiscoverStep_qml.cpp
+  ModelHubChooseStep_qml.cpp
+  ModelHubDownloadStep_qml.cpp
+  ModelHubActivateServerStep_qml.cpp
+  Gerando Código...
+  Compilando...
+  QuickOpenDialog_qml.cpp
+  ScmChangeRow_qml.cpp
+  ScmChangesSection_qml.cpp
+  ScmCommitSection_qml.cpp
+  ScmHeader_qml.cpp
+  ScmHistorySection_qml.cpp
+  ScmSectionHeader_qml.cpp
+  SearchPanel_qml.cpp
+  Sidebar_qml.cpp
+  SourceControlPanel_qml.cpp
+  qrc_LocalCodeIDE_raw_qml_0.cpp
+  qrc_LocalCodeIDE_raw_qml_0_extra_qmldirs.cpp
+  mocs_compilation_Release.cpp
+  Gerando Código...
+  localcodeide_qmltyperegistrations.cpp
+     Criando biblioteca C:/Users/celso/Documents/projetos/local-code-ide/build/Release/LocalCodeIDE.lib e objeto C:/Users/celso/Documents/projetos/local-code-ide/build/Release/LocalCodeIDE.exp
+  LocalCodeIDE.vcxproj -> C:\Users\celso\Documents\projetos\local-code-ide\build\Release\LocalCodeIDE.exe

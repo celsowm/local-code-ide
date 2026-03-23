@@ -9,7 +9,10 @@ namespace ide::services {
 AiService::AiService(std::unique_ptr<interfaces::IAiBackend> backend,
                      std::unique_ptr<ToolCallingService> toolCallingService)
     : m_backend(std::move(backend))
-    , m_toolCallingService(std::move(toolCallingService)) {}
+    , m_toolCallingService(std::move(toolCallingService)) {
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+    m_toolCoordinator = std::make_unique<ToolCallCoordinator>(m_toolCallingService.get());
+}
 
 QString AiService::ask(const QString& prompt,
                        const QString& workspaceRoot,
@@ -21,11 +24,18 @@ QString AiService::ask(const QString& prompt,
     m_lastToolLog.clear();
     m_lastToolTouchedPaths.clear();
     m_lastToolCallCount = 0;
-    if (m_toolCallingService) {
-        m_toolCallingService->resetLastRun();
+
+    if (m_toolCoordinator) {
+        m_toolCoordinator->reset();
     }
 
-    auto request = buildRequest(prompt, currentPath, documentText, diagnosticsText, gitSummary, workspaceContextText);
+    std::vector<interfaces::AiToolDefinition> tools;
+    if (m_settings.enableTools && m_toolCallingService) {
+        m_toolCallingService->setRequireApprovalForDestructive(m_settings.requireApprovalForDestructiveTools);
+        tools = m_toolCallingService->definitions();
+    }
+
+    auto request = m_requestBuilder->build(prompt, currentPath, documentText, diagnosticsText, gitSummary, workspaceContextText, tools);
     QString finalContent;
 
     const int rounds = request.enableTools ? qMax(0, request.maxToolRounds) : 0;
@@ -90,27 +100,60 @@ bool AiService::isBackendAvailable() const {
 }
 
 QString AiService::systemPrompt() const { return m_settings.systemPrompt; }
-void AiService::setSystemPrompt(const QString& value) { m_settings.systemPrompt = value.trimmed().isEmpty() ? Settings{}.systemPrompt : value; }
+void AiService::setSystemPrompt(const QString& value) { 
+    m_settings.systemPrompt = value.trimmed().isEmpty() ? Settings{}.systemPrompt : value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 int AiService::maxOutputTokens() const { return m_settings.maxOutputTokens; }
-void AiService::setMaxOutputTokens(int value) { m_settings.maxOutputTokens = qBound(64, value, 8192); }
+void AiService::setMaxOutputTokens(int value) { 
+    m_settings.maxOutputTokens = qBound(64, value, 8192); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 double AiService::temperature() const { return m_settings.temperature; }
-void AiService::setTemperature(double value) { m_settings.temperature = qBound(0.0, value, 2.0); }
+void AiService::setTemperature(double value) { 
+    m_settings.temperature = qBound(0.0, value, 2.0); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 int AiService::documentContextChars() const { return m_settings.documentContextChars; }
-void AiService::setDocumentContextChars(int value) { m_settings.documentContextChars = qBound(512, value, 200000); }
+void AiService::setDocumentContextChars(int value) { 
+    m_settings.documentContextChars = qBound(512, value, 200000); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 int AiService::workspaceContextChars() const { return m_settings.workspaceContextChars; }
-void AiService::setWorkspaceContextChars(int value) { m_settings.workspaceContextChars = qBound(0, value, 400000); }
+void AiService::setWorkspaceContextChars(int value) { 
+    m_settings.workspaceContextChars = qBound(0, value, 400000); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 int AiService::workspaceContextMaxFiles() const { return m_settings.workspaceContextMaxFiles; }
-void AiService::setWorkspaceContextMaxFiles(int value) { m_settings.workspaceContextMaxFiles = qBound(0, value, 24); }
+void AiService::setWorkspaceContextMaxFiles(int value) { 
+    m_settings.workspaceContextMaxFiles = qBound(0, value, 24); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::includeDocument() const { return m_settings.includeDocument; }
-void AiService::setIncludeDocument(bool value) { m_settings.includeDocument = value; }
+void AiService::setIncludeDocument(bool value) { 
+    m_settings.includeDocument = value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::includeDiagnostics() const { return m_settings.includeDiagnostics; }
-void AiService::setIncludeDiagnostics(bool value) { m_settings.includeDiagnostics = value; }
+void AiService::setIncludeDiagnostics(bool value) { 
+    m_settings.includeDiagnostics = value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::includeGitSummary() const { return m_settings.includeGitSummary; }
-void AiService::setIncludeGitSummary(bool value) { m_settings.includeGitSummary = value; }
+void AiService::setIncludeGitSummary(bool value) { 
+    m_settings.includeGitSummary = value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::includeWorkspaceContext() const { return m_settings.includeWorkspaceContext; }
-void AiService::setIncludeWorkspaceContext(bool value) { m_settings.includeWorkspaceContext = value; }
+void AiService::setIncludeWorkspaceContext(bool value) { 
+    m_settings.includeWorkspaceContext = value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::toolsEnabled() const { return m_settings.enableTools && m_toolCallingService != nullptr; }
-void AiService::setToolsEnabled(bool value) { m_settings.enableTools = value; }
+void AiService::setToolsEnabled(bool value) { 
+    m_settings.enableTools = value; 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 bool AiService::requireApprovalForDestructiveTools() const {
     return m_toolCallingService ? m_toolCallingService->requireApprovalForDestructive() : m_settings.requireApprovalForDestructiveTools;
 }
@@ -121,7 +164,10 @@ void AiService::setRequireApprovalForDestructiveTools(bool value) {
     }
 }
 int AiService::maxToolRounds() const { return m_settings.maxToolRounds; }
-void AiService::setMaxToolRounds(int value) { m_settings.maxToolRounds = qBound(0, value, 12); }
+void AiService::setMaxToolRounds(int value) { 
+    m_settings.maxToolRounds = qBound(0, value, 12); 
+    m_requestBuilder = std::make_unique<AiRequestBuilder>(m_settings);
+}
 
 QString AiService::contextSummary(const QString& currentPath,
                                   const QString& documentText,
@@ -216,103 +262,6 @@ void AiService::clearPendingApprovals() {
     }
     m_toolCallingService->clearPendingApprovals();
     syncToolStateFromRunner();
-}
-
-interfaces::AiRequest AiService::buildRequest(const QString& prompt,
-                                              const QString& currentPath,
-                                              const QString& documentText,
-                                              const QString& diagnosticsText,
-                                              const QString& gitSummary,
-                                              const QString& workspaceContextText) const {
-    interfaces::AiRequest request;
-    request.prompt = prompt;
-    request.currentPath = currentPath;
-    request.systemPrompt = m_settings.systemPrompt;
-    request.maxOutputTokens = m_settings.maxOutputTokens;
-    request.temperature = m_settings.temperature;
-    request.documentContextChars = m_settings.documentContextChars;
-    request.workspaceContextChars = m_settings.workspaceContextChars;
-    request.workspaceContextMaxFiles = m_settings.workspaceContextMaxFiles;
-    request.includeDocument = m_settings.includeDocument;
-    request.includeDiagnostics = m_settings.includeDiagnostics;
-    request.includeGitSummary = m_settings.includeGitSummary;
-    request.includeWorkspaceContext = m_settings.includeWorkspaceContext;
-    request.enableTools = m_settings.enableTools && m_toolCallingService != nullptr;
-    request.maxToolRounds = m_settings.maxToolRounds;
-    if (m_toolCallingService) {
-        m_toolCallingService->setRequireApprovalForDestructive(m_settings.requireApprovalForDestructiveTools);
-    }
-    if (request.enableTools && m_toolCallingService) {
-        request.tools = m_toolCallingService->definitions();
-    }
-    if (m_settings.includeDocument) {
-        request.documentText = trimForContext(documentText, m_settings.documentContextChars);
-    }
-    if (m_settings.includeDiagnostics) {
-        request.diagnosticsText = diagnosticsText;
-    }
-    if (m_settings.includeGitSummary) {
-        request.gitSummary = gitSummary;
-    }
-    if (m_settings.includeWorkspaceContext) {
-        request.workspaceContextText = trimForContext(workspaceContextText, m_settings.workspaceContextChars);
-    }
-    request.messages = buildInitialMessages(prompt, currentPath, documentText, diagnosticsText, gitSummary, workspaceContextText);
-    return request;
-}
-
-std::vector<interfaces::AiMessage> AiService::buildInitialMessages(const QString& prompt,
-                                                                   const QString& currentPath,
-                                                                   const QString& documentText,
-                                                                   const QString& diagnosticsText,
-                                                                   const QString& gitSummary,
-                                                                   const QString& workspaceContextText) const {
-    std::vector<interfaces::AiMessage> messages;
-    messages.push_back(interfaces::AiMessage{
-        QStringLiteral("system"),
-        m_settings.systemPrompt,
-        {},
-        {},
-        {}
-    });
-    messages.push_back(interfaces::AiMessage{
-        QStringLiteral("user"),
-        buildUserMessage(prompt, currentPath, documentText, diagnosticsText, gitSummary, workspaceContextText),
-        {},
-        {},
-        {}
-    });
-    return messages;
-}
-
-QString AiService::buildUserMessage(const QString& prompt,
-                                    const QString& currentPath,
-                                    const QString& documentText,
-                                    const QString& diagnosticsText,
-                                    const QString& gitSummary,
-                                    const QString& workspaceContextText) const {
-    QString userMessage = QStringLiteral("Current file: %1\n")
-        .arg(currentPath.isEmpty() ? QStringLiteral("untitled") : currentPath);
-    if (m_settings.includeDocument && !documentText.isEmpty()) {
-        userMessage += QStringLiteral("\nCurrent document:\n```\n%1\n```\n")
-            .arg(trimForContext(documentText, m_settings.documentContextChars));
-    }
-    if (m_settings.includeDiagnostics && !diagnosticsText.isEmpty()) {
-        userMessage += QStringLiteral("\nDiagnostics:\n%1\n").arg(diagnosticsText);
-    }
-    if (m_settings.includeGitSummary && !gitSummary.isEmpty()) {
-        userMessage += QStringLiteral("\nGit summary:\n%1\n").arg(gitSummary);
-    }
-    if (m_settings.includeWorkspaceContext && !workspaceContextText.isEmpty()) {
-        userMessage += QStringLiteral("\nRelevant workspace context:\n%1\n")
-            .arg(trimForContext(workspaceContextText, m_settings.workspaceContextChars));
-    }
-    userMessage += QStringLiteral(
-        "\nUser request: %1\n\n"
-        "Prefer a unified diff inside a ```diff fenced block when proposing concrete edits. "
-        "If tool calling is available and a file/workspace action is required, call a tool."
-    ).arg(prompt);
-    return userMessage;
 }
 
 QString AiService::trimForContext(const QString& text, int maxChars) const {

@@ -1,0 +1,20 @@
+# Test dependencies for LocalCodeIDE
+# Install: pip install -r requirements-test.txt
+
+# Testing framework
+pytest>=7.0.0
+
+# Test coverage
+pytest-cov>=4.0.0
+
+# Parallel test execution
+pytest-xdist>=3.0.0
+
+# HTTP client for API tests
+requests>=2.28.0
+
+# Type checking (optional)
+# mypy>=1.0.0
+
+# Linting (optional)  
+# ruff>=0.1.0

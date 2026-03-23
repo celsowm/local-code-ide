@@ -10,21 +10,19 @@
 #include "services/TerminalService.hpp"
 #include "services/WorkspaceContextService.hpp"
 #include "services/WorkspaceService.hpp"
+#include "ui/viewmodels/EditorManager.hpp"
+#include "ui/viewmodels/GitViewModel.hpp"
+#include "ui/viewmodels/UiStateManager.hpp"
 #include "ui/models/CommandPaletteListModel.hpp"
 #include "ui/models/CompletionListModel.hpp"
 #include "ui/models/DiagnosticListModel.hpp"
-#include "ui/models/GitChangeListModel.hpp"
-#include "ui/models/GitCommitListModel.hpp"
-#include "ui/models/OpenEditorListModel.hpp"
 #include "ui/models/PendingToolApprovalListModel.hpp"
 #include "ui/models/RelevantContextListModel.hpp"
-#include "ui/models/ScmSectionListModel.hpp"
 #include "ui/models/SearchResultListModel.hpp"
 #include "ui/models/WorkspaceFileListModel.hpp"
 #include "ui/models/WorkspaceTreeListModel.hpp"
 
 #include <QObject>
-#include <QSettings>
 #include <memory>
 #include <vector>
 
@@ -32,13 +30,12 @@ namespace ide::ui::viewmodels {
 
 class MainViewModel final : public QObject {
     Q_OBJECT
+
     Q_PROPERTY(QString editorText READ editorText WRITE setEditorText NOTIFY editorTextChanged)
     Q_PROPERTY(QString currentPath READ currentPath NOTIFY currentPathChanged)
     Q_PROPERTY(QString languageId READ languageId NOTIFY currentPathChanged)
     Q_PROPERTY(QString chatInput READ chatInput WRITE setChatInput NOTIFY chatInputChanged)
     Q_PROPERTY(QString chatResponse READ chatResponse NOTIFY chatResponseChanged)
-    Q_PROPERTY(QString gitSummary READ gitSummary NOTIFY gitSummaryChanged)
-    Q_PROPERTY(QString gitBranchLabel READ gitBranchLabel NOTIFY gitSummaryChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
     Q_PROPERTY(QString diagnosticsProviderName READ diagnosticsProviderName CONSTANT)
     Q_PROPERTY(QString codeIntelProviderName READ codeIntelProviderName CONSTANT)
@@ -85,6 +82,34 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QObject* relevantContextModel READ relevantContextModel CONSTANT)
     Q_PROPERTY(QObject* pendingApprovalModel READ pendingApprovalModel CONSTANT)
     Q_PROPERTY(bool hasPatchPreview READ hasPatchPreview NOTIFY patchPreviewChanged)
+    Q_PROPERTY(bool canApplyPatchPreview READ canApplyPatchPreview NOTIFY patchPreviewChanged)
+    Q_PROPERTY(QString patchSummary READ patchSummary NOTIFY patchPreviewChanged)
+    Q_PROPERTY(QString patchPreviewText READ patchPreviewText NOTIFY patchPreviewChanged)
+
+    Q_PROPERTY(QObject* openEditorsModel READ openEditorsModel CONSTANT)
+    Q_PROPERTY(QObject* commandPaletteModel READ commandPaletteModel CONSTANT)
+    Q_PROPERTY(int commandPaletteCount READ commandPaletteCount NOTIFY commandPaletteChanged)
+
+    Q_PROPERTY(int primaryViewIndex READ primaryViewIndex WRITE setPrimaryViewIndex NOTIFY primaryViewIndexChanged)
+    Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
+    Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
+
+    Q_PROPERTY(bool currentDocumentDirty READ currentDocumentDirty NOTIFY openEditorsChanged)
+
+    Q_PROPERTY(QObject* gitChangesModel READ gitChangesModel CONSTANT)
+    Q_PROPERTY(QObject* scmSectionsModel READ scmSectionsModel CONSTANT)
+    Q_PROPERTY(QObject* gitRecentCommitsModel READ gitRecentCommitsModel CONSTANT)
+    Q_PROPERTY(int gitChangeCount READ gitChangeCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitStagedCount READ gitStagedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitUnstagedCount READ gitUnstagedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitUntrackedCount READ gitUntrackedCount NOTIFY gitChanged)
+    Q_PROPERTY(int gitRecentCommitCount READ gitRecentCommitCount NOTIFY gitChanged)
+    Q_PROPERTY(QString scmCommitMessage READ scmCommitMessage WRITE setScmCommitMessage NOTIFY scmCommitMessageChanged)
+
+    Q_PROPERTY(QString gitSummary READ gitSummary NOTIFY gitSummaryChanged)
+    Q_PROPERTY(QString gitBranchLabel READ gitBranchLabel NOTIFY gitSummaryChanged)
+
     Q_PROPERTY(bool splitEditorVisible READ splitEditorVisible NOTIFY splitEditorChanged)
     Q_PROPERTY(bool diffEditorVisible READ diffEditorVisible NOTIFY splitEditorChanged)
     Q_PROPERTY(QString secondaryEditorPath READ secondaryEditorPath NOTIFY splitEditorChanged)
@@ -95,28 +120,6 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString diffOriginalText READ diffOriginalText NOTIFY splitEditorChanged)
     Q_PROPERTY(QString diffModifiedText READ diffModifiedText NOTIFY splitEditorChanged)
     Q_PROPERTY(QString diffEditorTitle READ diffEditorTitle NOTIFY splitEditorChanged)
-    Q_PROPERTY(bool canApplyPatchPreview READ canApplyPatchPreview NOTIFY patchPreviewChanged)
-    Q_PROPERTY(QString patchSummary READ patchSummary NOTIFY patchPreviewChanged)
-    Q_PROPERTY(QString patchPreviewText READ patchPreviewText NOTIFY patchPreviewChanged)
-
-    Q_PROPERTY(QObject* openEditorsModel READ openEditorsModel CONSTANT)
-    Q_PROPERTY(QObject* commandPaletteModel READ commandPaletteModel CONSTANT)
-    Q_PROPERTY(QObject* gitChangesModel READ gitChangesModel CONSTANT)
-    Q_PROPERTY(QObject* scmSectionsModel READ scmSectionsModel CONSTANT)
-    Q_PROPERTY(QObject* gitRecentCommitsModel READ gitRecentCommitsModel CONSTANT)
-    Q_PROPERTY(int openEditorCount READ openEditorCount NOTIFY openEditorsChanged)
-    Q_PROPERTY(int commandPaletteCount READ commandPaletteCount NOTIFY commandPaletteChanged)
-    Q_PROPERTY(int gitChangeCount READ gitChangeCount NOTIFY gitChanged)
-    Q_PROPERTY(int gitStagedCount READ gitStagedCount NOTIFY gitChanged)
-    Q_PROPERTY(int gitUnstagedCount READ gitUnstagedCount NOTIFY gitChanged)
-    Q_PROPERTY(int gitUntrackedCount READ gitUntrackedCount NOTIFY gitChanged)
-    Q_PROPERTY(int gitRecentCommitCount READ gitRecentCommitCount NOTIFY gitChanged)
-    Q_PROPERTY(int primaryViewIndex READ primaryViewIndex WRITE setPrimaryViewIndex NOTIFY primaryViewIndexChanged)
-    Q_PROPERTY(bool secondaryAiVisible READ secondaryAiVisible WRITE setSecondaryAiVisible NOTIFY secondaryAiChanged)
-    Q_PROPERTY(int secondaryAiTab READ secondaryAiTab WRITE setSecondaryAiTab NOTIFY secondaryAiChanged)
-    Q_PROPERTY(int secondaryAiWidth READ secondaryAiWidth WRITE setSecondaryAiWidth NOTIFY secondaryAiChanged)
-    Q_PROPERTY(QString scmCommitMessage READ scmCommitMessage WRITE setScmCommitMessage NOTIFY scmCommitMessageChanged)
-    Q_PROPERTY(bool currentDocumentDirty READ currentDocumentDirty NOTIFY openEditorsChanged)
 
 public:
     MainViewModel(std::unique_ptr<ide::services::DocumentService> documentService,
@@ -140,8 +143,6 @@ public:
     void setChatInput(const QString& text);
 
     QString chatResponse() const;
-    QString gitSummary() const;
-    QString gitBranchLabel() const;
     QString statusMessage() const;
     QString diagnosticsProviderName() const;
     QString codeIntelProviderName() const;
@@ -210,6 +211,39 @@ public:
     QObject* pendingApprovalModel();
 
     bool hasPatchPreview() const;
+    bool canApplyPatchPreview() const;
+    QString patchSummary() const;
+    QString patchPreviewText() const;
+
+    QObject* openEditorsModel();
+    QObject* commandPaletteModel();
+    int commandPaletteCount() const;
+
+    int primaryViewIndex() const;
+    void setPrimaryViewIndex(int value);
+    bool secondaryAiVisible() const;
+    void setSecondaryAiVisible(bool value);
+    int secondaryAiTab() const;
+    void setSecondaryAiTab(int value);
+    int secondaryAiWidth() const;
+    void setSecondaryAiWidth(int value);
+
+    bool currentDocumentDirty() const;
+
+    QObject* gitChangesModel();
+    QObject* scmSectionsModel();
+    QObject* gitRecentCommitsModel();
+    int gitChangeCount() const;
+    int gitStagedCount() const;
+    int gitUnstagedCount() const;
+    int gitUntrackedCount() const;
+    int gitRecentCommitCount() const;
+    QString scmCommitMessage() const;
+    void setScmCommitMessage(const QString& value);
+
+    QString gitSummary() const;
+    QString gitBranchLabel() const;
+
     bool splitEditorVisible() const;
     bool diffEditorVisible() const;
     QString secondaryEditorPath() const;
@@ -221,38 +255,10 @@ public:
     QString diffOriginalText() const;
     QString diffModifiedText() const;
     QString diffEditorTitle() const;
-    bool canApplyPatchPreview() const;
-    QString patchSummary() const;
-    QString patchPreviewText() const;
-
-    QObject* openEditorsModel();
-    QObject* commandPaletteModel();
-    QObject* gitChangesModel();
-    QObject* scmSectionsModel();
-    QObject* gitRecentCommitsModel();
-    int openEditorCount() const;
-    int commandPaletteCount() const;
-    int gitChangeCount() const;
-    int gitStagedCount() const;
-    int gitUnstagedCount() const;
-    int gitUntrackedCount() const;
-    int gitRecentCommitCount() const;
-    int primaryViewIndex() const;
-    void setPrimaryViewIndex(int value);
-    bool secondaryAiVisible() const;
-    void setSecondaryAiVisible(bool value);
-    int secondaryAiTab() const;
-    void setSecondaryAiTab(int value);
-    int secondaryAiWidth() const;
-    void setSecondaryAiWidth(int value);
-    QString scmCommitMessage() const;
-    void setScmCommitMessage(const QString& value);
-    bool currentDocumentDirty() const;
 
     Q_INVOKABLE void analyzeNow();
     Q_INVOKABLE void askAssistant();
     Q_INVOKABLE void saveCurrent();
-    Q_INVOKABLE void refreshGitSummary();
     Q_INVOKABLE void loadSampleCpp();
     Q_INVOKABLE void loadSampleRust();
     Q_INVOKABLE void refreshWorkspace();
@@ -287,7 +293,6 @@ public:
     Q_INVOKABLE void openFirstMatchingWorkspaceFile(const QString& query);
     Q_INVOKABLE void switchOpenEditor(const QString& path);
     Q_INVOKABLE void closeOpenEditor(const QString& path);
-    Q_INVOKABLE void refreshGitChanges();
     Q_INVOKABLE void stageGitPath(const QString& path);
     Q_INVOKABLE void unstageGitPath(const QString& path);
     Q_INVOKABLE void discardGitPath(const QString& path);
@@ -302,7 +307,6 @@ signals:
     void currentPathChanged();
     void chatInputChanged();
     void chatResponseChanged();
-    void gitSummaryChanged();
     void statusMessageChanged();
     void diagnosticsCountChanged();
     void workspaceChanged();
@@ -323,6 +327,7 @@ signals:
     void primaryViewIndexChanged();
     void secondaryAiChanged();
     void scmCommitMessageChanged();
+    void gitSummaryChanged();
 
 private:
     struct CommandSpec {
@@ -338,16 +343,10 @@ private:
     void goToDocumentLocation(const QString& path, int line, int column);
     void syncAfterToolRun(const QStringList& touchedPaths);
     void refreshPendingApprovals();
-    void syncOpenEditors();
-    bool loadFileIntoSecondaryEditor(const QString& path);
     void rebuildCommandPalette(const QString& query);
-    void refreshGitState();
     void rebuildWorkspaceModels();
-    void syncActiveDocumentState(const QString& path, bool expandTreePath);
+    void refreshGitState();
     QString uniqueWorkspaceChildPath(const QString& preferredName) const;
-    void touchOpenEditor(const QString& path);
-    void loadUiState();
-    void saveUiState();
 
     std::unique_ptr<ide::services::DocumentService> m_documentService;
     std::unique_ptr<ide::services::DiagnosticService> m_diagnosticService;
@@ -368,17 +367,18 @@ private:
     ide::ui::models::CompletionListModel m_completionModel;
     ide::ui::models::RelevantContextListModel m_relevantContextModel;
     ide::ui::models::PendingToolApprovalListModel m_pendingApprovalModel;
-    ide::ui::models::OpenEditorListModel m_openEditorsModel;
     ide::ui::models::CommandPaletteListModel m_commandPaletteModel;
-    ide::ui::models::GitChangeListModel m_gitChangesModel;
-    ide::ui::models::ScmSectionListModel m_scmSectionsModel;
-    ide::ui::models::GitCommitListModel m_gitRecentCommitsModel;
-    QSettings m_uiSettings;
+
+    std::vector<CommandSpec> m_commandCatalog;
+    int m_cursorLine = 1;
+    int m_cursorColumn = 1;
+
+    ide::ui::viewmodels::EditorManager m_editorManager;
+    ide::ui::viewmodels::GitViewModel m_gitViewModel;
+    ide::ui::viewmodels::UiStateManager m_uiStateManager;
 
     QString m_chatInput;
     QString m_chatResponse;
-    QString m_gitSummary;
-    QString m_gitBranchLabel;
     QString m_statusMessage;
     QString m_workspaceRootPath;
     QString m_searchPattern;
@@ -388,26 +388,8 @@ private:
     QString m_terminalOutput;
     QString m_renderedWorkspaceContext;
     QString m_relevantContextSummary;
-    QString m_scmCommitMessage;
-    QString m_secondaryEditorPath;
-    QString m_secondaryEditorText;
-    QString m_secondarySavedTextSnapshot;
-    QString m_diffOriginalText;
-    QString m_diffModifiedText;
-    QString m_diffEditorTitle;
-    QString m_savedTextSnapshot;
     ide::services::PatchPreview m_patchPreview;
     std::vector<ide::services::interfaces::WorkspaceFile> m_workspaceFiles;
-    std::vector<ide::ui::models::OpenEditorItem> m_openEditors;
-    std::vector<CommandSpec> m_commandCatalog;
-    int m_cursorLine = 1;
-    int m_cursorColumn = 1;
-    int m_primaryViewIndex = 0;
-    bool m_secondaryAiVisible = true;
-    int m_secondaryAiTab = 0;
-    int m_secondaryAiWidth = 390;
-    bool m_splitEditorVisible = false;
-    bool m_splitDiffMode = false;
 };
 
 } // namespace ide::ui::viewmodels

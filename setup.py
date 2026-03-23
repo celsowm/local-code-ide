@@ -11,6 +11,7 @@ import os
 import sys
 import subprocess
 import shutil
+import time
 from pathlib import Path
 
 # Colors
@@ -104,16 +105,18 @@ def deploy_qt(exe_path, qt_path):
         f"{qt_path}\\bin\\windeployqt.exe",
         str(exe_path),
         "--release",
+        "--qmldir", "qml",
         "--no-translations",
         "--no-opengl-sw"
     ], check=True)
     
-    # Copy QML modules
+    # Ensure QML modules are present (windeployqt may leave an empty qml dir in some setups)
     qml_src = Path(qt_path) / "qml"
     qml_dst = Path("build/Release/qml")
-    if qml_src.exists() and not qml_dst.exists():
+    has_qml_content = qml_dst.exists() and any(qml_dst.rglob("*"))
+    if qml_src.exists() and not has_qml_content:
         log("Copying QML modules...", BLUE)
-        shutil.copytree(qml_src, qml_dst)
+        shutil.copytree(qml_src, qml_dst, dirs_exist_ok=True)
     
     # Move plugins to correct folder
     plugins_dst = Path("build/Release/plugins")
@@ -127,6 +130,116 @@ def deploy_qt(exe_path, qt_path):
     # Create qt.conf
     qt_conf = Path("build/Release/qt.conf")
     qt_conf.write_text("[Paths]\nPrefix = .\nPlugins = ./plugins\nQml2Imports = ./qml\n")
+
+
+def required_qt_runtime_paths(exe_path):
+    """Return required Qt runtime artifacts expected near the executable."""
+    release_dir = exe_path.parent
+    return [
+        release_dir / "Qt6Core.dll",
+        release_dir / "Qt6Gui.dll",
+        release_dir / "Qt6Qml.dll",
+        release_dir / "Qt6Quick.dll",
+        release_dir / "plugins" / "platforms" / "qwindows.dll",
+        release_dir / "qml" / "QtQuick" / "Controls" / "qtquickcontrols2plugin.dll",
+        release_dir / "qt.conf",
+    ]
+
+
+def needs_qt_deploy(exe_path):
+    """Return True when essential Qt runtime artifacts are missing near the executable."""
+    required_paths = required_qt_runtime_paths(exe_path)
+    return any(not path.exists() for path in required_paths)
+
+
+def smoke_test_startup(exe_path, timeout_seconds=8):
+    """
+    Start the app and ensure it stays alive for a short window.
+    Returns: (ok: bool, details: str)
+    """
+    log_path = Path("build") / "doctor-startup.log"
+    log_path.parent.mkdir(exist_ok=True)
+
+    env = os.environ.copy()
+    env["QT_FORCE_STDERR_LOGGING"] = "1"
+
+    with log_path.open("w", encoding="utf-8", errors="ignore") as handle:
+        proc = subprocess.Popen([str(exe_path)], stdout=handle, stderr=subprocess.STDOUT, env=env)
+        time.sleep(timeout_seconds)
+        return_code = proc.poll()
+
+        if return_code is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=3)
+            return True, f"Startup smoke test passed ({timeout_seconds}s)."
+
+        handle.flush()
+
+    tail = ""
+    if log_path.exists():
+        lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        tail = "\n".join(lines[-10:]) if lines else "(no startup logs)"
+    details = (
+        f"App exited early with code {return_code}. "
+        f"See {log_path} for full logs.\nLast lines:\n{tail}"
+    )
+    return False, details
+
+
+def doctor():
+    """Preflight checks similar to a 'health check' command."""
+    log("\n" + "=" * 60, GREEN)
+    log("LocalCodeIDE - Doctor", GREEN)
+    log("=" * 60, GREEN)
+
+    exe = Path("build/Release/LocalCodeIDE.exe")
+    if not exe.exists():
+        log("ERROR: Missing build/Release/LocalCodeIDE.exe. Run 'python setup.py' first.", RED)
+        return 1
+
+    qt_path = find_qt()
+    if not qt_path:
+        log("ERROR: Qt installation not found (C:\\Qt or QT_DIR).", RED)
+        return 1
+
+    os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
+
+    log("\n[1/3] Qt runtime deploy check...", BLUE)
+    if needs_qt_deploy(exe):
+        log("Qt runtime incomplete. Running deploy...", YELLOW)
+        try:
+            deploy_qt(exe, qt_path)
+        except subprocess.CalledProcessError as e:
+            log(f"ERROR: Qt deploy failed: {e}", RED)
+            return 1
+
+    missing = [str(path) for path in required_qt_runtime_paths(exe) if not path.exists()]
+    if missing:
+        log("ERROR: Missing runtime artifacts after deploy:", RED)
+        for item in missing:
+            log(f"  - {item}", RED)
+        return 1
+    log("Qt runtime artifacts: OK", GREEN)
+
+    log("\n[2/3] QML lint check...", BLUE)
+    lint_result = lint()
+    if lint_result != 0:
+        log("ERROR: Lint failed.", RED)
+        return lint_result
+
+    log("\n[3/3] Startup smoke test...", BLUE)
+    ok, details = smoke_test_startup(exe)
+    if not ok:
+        log("ERROR: " + details, RED)
+        return 1
+    log(details, GREEN)
+
+    log("\nDoctor checks passed.", GREEN)
+    return 0
 
 def main():
     log("\n" + "=" * 60, GREEN)
@@ -217,16 +330,26 @@ def main():
 
 def run():
     qt_path = find_qt()
-    if qt_path:
-        os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
-
     exe = Path("build/Release/LocalCodeIDE.exe")
     if not exe.exists():
         log("ERROR: Run 'python setup.py' first", RED)
         return 1
+    
+    if qt_path:
+        os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
+        if needs_qt_deploy(exe):
+            log("Qt runtime not deployed to build/Release. Deploying now...", YELLOW)
+            try:
+                deploy_qt(exe, qt_path)
+            except subprocess.CalledProcessError as e:
+                log(f"ERROR: Qt deploy failed: {e}", RED)
+                return 1
+    else:
+        log("WARNING: Qt installation not found in C:\\Qt or QT_DIR.", YELLOW)
+        log("The app may fail to start if Qt runtime DLLs are missing.", YELLOW)
 
-    subprocess.run([str(exe)])
-    return 0
+    result = subprocess.run([str(exe)])
+    return result.returncode
 
 def lint():
     """Run project lint checks (QML + Python)."""
@@ -318,46 +441,79 @@ def screenshot(output_path=""):
 def build_installer():
     """Build WiX installer"""
     from version import get_version
-    
+
     qt_path = find_qt()
     if not qt_path:
         log("ERROR: Qt not found. Run 'python setup.py' first", RED)
         return 1
-    
+
     os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
-    
+
     # Add WiX to PATH
     wix_path = Path.home() / ".dotnet" / "tools"
     os.environ['PATH'] = f"{wix_path};{os.environ['PATH']}"
-    
+
     # Check if wix is installed
     try:
         subprocess.run(["wix", "--version"], capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         log("WiX Toolset not found. Installing...", YELLOW)
         subprocess.run(["dotnet", "tool", "install", "--global", "wix"], check=True)
-    
+
     # Run installer build script
     installer_script = Path("installer/build-installer.ps1")
     if not installer_script.exists():
         log("ERROR: Installer script not found", RED)
         return 1
-    
+
     version = get_version()
     log(f"\nBuilding installer for version {version}...", BLUE)
-    
+
     subprocess.run([
         "powershell", "-ExecutionPolicy", "Bypass",
         "-File", str(installer_script),
         "-Version", version
     ], check=True)
-    
+
     log("\n" + "=" * 60, GREEN)
     log("INSTALLER BUILT SUCCESSFULLY!", GREEN)
     log("=" * 60, GREEN)
     log(f"\nOutput: build/installer/LocalCodeIDE-{version}.msi", BLUE)
-    
+
     return 0
+
+
+def install_test_deps():
+    """Install test dependencies."""
+    log("Installing test dependencies...", BLUE)
+    subprocess.run([
+        sys.executable, "-m", "pip", "install",
+        "pytest>=7.0.0",
+        "pytest-cov>=4.0.0",
+        "pytest-xdist>=3.0.0",
+        "requests>=2.28.0",
+    ], check=True)
+    log("Test dependencies installed!", GREEN)
+    return 0
+
+
+def run_tests(category="", verbose=False):
+    """Run test suite."""
+    test_script = Path("run_tests.py")
+    if not test_script.exists():
+        log("ERROR: Test runner not found", RED)
+        return 1
+
+    cmd = [sys.executable, str(test_script)]
+    
+    if category:
+        cmd.extend(["--category", category])
+    
+    if verbose:
+        cmd.append("-v")
+    
+    result = subprocess.run(cmd)
+    return result.returncode
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -370,13 +526,24 @@ if __name__ == "__main__":
             sys.exit(screenshot(output))
         elif sys.argv[1] == "installer":
             sys.exit(build_installer())
+        elif sys.argv[1] == "doctor":
+            sys.exit(doctor())
+        elif sys.argv[1] == "testdeps":
+            sys.exit(install_test_deps())
+        elif sys.argv[1] == "test":
+            category = sys.argv[2] if len(sys.argv) > 2 else ""
+            sys.exit(run_tests(category))
         else:
             log(f"Unknown command: {sys.argv[1]}", RED)
             log("Usage:", YELLOW)
             log("  python setup.py           - Build the project", BLUE)
             log("  python setup.py run       - Run the application", BLUE)
             log("  python setup.py lint      - Run lint checks", BLUE)
+            log("  python setup.py doctor    - Run preflight checks (deploy/lint/startup smoke test)", BLUE)
             log("  python setup.py screenshot [path] - Capture app screenshot", BLUE)
             log("  python setup.py installer - Build WiX installer (.msi)", BLUE)
+            log("  python setup.py testdeps  - Install test dependencies", BLUE)
+            log("  python setup.py test [category] - Run tests", BLUE)
+            log("    Categories: integration, server, inference, tools", BLUE)
             sys.exit(1)
     sys.exit(main())
