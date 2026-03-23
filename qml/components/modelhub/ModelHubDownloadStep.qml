@@ -55,27 +55,27 @@ ModelHubCard {
             IconButton {
                 text: "Download selected"
                 iconName: "download"
-                enabled: !modelHubViewModel.downloadActive
+                enabled: !Boolean(modelHubViewModel.downloadActive)
                 onClicked: modelHubViewModel.startDownloadSelected()
             }
 
             IconButton {
                 text: "Download suggested"
                 iconName: "download"
-                enabled: !modelHubViewModel.downloadActive
+                enabled: !Boolean(modelHubViewModel.downloadActive)
                 onClicked: modelHubViewModel.downloadSuggested()
             }
 
             IconButton {
                 text: "Cancel"
                 iconName: "stop"
-                enabled: modelHubViewModel.downloadActive
+                enabled: Boolean(modelHubViewModel.downloadActive)
                 onClicked: modelHubViewModel.cancelDownload()
             }
         }
 
         Label {
-            text: "Selected file: " + (modelHubViewModel.selectedFilePath.length > 0 ? modelHubViewModel.selectedFilePath : "none")
+            text: "Selected file: " + ((modelHubViewModel.selectedFilePath || "").length > 0 ? modelHubViewModel.selectedFilePath : "none")
             color: tokens.textMuted
             Layout.fillWidth: true
             wrapMode: Text.Wrap
@@ -100,12 +100,12 @@ ModelHubCard {
             Layout.fillWidth: true
             from: 0
             to: 1
-            value: modelHubViewModel.downloadProgress
-            indeterminate: modelHubViewModel.downloadActive && modelHubViewModel.downloadProgress <= 0
+            value: Number(modelHubViewModel.downloadProgress) >= 0 ? Number(modelHubViewModel.downloadProgress) : 0
+            indeterminate: Boolean(modelHubViewModel.downloadActive) && Number(modelHubViewModel.downloadProgress) <= 0
         }
 
         Label {
-            text: modelHubViewModel.downloadStatus
+            text: modelHubViewModel.downloadStatus || ""
             color: tokens.textSecondary
             Layout.fillWidth: true
             wrapMode: Text.Wrap
@@ -119,7 +119,7 @@ ModelHubCard {
         }
 
         Label {
-            text: modelHubViewModel.downloadProgressDetails
+            text: modelHubViewModel.downloadProgressDetails || ""
             color: tokens.successColor
             Layout.fillWidth: true
             wrapMode: Text.Wrap
@@ -147,7 +147,7 @@ ModelHubCard {
 
             TextArea {
                 readOnly: true
-                text: modelHubViewModel.downloadDiagnostics
+                text: modelHubViewModel.downloadDiagnostics || ""
                 color: tokens.textSecondary
                 font.family: "monospace"
                 wrapMode: TextArea.WrapAnywhere

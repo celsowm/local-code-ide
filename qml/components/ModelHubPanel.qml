@@ -6,10 +6,10 @@ Item {
     id: root
 
     readonly property bool compact: width < 520
-    readonly property bool discoverComplete: modelHubViewModel.selectedRepoId.length > 0
-    readonly property bool chooseComplete: modelHubViewModel.selectedFilePath.length > 0
-    readonly property bool downloadComplete: modelHubViewModel.downloadedPath.length > 0 || modelHubViewModel.canUseSelectedAsCurrent
-    readonly property bool activateComplete: modelHubViewModel.hasCurrentLocalModel
+    readonly property bool discoverComplete: (modelHubViewModel.selectedRepoId || "").length > 0
+    readonly property bool chooseComplete: (modelHubViewModel.selectedFilePath || "").length > 0
+    readonly property bool downloadComplete: (modelHubViewModel.downloadedPath || "").length > 0 || !!modelHubViewModel.canUseSelectedAsCurrent
+    readonly property bool activateComplete: !!modelHubViewModel.hasCurrentLocalModel
 
     QtObject {
         id: themeTokens

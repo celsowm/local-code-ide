@@ -17,8 +17,8 @@ AssistantCard {
     }
 
     Label {
-        text: modelHubViewModel.currentLocalModelSummary
-        color: modelHubViewModel.hasCurrentLocalModel ? "#6a9955" : "#808080"
+        text: modelHubViewModel.currentLocalModelSummary || ""
+        color: !!modelHubViewModel.hasCurrentLocalModel ? "#6a9955" : "#808080"
         wrapMode: Text.WrapAnywhere
         Layout.fillWidth: true
     }
@@ -33,14 +33,14 @@ AssistantCard {
             to: 131072
             stepSize: 1024
             editable: true
-            value: modelHubViewModel.runtimeContextSize
+            value: Number(modelHubViewModel.runtimeContextSize) > 0 ? Number(modelHubViewModel.runtimeContextSize) : 4096
             onValueModified: modelHubViewModel.runtimeContextSize = value
         }
 
         Label { text: "server"; color: "#c5c5c5" }
         TextField {
             Layout.fillWidth: true
-            text: modelHubViewModel.serverBaseUrl
+            text: modelHubViewModel.serverBaseUrl || ""
             color: "#d4d4d4"
             background: Rectangle { color: "#181818"; radius: 4; border.color: "#3c3c3c" }
             onTextChanged: modelHubViewModel.serverBaseUrl = text
@@ -59,7 +59,7 @@ AssistantCard {
     }
 
     Label {
-        text: modelHubViewModel.currentLocalLaunchCommand
+        text: modelHubViewModel.currentLocalLaunchCommand || ""
         color: "#808080"
         wrapMode: Text.WrapAnywhere
         Layout.fillWidth: true
