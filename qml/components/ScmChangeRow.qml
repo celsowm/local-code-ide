@@ -94,6 +94,7 @@ Rectangle {
                 font.pixelSize: 12
                 implicitWidth: 24
                 implicitHeight: 24
+                enabled: root.viewModel && !root.viewModel.gitBusy
                 ToolTip.visible: hovered
                 ToolTip.text: root.staged ? "Unstage" : "Stage"
                 onClicked: root.staged ? root.viewModel.unstageGitPath(root.path) : root.viewModel.stageGitPath(root.path)
@@ -116,6 +117,7 @@ Rectangle {
                 implicitHeight: 24
                 ToolTip.visible: hovered
                 ToolTip.text: "Diff"
+                enabled: root.viewModel && !root.viewModel.gitDiffBusy
                 onClicked: root.viewModel.openGitDiff(root.path)
             }
 
@@ -126,7 +128,7 @@ Rectangle {
                 implicitHeight: 24
                 ToolTip.visible: hovered
                 ToolTip.text: "Discard"
-                enabled: !root.untracked
+                enabled: !root.untracked && root.viewModel && !root.viewModel.gitBusy
                 onClicked: root.viewModel.discardGitPath(root.path)
             }
         }

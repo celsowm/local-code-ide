@@ -52,6 +52,21 @@ public:
         const ide::services::interfaces::EditorPosition& position,
         int waitMs = 700
     );
+    int requestCompletionsAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position
+    );
+    int requestHoverAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position
+    );
+    int requestDefinitionAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position
+    );
 
 private slots:
     void onReadyReadStandardOutput();
@@ -60,20 +75,36 @@ private slots:
 signals:
     void diagnosticsPublished(const QString& filePath, int version, const QString& source);
     void serverStatusChanged(const QString& statusLine);
+    void completionsReady(int requestId,
+                          const QString& filePath,
+                          const std::vector<ide::services::interfaces::CompletionItem>& items);
+    void hoverReady(int requestId,
+                    const QString& filePath,
+                    const ide::services::interfaces::HoverInfo& info);
+    void definitionReady(int requestId,
+                         const QString& filePath,
+                         bool found,
+                         const ide::services::interfaces::DefinitionLocation& location);
 
 private:
+    struct PendingDocumentOpen {
+        QString filePath;
+        QString text;
+    };
+
     int sendRequest(const QString& method, const QJsonObject& params = {});
     void sendNotification(const QString& method, const QJsonObject& params = {});
     void sendMessage(const QJsonObject& message);
     void parseBufferedMessages();
     void handleMessage(const QJsonObject& message);
     void sendInitialize();
-    void ensureDocumentOpened(const QString& filePath, const QString& text);
+    bool ensureDocumentOpened(const QString& filePath, const QString& text, int version);
     void waitUntilInitialized(int waitMs = 800);
     QJsonObject waitForResponse(int requestId, int waitMs);
     QJsonObject makeTextDocumentPositionParams(const QString& filePath,
                                               const QString& text,
                                               const ide::services::interfaces::EditorPosition& position);
+    void flushPendingDocumentOpens();
 
     QString uriForPath(const QString& filePath) const;
     QString languageIdForPath(const QString& filePath) const;
@@ -97,6 +128,10 @@ private:
     QHash<QString, std::vector<ide::services::interfaces::Diagnostic>> m_diagnosticsByUri;
     QHash<QString, int> m_diagnosticVersionsByUri;
     QHash<int, QJsonObject> m_pendingResponses;
+    QHash<QString, PendingDocumentOpen> m_pendingDocumentOpensByUri;
+    QHash<int, QString> m_pendingCompletionByRequestId;
+    QHash<int, QString> m_pendingHoverByRequestId;
+    QHash<int, QString> m_pendingDefinitionByRequestId;
 };
 
 } // namespace ide::adapters::diagnostics

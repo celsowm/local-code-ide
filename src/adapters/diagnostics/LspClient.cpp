@@ -54,6 +54,16 @@ LspClient::LspClient(QString program, QStringList args, QObject* parent)
     , m_args(std::move(args)) {
     QObject::connect(&m_process, &QProcess::readyReadStandardOutput, this, &LspClient::onReadyReadStandardOutput);
     QObject::connect(&m_process, &QProcess::readyReadStandardError, this, &LspClient::onReadyReadStandardError);
+    QObject::connect(&m_process, &QProcess::started, this, [this]() {
+        sendInitialize();
+        emit serverStatusChanged(statusLine());
+    });
+    QObject::connect(&m_process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, [this](int, QProcess::ExitStatus) {
+        m_initialized = false;
+        m_openDocuments.clear();
+        m_pendingDocumentOpensByUri.clear();
+        emit serverStatusChanged(statusLine());
+    });
 }
 
 bool LspClient::ensureStarted() {
@@ -62,21 +72,12 @@ bool LspClient::ensureStarted() {
     }
 
     if (m_process.state() == QProcess::Running) {
-        if (!m_initialized) {
-            sendInitialize();
-        }
         return true;
     }
 
     m_process.start(m_program, m_args);
-    if (!m_process.waitForStarted(1000)) {
-        emit serverStatusChanged(statusLine());
-        return false;
-    }
-
-    sendInitialize();
     emit serverStatusChanged(statusLine());
-    return true;
+    return (m_process.state() != QProcess::NotRunning);
 }
 
 bool LspClient::isRunning() const {
@@ -101,12 +102,19 @@ int LspClient::publishDocument(const QString& filePath, const QString& text) {
         return -1;
     }
 
-    waitUntilInitialized();
-    ensureDocumentOpened(filePath, text);
-
     const QString uri = uriForPath(filePath);
-    const int nextVersion = m_documentVersions.value(uri, 1) + 1;
+    const int nextVersion = m_documentVersions.value(uri, 0) + 1;
     m_documentVersions.insert(uri, nextVersion);
+
+    if (!m_initialized) {
+        m_pendingDocumentOpensByUri.insert(uri, PendingDocumentOpen{filePath, text});
+        return nextVersion;
+    }
+
+    const bool justOpened = ensureDocumentOpened(filePath, text, nextVersion);
+    if (justOpened) {
+        return nextVersion;
+    }
 
     sendNotification("textDocument/didChange", QJsonObject{
         {"textDocument", QJsonObject{{"uri", uri}, {"version", nextVersion}}},
@@ -144,6 +152,10 @@ std::vector<CompletionItem> LspClient::requestCompletions(const QString& filePat
     if (!ensureStarted()) {
         return {};
     }
+    waitUntilInitialized();
+    if (!m_initialized) {
+        return {};
+    }
 
     publishDocument(filePath, text);
     const int requestId = sendRequest("textDocument/completion", makeTextDocumentPositionParams(filePath, text, position));
@@ -155,6 +167,10 @@ HoverInfo LspClient::requestHover(const QString& filePath,
                                   const EditorPosition& position,
                                   int waitMs) {
     if (!ensureStarted()) {
+        return {};
+    }
+    waitUntilInitialized();
+    if (!m_initialized) {
         return {};
     }
 
@@ -170,10 +186,65 @@ std::optional<DefinitionLocation> LspClient::requestDefinition(const QString& fi
     if (!ensureStarted()) {
         return std::nullopt;
     }
+    waitUntilInitialized();
+    if (!m_initialized) {
+        return std::nullopt;
+    }
 
     publishDocument(filePath, text);
     const int requestId = sendRequest("textDocument/definition", makeTextDocumentPositionParams(filePath, text, position));
     return parseDefinition(waitForResponse(requestId, waitMs).value("result"));
+}
+
+int LspClient::requestCompletionsAsync(const QString& filePath,
+                                       const QString& text,
+                                       const EditorPosition& position) {
+    if (!ensureStarted()) {
+        return -1;
+    }
+    if (!m_initialized) {
+        publishDocument(filePath, text);
+        return -1;
+    }
+    publishDocument(filePath, text);
+    const QString normalizedPath = QFileInfo(filePath).absoluteFilePath();
+    const int requestId = sendRequest("textDocument/completion", makeTextDocumentPositionParams(filePath, text, position));
+    m_pendingCompletionByRequestId.insert(requestId, normalizedPath);
+    return requestId;
+}
+
+int LspClient::requestHoverAsync(const QString& filePath,
+                                 const QString& text,
+                                 const EditorPosition& position) {
+    if (!ensureStarted()) {
+        return -1;
+    }
+    if (!m_initialized) {
+        publishDocument(filePath, text);
+        return -1;
+    }
+    publishDocument(filePath, text);
+    const QString normalizedPath = QFileInfo(filePath).absoluteFilePath();
+    const int requestId = sendRequest("textDocument/hover", makeTextDocumentPositionParams(filePath, text, position));
+    m_pendingHoverByRequestId.insert(requestId, normalizedPath);
+    return requestId;
+}
+
+int LspClient::requestDefinitionAsync(const QString& filePath,
+                                      const QString& text,
+                                      const EditorPosition& position) {
+    if (!ensureStarted()) {
+        return -1;
+    }
+    if (!m_initialized) {
+        publishDocument(filePath, text);
+        return -1;
+    }
+    publishDocument(filePath, text);
+    const QString normalizedPath = QFileInfo(filePath).absoluteFilePath();
+    const int requestId = sendRequest("textDocument/definition", makeTextDocumentPositionParams(filePath, text, position));
+    m_pendingDefinitionByRequestId.insert(requestId, normalizedPath);
+    return requestId;
 }
 
 void LspClient::onReadyReadStandardOutput() {
@@ -263,10 +334,31 @@ void LspClient::handleMessage(const QJsonObject& message) {
 
     if (message.contains("id")) {
         const int id = message.value("id").toInt();
+        if (m_pendingCompletionByRequestId.contains(id)) {
+            const QString filePath = m_pendingCompletionByRequestId.take(id);
+            emit completionsReady(id, filePath, parseCompletionItems(message.value("result")));
+            return;
+        }
+        if (m_pendingHoverByRequestId.contains(id)) {
+            const QString filePath = m_pendingHoverByRequestId.take(id);
+            emit hoverReady(id, filePath, parseHover(message.value("result")));
+            return;
+        }
+        if (m_pendingDefinitionByRequestId.contains(id)) {
+            const QString filePath = m_pendingDefinitionByRequestId.take(id);
+            const auto definition = parseDefinition(message.value("result"));
+            if (definition.has_value()) {
+                emit definitionReady(id, filePath, true, definition.value());
+            } else {
+                emit definitionReady(id, filePath, false, DefinitionLocation{});
+            }
+            return;
+        }
         m_pendingResponses.insert(id, message);
         if (!m_initialized && !message.contains("error")) {
             m_initialized = true;
             sendNotification("initialized", QJsonObject{});
+            flushPendingDocumentOpens();
             emit serverStatusChanged(statusLine());
         }
     }
@@ -288,22 +380,22 @@ void LspClient::sendInitialize() {
     });
 }
 
-void LspClient::ensureDocumentOpened(const QString& filePath, const QString& text) {
+bool LspClient::ensureDocumentOpened(const QString& filePath, const QString& text, int version) {
     const QString uri = uriForPath(filePath);
     if (m_openDocuments.contains(uri)) {
-        return;
+        return false;
     }
 
     m_openDocuments.insert(uri);
-    m_documentVersions.insert(uri, 1);
     sendNotification("textDocument/didOpen", QJsonObject{
         {"textDocument", QJsonObject{
             {"uri", uri},
             {"languageId", languageIdForPath(filePath)},
-            {"version", 1},
+            {"version", version},
             {"text", text}
         }}
     });
+    return true;
 }
 
 void LspClient::waitUntilInitialized(int waitMs) {
@@ -333,11 +425,27 @@ QJsonObject LspClient::waitForResponse(int requestId, int waitMs) {
 QJsonObject LspClient::makeTextDocumentPositionParams(const QString& filePath,
                                                       const QString& text,
                                                       const EditorPosition& position) {
-    ensureDocumentOpened(filePath, text);
+    const QString uri = uriForPath(filePath);
+    const int version = m_documentVersions.value(uri, 1);
+    ensureDocumentOpened(filePath, text, version);
     return QJsonObject{
-        {"textDocument", QJsonObject{{"uri", uriForPath(filePath)}}},
+        {"textDocument", QJsonObject{{"uri", uri}}},
         {"position", QJsonObject{{"line", qMax(0, position.line - 1)}, {"character", qMax(0, position.column - 1)}}}
     };
+}
+
+void LspClient::flushPendingDocumentOpens() {
+    if (!m_initialized || m_pendingDocumentOpensByUri.isEmpty()) {
+        return;
+    }
+
+    for (auto it = m_pendingDocumentOpensByUri.begin(); it != m_pendingDocumentOpensByUri.end(); ++it) {
+        const QString uri = it.key();
+        const PendingDocumentOpen& pending = it.value();
+        const int version = m_documentVersions.value(uri, 1);
+        ensureDocumentOpened(pending.filePath, pending.text, version);
+    }
+    m_pendingDocumentOpensByUri.clear();
 }
 
 QString LspClient::uriForPath(const QString& filePath) const {

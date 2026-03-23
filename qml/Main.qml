@@ -65,12 +65,12 @@ ApplicationWindow {
         Menu {
             title: "Code"
             Action { text: "Analyze"; icon.source: IconRegistry.source("analyze"); onTriggered: mainViewModel.analyzeNow() }
-            Action { text: "Complete"; icon.source: IconRegistry.source("complete"); onTriggered: mainViewModel.requestCompletionsAtCursor() }
-            Action { text: "Hover"; icon.source: IconRegistry.source("hover"); onTriggered: mainViewModel.requestHoverAtCursor() }
+            Action { text: "Complete"; icon.source: IconRegistry.source("complete"); enabled: !mainViewModel.codeIntelBusy; onTriggered: mainViewModel.requestCompletionsAtCursor() }
+            Action { text: "Hover"; icon.source: IconRegistry.source("hover"); enabled: !mainViewModel.codeIntelBusy; onTriggered: mainViewModel.requestHoverAtCursor() }
             Action {
                 text: "Definition"
                 icon.source: IconRegistry.source("definition")
-                enabled: mainViewModel.definitionAvailable
+                enabled: mainViewModel.definitionAvailable && !mainViewModel.codeIntelBusy
                 onTriggered: mainViewModel.requestDefinitionAtCursor()
             }
             Action { text: "Extract patch preview"; icon.source: IconRegistry.source("diff"); onTriggered: mainViewModel.extractPatchPreview() }
@@ -79,8 +79,8 @@ ApplicationWindow {
         }
         Menu {
             title: "Git"
-            Action { text: "Refresh"; icon.source: IconRegistry.source("refresh"); onTriggered: mainViewModel.refreshGitChanges() }
-            Action { text: "Commit"; icon.source: IconRegistry.source("apply_patch"); onTriggered: mainViewModel.commitGitChanges() }
+            Action { text: "Refresh"; icon.source: IconRegistry.source("refresh"); enabled: !mainViewModel.gitBusy; onTriggered: mainViewModel.refreshGitChanges() }
+            Action { text: "Commit"; icon.source: IconRegistry.source("apply_patch"); enabled: !mainViewModel.gitBusy; onTriggered: mainViewModel.commitGitChanges() }
         }
         Menu {
             title: "Models"

@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <functional>
 
 namespace ide::services {
 
@@ -20,6 +21,18 @@ public:
     std::optional<interfaces::DefinitionLocation> definition(const QString& filePath,
                                                              const QString& text,
                                                              const interfaces::EditorPosition& position);
+    void completionsAsync(const QString& filePath,
+                          const QString& text,
+                          const interfaces::EditorPosition& position,
+                          std::function<void(std::vector<interfaces::CompletionItem>)> onReady);
+    void hoverAsync(const QString& filePath,
+                    const QString& text,
+                    const interfaces::EditorPosition& position,
+                    std::function<void(interfaces::HoverInfo)> onReady);
+    void definitionAsync(const QString& filePath,
+                         const QString& text,
+                         const interfaces::EditorPosition& position,
+                         std::function<void(std::optional<interfaces::DefinitionLocation>)> onReady);
     QString providerName() const;
 
 private:

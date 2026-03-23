@@ -73,10 +73,11 @@ int LanguageServerHub::publishDocument(const QString& filePath, const QString& t
     state.clientKey = active.key;
     state.expectedVersion = version;
     RuntimeStatus runtime;
-    runtime.lspReady = true;
+    const QString clientStatus = active.client->statusLine();
+    runtime.lspReady = clientStatus.contains(QStringLiteral(" running"));
     runtime.languageId = languageId;
     runtime.providerLabel = active.providerLabel;
-    runtime.statusLine = QStringLiteral("%1: LSP ready (%2)").arg(languageId, active.providerLabel);
+    runtime.statusLine = QStringLiteral("%1: %2").arg(languageId, clientStatus);
     state.runtime = runtime;
     m_documentStatesByPath.insert(path, state);
     setRuntimeStatus(path, runtime);
@@ -114,6 +115,72 @@ std::optional<DefinitionLocation> LanguageServerHub::definition(const QString& f
         return std::nullopt;
     }
     return m_clientsByKey.value(state->clientKey)->requestDefinition(normalizedPath(filePath), text, position);
+}
+
+void LanguageServerHub::completionsAsync(const QString& filePath,
+                                         const QString& text,
+                                         const EditorPosition& position,
+                                         std::function<void(std::vector<CompletionItem>)> onReady) {
+    const int publishedVersion = publishDocument(filePath, text);
+    const DocumentState* state = documentStateFor(filePath);
+    if (!state || !state->runtime.lspReady || publishedVersion < 0 || !m_clientsByKey.contains(state->clientKey)) {
+        if (onReady) {
+            onReady({});
+        }
+        return;
+    }
+    const int requestId = m_clientsByKey.value(state->clientKey)->requestCompletionsAsync(normalizedPath(filePath), text, position);
+    if (requestId < 0) {
+        if (onReady) {
+            onReady({});
+        }
+        return;
+    }
+    m_pendingCompletionCallbacks.insert(pendingRequestKey(state->clientKey, requestId), std::move(onReady));
+}
+
+void LanguageServerHub::hoverAsync(const QString& filePath,
+                                   const QString& text,
+                                   const EditorPosition& position,
+                                   std::function<void(HoverInfo)> onReady) {
+    const int publishedVersion = publishDocument(filePath, text);
+    const DocumentState* state = documentStateFor(filePath);
+    if (!state || !state->runtime.lspReady || publishedVersion < 0 || !m_clientsByKey.contains(state->clientKey)) {
+        if (onReady) {
+            onReady({});
+        }
+        return;
+    }
+    const int requestId = m_clientsByKey.value(state->clientKey)->requestHoverAsync(normalizedPath(filePath), text, position);
+    if (requestId < 0) {
+        if (onReady) {
+            onReady({});
+        }
+        return;
+    }
+    m_pendingHoverCallbacks.insert(pendingRequestKey(state->clientKey, requestId), std::move(onReady));
+}
+
+void LanguageServerHub::definitionAsync(const QString& filePath,
+                                        const QString& text,
+                                        const EditorPosition& position,
+                                        std::function<void(std::optional<DefinitionLocation>)> onReady) {
+    const int publishedVersion = publishDocument(filePath, text);
+    const DocumentState* state = documentStateFor(filePath);
+    if (!state || !state->runtime.lspReady || publishedVersion < 0 || !m_clientsByKey.contains(state->clientKey)) {
+        if (onReady) {
+            onReady(std::nullopt);
+        }
+        return;
+    }
+    const int requestId = m_clientsByKey.value(state->clientKey)->requestDefinitionAsync(normalizedPath(filePath), text, position);
+    if (requestId < 0) {
+        if (onReady) {
+            onReady(std::nullopt);
+        }
+        return;
+    }
+    m_pendingDefinitionCallbacks.insert(pendingRequestKey(state->clientKey, requestId), std::move(onReady));
 }
 
 LanguageServerHub::RuntimeStatus LanguageServerHub::runtimeStatus(const QString& filePathOrLanguageId) const {
@@ -203,6 +270,39 @@ LanguageServerHub::ActiveClient LanguageServerHub::ensureClient(const ide::servi
             setRuntimeStatus(it.key(), runtime);
         }
     });
+    connect(client.get(), &ide::adapters::diagnostics::LspClient::completionsReady, this,
+            [this, key](int requestId, const QString&, const std::vector<CompletionItem>& items) {
+        const QString callbackKey = pendingRequestKey(key, requestId);
+        if (!m_pendingCompletionCallbacks.contains(callbackKey)) {
+            return;
+        }
+        auto callback = m_pendingCompletionCallbacks.take(callbackKey);
+        if (callback) {
+            callback(items);
+        }
+    });
+    connect(client.get(), &ide::adapters::diagnostics::LspClient::hoverReady, this,
+            [this, key](int requestId, const QString&, const HoverInfo& info) {
+        const QString callbackKey = pendingRequestKey(key, requestId);
+        if (!m_pendingHoverCallbacks.contains(callbackKey)) {
+            return;
+        }
+        auto callback = m_pendingHoverCallbacks.take(callbackKey);
+        if (callback) {
+            callback(info);
+        }
+    });
+    connect(client.get(), &ide::adapters::diagnostics::LspClient::definitionReady, this,
+            [this, key](int requestId, const QString&, bool found, const DefinitionLocation& location) {
+        const QString callbackKey = pendingRequestKey(key, requestId);
+        if (!m_pendingDefinitionCallbacks.contains(callbackKey)) {
+            return;
+        }
+        auto callback = m_pendingDefinitionCallbacks.take(callbackKey);
+        if (callback) {
+            callback(found ? std::optional<DefinitionLocation>{location} : std::nullopt);
+        }
+    });
 
     m_clientsByKey.insert(key, client);
     return {client, key, spec.source.isEmpty() ? QFileInfo(spec.command).fileName() : spec.source};
@@ -225,6 +325,10 @@ const LanguageServerHub::DocumentState* LanguageServerHub::documentStateFor(cons
     const QString path = normalizedPath(filePath);
     auto it = m_documentStatesByPath.find(path);
     return it == m_documentStatesByPath.end() ? nullptr : &it.value();
+}
+
+QString LanguageServerHub::pendingRequestKey(const QString& clientKey, int requestId) const {
+    return QStringLiteral("%1|%2").arg(clientKey, QString::number(requestId));
 }
 
 } // namespace ide::services

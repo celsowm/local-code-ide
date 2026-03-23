@@ -173,6 +173,7 @@ Rectangle {
                         TextField {
                             Layout.fillWidth: true
                             text: mainViewModel.terminalCommand
+                            enabled: !mainViewModel.terminalBusy
                             color: WorkbenchTheme.textPrimary
                             placeholderText: "Enter a command"
                             onTextChanged: mainViewModel.terminalCommand = text
@@ -186,8 +187,16 @@ Rectangle {
                         }
 
                         Button {
-                            text: "Run"
+                            text: mainViewModel.terminalBusy ? "Running..." : "Run"
+                            enabled: !mainViewModel.terminalBusy
                             onClicked: mainViewModel.runTerminalCommand()
+                        }
+
+                        BusyIndicator {
+                            running: mainViewModel.terminalBusy
+                            visible: running
+                            Layout.preferredWidth: 18
+                            Layout.preferredHeight: 18
                         }
                     }
 

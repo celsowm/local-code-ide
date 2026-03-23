@@ -12,6 +12,7 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $StagingDir = Join-Path $OutputDir "staging"
 $ReleaseDir = Join-Path $BuildDir "Release"
 $InstallerDir = Join-Path $ProjectRoot "installer"
+$AppIconSource = Join-Path $ProjectRoot "assets\local-code-ide-logo.ico"
 $OutputMsi = Join-Path $OutputDir "LocalCodeIDE-${Version}.msi"
 
 # WiX variables
@@ -50,6 +51,11 @@ if (Test-Path $StagingDir) {
     Remove-Item -Recurse -Force $StagingDir
 }
 Copy-Item -Recurse -Force $ReleaseDir $StagingDir
+if (Test-Path $AppIconSource) {
+    Copy-Item -Force $AppIconSource (Join-Path $StagingDir "local-code-ide-logo.ico")
+} else {
+    Write-Host "WARNING: App icon not found at $AppIconSource" -ForegroundColor Yellow
+}
 
 # Verify required files
 $requiredFiles = @(
@@ -60,6 +66,7 @@ $requiredFiles = @(
     "Qt6Quick.dll",
     "Qt6Network.dll",
     "plugins\platforms\qwindows.dll",
+    "local-code-ide-logo.ico",
     "language-packs\manifest.json",
     "language-packs\windows\rust-analyzer\rust-analyzer.cmd",
     "language-packs\linux\rust-analyzer\rust-analyzer.sh",

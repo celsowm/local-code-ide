@@ -5,16 +5,14 @@
 #include <QFileInfo>
 #include <QProcessEnvironment>
 #include <QRegularExpression>
+#include <QStandardPaths>
 
 namespace ide::adapters::modelhub {
 
 HfCliDownloadBackend::HfCliDownloadBackend(QObject* parent)
     : IFileDownloadBackend(parent) {
-    QProcess probe;
-    probe.setProgram(QStringLiteral("hf"));
-    probe.setArguments({QStringLiteral("version")});
-    probe.start();
-    m_available = probe.waitForStarted(1200) && probe.waitForFinished(2500) && probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0;
+    // Fast non-blocking availability check for startup path.
+    m_available = !QStandardPaths::findExecutable(QStringLiteral("hf")).trimmed().isEmpty();
 
     connect(&m_process, &QProcess::started, this, [this]() {
         setPhase(QStringLiteral("downloading"));

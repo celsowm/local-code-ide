@@ -14,6 +14,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 90
             text: mainViewModel.chatInput
+            enabled: !mainViewModel.aiBusy
             placeholderText: "Explain an error, propose refactor, generate test, suggest diff, or ask to read/create/edit/search..."
             color: "#d4d4d4"
             wrapMode: TextArea.Wrap
@@ -26,8 +27,16 @@ Item {
             spacing: 8
 
             Button {
-                text: "Ask"
+                text: mainViewModel.aiBusy ? "Asking..." : "Ask"
+                enabled: !mainViewModel.aiBusy
                 onClicked: mainViewModel.askAssistant()
+            }
+
+            BusyIndicator {
+                running: mainViewModel.aiBusy
+                visible: running
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 20
             }
 
             Label {

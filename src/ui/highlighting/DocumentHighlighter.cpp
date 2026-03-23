@@ -1,6 +1,7 @@
 #include "ui/highlighting/DocumentHighlighter.hpp"
 
 #include <QQuickTextDocument>
+#include <QSet>
 #include <QTextDocument>
 #include <QVariantMap>
 
@@ -80,7 +81,22 @@ void DocumentHighlighter::rebuildHighlighter() {
     }
 
     m_cppHighlighter = std::make_unique<CppSyntaxHighlighter>(document);
-    const bool lexicalEnabled = (m_language == "cpp" || m_language == "c" || m_language == "rust");
+    static const QSet<QString> lexicalLanguages = {
+        QStringLiteral("cpp"),
+        QStringLiteral("c"),
+        QStringLiteral("rust"),
+        QStringLiteral("python"),
+        QStringLiteral("typescript"),
+        QStringLiteral("javascript"),
+        QStringLiteral("qml"),
+        QStringLiteral("json"),
+        QStringLiteral("yaml"),
+        QStringLiteral("toml"),
+        QStringLiteral("ini"),
+        QStringLiteral("powershell"),
+        QStringLiteral("markdown")
+    };
+    const bool lexicalEnabled = lexicalLanguages.contains(m_language.toLower());
     m_cppHighlighter->setLexicalHighlightingEnabled(lexicalEnabled);
     setDiagnostics(m_diagnostics);
 }

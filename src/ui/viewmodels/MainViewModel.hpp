@@ -45,19 +45,23 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString codeIntelProviderName READ codeIntelProviderName CONSTANT)
     Q_PROPERTY(QString aiBackendName READ aiBackendName CONSTANT)
     Q_PROPERTY(QString aiBackendStatusLine READ aiBackendStatusLine NOTIFY aiSettingsChanged)
+    Q_PROPERTY(bool aiBusy READ aiBusy NOTIFY aiBusyChanged)
     Q_PROPERTY(QString editorTabTitle READ editorTabTitle NOTIFY currentPathChanged)
     Q_PROPERTY(int diagnosticsCount READ diagnosticsCount NOTIFY diagnosticsCountChanged)
     Q_PROPERTY(int workspaceFileCount READ workspaceFileCount NOTIFY workspaceChanged)
     Q_PROPERTY(bool workspaceLoading READ workspaceLoading NOTIFY workspaceLoadingChanged)
     Q_PROPERTY(QString workspaceLoadingText READ workspaceLoadingText NOTIFY workspaceLoadingChanged)
     Q_PROPERTY(int searchResultCount READ searchResultCount NOTIFY searchResultsChanged)
+    Q_PROPERTY(bool searchBusy READ searchBusy NOTIFY searchBusyChanged)
     Q_PROPERTY(int completionCount READ completionCount NOTIFY completionsChanged)
+    Q_PROPERTY(bool codeIntelBusy READ codeIntelBusy NOTIFY codeIntelBusyChanged)
     Q_PROPERTY(QString workspaceRootPath READ workspaceRootPath WRITE setWorkspaceRootPath NOTIFY workspaceChanged)
     Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern NOTIFY searchPatternChanged)
     Q_PROPERTY(QString hoverText READ hoverText NOTIFY hoverTextChanged)
     Q_PROPERTY(QString definitionText READ definitionText NOTIFY definitionTextChanged)
     Q_PROPERTY(QString terminalCommand READ terminalCommand WRITE setTerminalCommand NOTIFY terminalCommandChanged)
     Q_PROPERTY(QString terminalOutput READ terminalOutput NOTIFY terminalOutputChanged)
+    Q_PROPERTY(bool terminalBusy READ terminalBusy NOTIFY terminalBusyChanged)
     Q_PROPERTY(QString terminalBackendName READ terminalBackendName CONSTANT)
     Q_PROPERTY(QString aiSystemPrompt READ aiSystemPrompt WRITE setAiSystemPrompt NOTIFY aiSettingsChanged)
     Q_PROPERTY(double aiTemperature READ aiTemperature WRITE setAiTemperature NOTIFY aiSettingsChanged)
@@ -121,6 +125,8 @@ class MainViewModel final : public QObject {
 
     Q_PROPERTY(QString gitSummary READ gitSummary NOTIFY gitSummaryChanged)
     Q_PROPERTY(QString gitBranchLabel READ gitBranchLabel NOTIFY gitSummaryChanged)
+    Q_PROPERTY(bool gitBusy READ gitBusy NOTIFY gitOperationStateChanged)
+    Q_PROPERTY(bool gitDiffBusy READ gitDiffBusy NOTIFY gitOperationStateChanged)
 
     Q_PROPERTY(bool splitEditorVisible READ splitEditorVisible NOTIFY splitEditorChanged)
     Q_PROPERTY(bool diffEditorVisible READ diffEditorVisible NOTIFY splitEditorChanged)
@@ -165,12 +171,15 @@ public:
     QString codeIntelProviderName() const;
     QString aiBackendName() const;
     QString aiBackendStatusLine() const;
+    bool aiBusy() const;
     int diagnosticsCount() const;
     int workspaceFileCount() const;
     bool workspaceLoading() const;
     QString workspaceLoadingText() const;
     int searchResultCount() const;
+    bool searchBusy() const;
     int completionCount() const;
+    bool codeIntelBusy() const;
     int relevantContextCount() const;
 
     QString workspaceRootPath() const;
@@ -185,6 +194,7 @@ public:
     QString terminalCommand() const;
     void setTerminalCommand(const QString& command);
     QString terminalOutput() const;
+    bool terminalBusy() const;
     QString terminalBackendName() const;
 
     QString aiSystemPrompt() const;
@@ -270,6 +280,8 @@ public:
 
     QString gitSummary() const;
     QString gitBranchLabel() const;
+    bool gitBusy() const;
+    bool gitDiffBusy() const;
 
     bool splitEditorVisible() const;
     bool diffEditorVisible() const;
@@ -335,6 +347,7 @@ public:
     Q_INVOKABLE void discardGitPath(const QString& path);
     Q_INVOKABLE void openGitDiff(const QString& path);
     Q_INVOKABLE void commitGitChanges();
+    Q_INVOKABLE void refreshGitChanges();
     Q_INVOKABLE void toggleSecondaryAiSidebar();
     Q_INVOKABLE void showAssistantSidebar();
     Q_INVOKABLE void showModelsSidebar();
@@ -352,12 +365,16 @@ signals:
     void workspaceLoadingChanged();
     void searchPatternChanged();
     void searchResultsChanged();
+    void searchBusyChanged();
     void hoverTextChanged();
     void definitionTextChanged();
     void terminalCommandChanged();
     void terminalOutputChanged();
+    void terminalBusyChanged();
     void completionsChanged();
+    void codeIntelBusyChanged();
     void aiSettingsChanged();
+    void aiBusyChanged();
     void relevantContextChanged();
     void patchPreviewChanged();
     void splitEditorChanged();
@@ -370,6 +387,7 @@ signals:
     void bottomPanelChanged();
     void scmCommitMessageChanged();
     void gitSummaryChanged();
+    void gitOperationStateChanged();
     void quickOpenRequested();
     void toastChanged();
 
@@ -383,6 +401,9 @@ private:
 
     QString diagnosticsSummary() const;
     void updateStatusMessage(const QString& message);
+    void refreshActivityStatus();
+    QString currentActivityStatusMessage() const;
+    void applyActivityStatusMessage(const QString& activityMessage);
     void applyDiagnostics(const std::vector<ide::services::interfaces::Diagnostic>& diagnostics);
     void showToast(const QString& message);
     void setDocumentSample(const QString& path, const QString& text);
@@ -445,8 +466,21 @@ private:
     ide::services::PatchPreview m_patchPreview;
     std::vector<ide::services::interfaces::WorkspaceFile> m_workspaceFiles;
     int m_workspaceRefreshGeneration = 0;
+    int m_relevantContextRefreshGeneration = 0;
+    int m_searchGeneration = 0;
+    int m_terminalGeneration = 0;
+    int m_gitDiffGeneration = 0;
+    int m_codeIntelGeneration = 0;
+    int m_assistantRequestGeneration = 0;
+    bool m_aiBusy = false;
     bool m_workspaceLoading = false;
+    bool m_searchBusy = false;
+    bool m_terminalBusy = false;
+    bool m_gitDiffBusy = false;
+    bool m_codeIntelBusy = false;
     QString m_workspaceLoadingText;
+    QString m_lastExplicitStatusMessage;
+    bool m_activityStatusActive = false;
 };
 
 } // namespace ide::ui::viewmodels

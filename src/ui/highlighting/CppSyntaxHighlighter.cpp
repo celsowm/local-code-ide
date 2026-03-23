@@ -52,6 +52,7 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument* parent)
     m_rules.push_back({QRegularExpression("\"[^\"]*\""), stringFormat});
     m_rules.push_back({QRegularExpression("'[^']*'"), stringFormat});
     m_rules.push_back({QRegularExpression("//[^\\n]*"), commentFormat});
+    m_rules.push_back({QRegularExpression("#[^\\n]*"), commentFormat});
     m_rules.push_back({QRegularExpression("\\b[0-9]+\\b"), numberFormat});
     m_rules.push_back({QRegularExpression("^\\s*#[^\\n]*"), preprocessorFormat});
 

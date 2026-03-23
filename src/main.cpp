@@ -38,8 +38,10 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QTimer>
 #include <QtQuickControls2/QQuickStyle>
 #include <QtQml>
 #include <utility>
@@ -64,6 +66,7 @@ int main(int argc, char* argv[]) {
     }
 
     QApplication app(argc, argv);
+    app.setWindowIcon(QIcon(QStringLiteral(":/qt/qml/LocalCodeIDE/assets/local-code-ide-logo-normalized.png")));
     QQmlApplicationEngine engine;
 
     auto documentService = std::make_unique<ide::services::DocumentService>();
@@ -190,12 +193,6 @@ int main(int argc, char* argv[]) {
     const QString workspaceFromEnv = envOrDefault("LOCALCODEIDE_WORKSPACE", QDir::currentPath());
     const QString modelHubAuthor = envOrDefault("LOCALCODEIDE_HF_AUTHOR", QStringLiteral("bartowski"));
     const QString modelHubDownloadDir = envOrDefault("LOCALCODEIDE_HF_DOWNLOAD_DIR");
-    mainViewModel->setWorkspaceRootPath(workspaceFromEnv);
-    modelHubViewModel->setAuthor(modelHubAuthor);
-    if (!modelHubDownloadDir.isEmpty()) {
-        modelHubViewModel->setTargetDownloadDir(modelHubDownloadDir);
-    }
-    modelHubViewModel->searchRepos();
 
     qmlRegisterType<ide::ui::highlighting::DocumentHighlighter>("LocalCodeIDE.Highlighting", 1, 0, "DocumentHighlighter");
 
@@ -215,6 +212,24 @@ int main(int argc, char* argv[]) {
         qCritical("Failed to load QML!");
         return -1;
     }
+
+    // Defer startup-heavy work until the UI is already up.
+    QTimer::singleShot(0, &app, [mainVm = mainViewModel.get(),
+                                 modelHubVm = modelHubViewModel.get(),
+                                 workspaceFromEnv,
+                                 modelHubAuthor,
+                                 modelHubDownloadDir]() {
+        if (mainVm) {
+            mainVm->setWorkspaceRootPath(workspaceFromEnv);
+        }
+        if (modelHubVm) {
+            modelHubVm->setAuthor(modelHubAuthor);
+            if (!modelHubDownloadDir.isEmpty()) {
+                modelHubVm->setTargetDownloadDir(modelHubDownloadDir);
+            }
+            modelHubVm->searchRepos();
+        }
+    });
 
     return app.exec();
 }

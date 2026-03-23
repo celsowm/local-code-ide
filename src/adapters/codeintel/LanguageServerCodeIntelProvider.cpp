@@ -52,6 +52,73 @@ std::optional<DefinitionLocation> LanguageServerCodeIntelProvider::definition(co
     return m_hub->definition(filePath, text, position);
 }
 
+void LanguageServerCodeIntelProvider::completionsAsync(
+    const QString& filePath,
+    const QString& text,
+    const EditorPosition& position,
+    std::function<void(std::vector<CompletionItem>)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    if (!m_hub) {
+        onReady(basicCompletions(text));
+        return;
+    }
+
+    m_hub->completionsAsync(filePath, text, position, [this, text, onReady = std::move(onReady)](std::vector<CompletionItem> items) mutable {
+        if (items.empty()) {
+            onReady(basicCompletions(text));
+            return;
+        }
+        onReady(std::move(items));
+    });
+}
+
+void LanguageServerCodeIntelProvider::hoverAsync(
+    const QString& filePath,
+    const QString& text,
+    const EditorPosition& position,
+    std::function<void(HoverInfo)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    if (!m_hub) {
+        HoverInfo info;
+        info.contents = QStringLiteral("Basic mode: language server unavailable.");
+        onReady(std::move(info));
+        return;
+    }
+
+    m_hub->hoverAsync(filePath, text, position, [this, filePath, onReady = std::move(onReady)](HoverInfo info) mutable {
+        if (!info.contents.trimmed().isEmpty()) {
+            onReady(std::move(info));
+            return;
+        }
+
+        const auto status = m_hub->runtimeStatus(filePath);
+        HoverInfo fallback;
+        fallback.contents = status.statusLine.isEmpty()
+            ? QStringLiteral("Basic mode: language server unavailable for this file.")
+            : QStringLiteral("Basic mode: %1").arg(status.statusLine);
+        onReady(std::move(fallback));
+    });
+}
+
+void LanguageServerCodeIntelProvider::definitionAsync(
+    const QString& filePath,
+    const QString& text,
+    const EditorPosition& position,
+    std::function<void(std::optional<DefinitionLocation>)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    if (!m_hub) {
+        onReady(std::nullopt);
+        return;
+    }
+    m_hub->definitionAsync(filePath, text, position, std::move(onReady));
+}
+
 QString LanguageServerCodeIntelProvider::name() const {
     return QStringLiteral("Language Server Hub Code Intel");
 }
@@ -91,4 +158,3 @@ std::vector<CompletionItem> LanguageServerCodeIntelProvider::basicCompletions(co
 }
 
 } // namespace ide::adapters::codeintel
-

@@ -19,13 +19,20 @@ Item {
             TextField {
                 Layout.fillWidth: true
                 text: root.viewModel ? root.viewModel.searchPattern : ""
+                enabled: root.viewModel && !root.viewModel.searchBusy
                 placeholderText: "find in workspace"
                 color: "#d4d4d4"
                 background: Rectangle { color: "#1e1e1e"; radius: 4; border.color: "#3c3c3c" }
                 onTextChanged: if (root.viewModel) root.viewModel.searchPattern = text
                 onAccepted: if (root.viewModel) root.viewModel.runSearch()
             }
-            Button { text: "Go"; enabled: !!root.viewModel; onClicked: if (root.viewModel) root.viewModel.runSearch() }
+            Button { text: root.viewModel && root.viewModel.searchBusy ? "Searching..." : "Go"; enabled: !!root.viewModel && !root.viewModel.searchBusy; onClicked: if (root.viewModel) root.viewModel.runSearch() }
+            BusyIndicator {
+                running: root.viewModel && root.viewModel.searchBusy
+                visible: running
+                Layout.preferredWidth: 18
+                Layout.preferredHeight: 18
+            }
         }
 
         Label { text: (root.viewModel ? root.viewModel.searchResultCount : 0) + " results"; color: "#808080" }

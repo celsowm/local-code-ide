@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QFutureWatcher>
 #include <QMetaObject>
+#include <QTimer>
 #include <QUrl>
 #include <QtGlobal>
 #include <QtConcurrent/QtConcurrentRun>
@@ -18,6 +19,34 @@
 namespace ide::ui::viewmodels {
 
 namespace {
+struct RelevantContextComputationResult {
+    std::vector<ide::services::RelevantContextFile> files;
+    QString rendered;
+};
+
+struct AssistantExecutionResult {
+    QString response;
+    QStringList touchedPaths;
+    int pendingApprovalCount = 0;
+    int toolCallCount = 0;
+};
+
+struct SearchExecutionResult {
+    std::vector<ide::services::interfaces::SearchResult> results;
+};
+
+struct TerminalExecutionResult {
+    ide::services::interfaces::TerminalResult terminalResult;
+};
+
+struct GitDiffExecutionResult {
+    QString path;
+    QString title;
+    QString original;
+    QString modified;
+    bool empty = false;
+};
+
 QString inferLanguageId(const QString& path) {
     const QString lower = path.toLower();
     if (lower.endsWith(".rs") || lower.endsWith(".ron")) return "rust";
@@ -40,6 +69,24 @@ QString displayTitleForPath(const QString& path) {
 
 QString normalized(const QString& text) {
     return text.trimmed().toLower();
+}
+
+bool isTransientDiagnosticsStatus(const QString& line) {
+    const QString lowered = line.trimmed().toLower();
+    if (lowered.isEmpty()) {
+        return false;
+    }
+    if (lowered.contains(QStringLiteral("ready")) || lowered.contains(QStringLiteral("basic mode"))) {
+        return false;
+    }
+    return lowered.contains(QStringLiteral("starting")) ||
+           lowered.contains(QStringLiteral("initializ")) ||
+           lowered.contains(QStringLiteral("launch")) ||
+           lowered.contains(QStringLiteral("install")) ||
+           lowered.contains(QStringLiteral("download")) ||
+           lowered.contains(QStringLiteral("index")) ||
+           lowered.contains(QStringLiteral("analyz")) ||
+           lowered.contains(QStringLiteral("wait"));
 }
 
 QString loadTextFile(const QString& path) {
@@ -136,7 +183,18 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
     connect(&m_editorManager, &EditorManager::gitChanged, this, &MainViewModel::gitChanged);
     
     connect(&m_gitViewModel, &GitViewModel::gitSummaryChanged, this, &MainViewModel::gitSummaryChanged);
-    connect(&m_gitViewModel, &GitViewModel::gitChanged, this, &MainViewModel::gitChanged);
+    connect(&m_gitViewModel, &GitViewModel::gitChanged, this, [this]() {
+        m_workspaceTreeModel.setGitChanges(m_gitViewModel.currentChanges());
+        emit gitChanged();
+    });
+    connect(&m_gitViewModel, &GitViewModel::busyChanged, this, [this]() {
+        emit gitOperationStateChanged();
+        refreshActivityStatus();
+    });
+    connect(&m_gitViewModel, &GitViewModel::operationCompleted, this,
+            [this](const QString&, const QString&, bool, const QString& message) {
+        updateStatusMessage(message);
+    });
     connect(&m_gitViewModel, &GitViewModel::scmCommitMessageChanged, this, &MainViewModel::scmCommitMessageChanged);
     
     connect(&m_uiStateManager, &UiStateManager::primaryViewIndexChanged, this, &MainViewModel::primaryViewIndexChanged);
@@ -166,19 +224,22 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
                 [this](const QString& line) {
             m_diagnosticsStatusLine = line;
             emit diagnosticsStatusChanged();
+            refreshActivityStatus();
         });
         connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::providerLabelChanged, this,
                 [this](const QString& label) {
             m_diagnosticsProviderName = label;
             emit diagnosticsStatusChanged();
+            refreshActivityStatus();
         });
         connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::toastRequested, this, &MainViewModel::showToast);
     }
 
     refreshWorkspace();
     refreshPendingApprovals();
-    analyzeNow();
+    QTimer::singleShot(0, this, [this]() { analyzeNow(); });
     updateStatusMessage("LocalCodeIDE v3.3 workbench loaded.");
+    refreshActivityStatus();
 }
 
 QString MainViewModel::editorText() const { return m_documentService->currentDocument().text(); }
@@ -218,12 +279,15 @@ bool MainViewModel::definitionAvailable() const {
 QString MainViewModel::codeIntelProviderName() const { return m_codeIntelService->providerName(); }
 QString MainViewModel::aiBackendName() const { return m_aiService->backendName(); }
 QString MainViewModel::aiBackendStatusLine() const { return m_aiService->backendStatusLine(); }
+bool MainViewModel::aiBusy() const { return m_aiBusy; }
 int MainViewModel::diagnosticsCount() const { return m_diagnosticsModel.diagnosticCount(); }
 int MainViewModel::workspaceFileCount() const { return m_workspaceFilesModel.fileCount(); }
 bool MainViewModel::workspaceLoading() const { return m_workspaceLoading; }
 QString MainViewModel::workspaceLoadingText() const { return m_workspaceLoadingText; }
 int MainViewModel::searchResultCount() const { return m_searchResultsModel.resultCount(); }
+bool MainViewModel::searchBusy() const { return m_searchBusy; }
 int MainViewModel::completionCount() const { return m_completionModel.itemCount(); }
+bool MainViewModel::codeIntelBusy() const { return m_codeIntelBusy; }
 int MainViewModel::relevantContextCount() const { return m_relevantContextModel.fileCount(); }
 
 QString MainViewModel::workspaceRootPath() const { return m_workspaceRootPath; }
@@ -251,6 +315,7 @@ void MainViewModel::setTerminalCommand(const QString& command) {
     emit terminalCommandChanged();
 }
 QString MainViewModel::terminalOutput() const { return m_terminalOutput; }
+bool MainViewModel::terminalBusy() const { return m_terminalBusy; }
 QString MainViewModel::terminalBackendName() const { return m_terminalService->backendName(); }
 
 QString MainViewModel::aiSystemPrompt() const { return m_aiService->systemPrompt(); }
@@ -351,6 +416,8 @@ void MainViewModel::setScmCommitMessage(const QString& value) { m_gitViewModel.s
 
 QString MainViewModel::gitSummary() const { return m_gitViewModel.gitSummary(); }
 QString MainViewModel::gitBranchLabel() const { return m_gitViewModel.gitBranchLabel(); }
+bool MainViewModel::gitBusy() const { return m_gitViewModel.busy(); }
+bool MainViewModel::gitDiffBusy() const { return m_gitDiffBusy; }
 
 bool MainViewModel::splitEditorVisible() const { return m_editorManager.splitEditorVisible(); }
 bool MainViewModel::diffEditorVisible() const { return m_editorManager.diffEditorVisible(); }
@@ -375,21 +442,74 @@ void MainViewModel::analyzeNow() {
 }
 
 void MainViewModel::askAssistant() {
-    refreshRelevantContext();
-    m_chatResponse = m_aiService->ask(m_chatInput, m_workspaceRootPath, currentPath(), editorText(), diagnosticsSummary(), gitSummary(), m_renderedWorkspaceContext);
-    emit chatResponseChanged();
-    syncAfterToolRun(m_aiService->lastToolTouchedPaths());
-    extractPatchPreview();
-    refreshPendingApprovals();
-    emit aiSettingsChanged();
-
-    if (pendingApprovalCount() > 0) {
-        updateStatusMessage(QString("%1 tool(s) aguardando aprovação manual.").arg(QString::number(pendingApprovalCount())));
-    } else if (toolCallCount() > 0) {
-        updateStatusMessage(QString("Resposta gerada via %1 com %2 tool call(s).").arg(aiBackendName(), QString::number(toolCallCount())));
-    } else {
-        updateStatusMessage(QString("Resposta gerada via %1.").arg(aiBackendName()));
+    if (m_aiBusy) {
+        updateStatusMessage(QStringLiteral("Assistant request already running."));
+        return;
     }
+
+    refreshRelevantContext();
+    const QString prompt = m_chatInput;
+    const QString workspaceRoot = m_workspaceRootPath;
+    const QString filePath = currentPath();
+    const QString text = editorText();
+    const QString diagnosticsText = diagnosticsSummary();
+    const QString gitText = gitSummary();
+    const QString workspaceContextText = m_renderedWorkspaceContext;
+    const QString backendNameSnapshot = aiBackendName();
+    const int generation = ++m_assistantRequestGeneration;
+
+    m_aiBusy = true;
+    emit aiBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QStringLiteral("Assistant is generating a response..."));
+
+    auto* watcher = new QFutureWatcher<AssistantExecutionResult>(this);
+    connect(watcher, &QFutureWatcher<AssistantExecutionResult>::finished, this,
+            [this, watcher, generation, backendNameSnapshot]() {
+        const AssistantExecutionResult result = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_assistantRequestGeneration) {
+            return;
+        }
+
+        m_chatResponse = result.response;
+        emit chatResponseChanged();
+        syncAfterToolRun(result.touchedPaths);
+        extractPatchPreview();
+        refreshPendingApprovals();
+        emit aiSettingsChanged();
+
+        m_aiBusy = false;
+        emit aiBusyChanged();
+        refreshActivityStatus();
+
+        if (result.pendingApprovalCount > 0) {
+            updateStatusMessage(QString("%1 tool(s) waiting for manual approval.").arg(QString::number(result.pendingApprovalCount)));
+        } else if (result.toolCallCount > 0) {
+            updateStatusMessage(QString("Response generated via %1 with %2 tool call(s).")
+                                    .arg(backendNameSnapshot, QString::number(result.toolCallCount)));
+        } else {
+            updateStatusMessage(QString("Response generated via %1.").arg(backendNameSnapshot));
+        }
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, prompt, workspaceRoot, filePath, text, diagnosticsText, gitText, workspaceContextText]() {
+        AssistantExecutionResult result;
+        result.response = m_aiService->ask(
+            prompt,
+            workspaceRoot,
+            filePath,
+            text,
+            diagnosticsText,
+            gitText,
+            workspaceContextText
+        );
+        result.touchedPaths = m_aiService->lastToolTouchedPaths();
+        result.pendingApprovalCount = m_aiService->pendingApprovalCount();
+        result.toolCallCount = m_aiService->lastToolCallCount();
+        return result;
+    }));
 }
 
 void MainViewModel::saveCurrent() {
@@ -567,10 +687,42 @@ void MainViewModel::collapseWorkspaceFolders() {
 }
 
 void MainViewModel::runSearch() {
-    const auto results = m_searchService->search(m_workspaceRootPath, m_searchPattern);
-    m_searchResultsModel.setResults(results);
-    emit searchResultsChanged();
-    updateStatusMessage(QString("Busca retornou %1 resultado(s).").arg(QString::number(searchResultCount())));
+    if (m_searchBusy) {
+        updateStatusMessage(QStringLiteral("Search already running."));
+        return;
+    }
+
+    const QString workspaceRoot = m_workspaceRootPath;
+    const QString pattern = m_searchPattern;
+    const int generation = ++m_searchGeneration;
+    m_searchBusy = true;
+    emit searchBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QStringLiteral("Searching workspace..."));
+
+    auto* watcher = new QFutureWatcher<SearchExecutionResult>(this);
+    connect(watcher, &QFutureWatcher<SearchExecutionResult>::finished, this, [this, watcher, generation]() {
+        const SearchExecutionResult result = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_searchGeneration) {
+            return;
+        }
+
+        m_searchResultsModel.setResults(result.results);
+        emit searchResultsChanged();
+
+        m_searchBusy = false;
+        emit searchBusyChanged();
+        refreshActivityStatus();
+        updateStatusMessage(QString("Search returned %1 result(s).").arg(QString::number(searchResultCount())));
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, workspaceRoot, pattern]() {
+        SearchExecutionResult result;
+        result.results = m_searchService->search(workspaceRoot, pattern);
+        return result;
+    }));
 }
 
 void MainViewModel::openSearchResult(const QString& path, int line, int column) { goToDocumentLocation(path, line, column); }
@@ -581,19 +733,81 @@ void MainViewModel::setCursorPosition(int line, int column) {
 }
 
 void MainViewModel::requestCompletionsAtCursor() {
+    if (m_codeIntelBusy) {
+        updateStatusMessage(QStringLiteral("Code intel request already running."));
+        return;
+    }
+
     const ide::services::interfaces::EditorPosition position{m_cursorLine, m_cursorColumn};
-    auto items = m_codeIntelService->completions(currentPath(), editorText(), position);
-    m_completionModel.setItems(std::move(items));
-    emit completionsChanged();
-    updateStatusMessage(QString("Completion requested at %1:%2 via %3.")
-                            .arg(QString::number(m_cursorLine), QString::number(m_cursorColumn), codeIntelProviderName()));
+    const QString path = currentPath();
+    const QString text = editorText();
+    const int line = m_cursorLine;
+    const int column = m_cursorColumn;
+    const int generation = ++m_codeIntelGeneration;
+    m_codeIntelBusy = true;
+    emit codeIntelBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QString("Completion requested at %1:%2 via %3...")
+                            .arg(QString::number(line), QString::number(column), codeIntelProviderName()));
+
+    m_codeIntelService->completionsAsync(path, text, position, [this, generation, line, column](std::vector<ide::services::interfaces::CompletionItem> items) {
+        if (generation != m_codeIntelGeneration) {
+            return;
+        }
+        m_completionModel.setItems(std::move(items));
+        emit completionsChanged();
+        m_codeIntelBusy = false;
+        emit codeIntelBusyChanged();
+        refreshActivityStatus();
+        updateStatusMessage(QString("Completion ready at %1:%2 via %3.")
+                                .arg(QString::number(line), QString::number(column), codeIntelProviderName()));
+    });
+    QTimer::singleShot(2000, this, [this, generation]() {
+        if (generation == m_codeIntelGeneration && m_codeIntelBusy) {
+            m_codeIntelBusy = false;
+            emit codeIntelBusyChanged();
+            refreshActivityStatus();
+            updateStatusMessage(QStringLiteral("Completion request timed out."));
+        }
+    });
 }
 
 void MainViewModel::requestHoverAtCursor() {
+    if (m_codeIntelBusy) {
+        updateStatusMessage(QStringLiteral("Code intel request already running."));
+        return;
+    }
+
     const ide::services::interfaces::EditorPosition position{m_cursorLine, m_cursorColumn};
-    m_hoverText = m_codeIntelService->hover(currentPath(), editorText(), position).contents;
-    emit hoverTextChanged();
-    updateStatusMessage(QString("Hover requested at %1:%2.").arg(QString::number(m_cursorLine), QString::number(m_cursorColumn)));
+    const QString path = currentPath();
+    const QString text = editorText();
+    const int line = m_cursorLine;
+    const int column = m_cursorColumn;
+    const int generation = ++m_codeIntelGeneration;
+    m_codeIntelBusy = true;
+    emit codeIntelBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QString("Hover requested at %1:%2...").arg(QString::number(line), QString::number(column)));
+
+    m_codeIntelService->hoverAsync(path, text, position, [this, generation, line, column](ide::services::interfaces::HoverInfo info) {
+        if (generation != m_codeIntelGeneration) {
+            return;
+        }
+        m_hoverText = info.contents;
+        emit hoverTextChanged();
+        m_codeIntelBusy = false;
+        emit codeIntelBusyChanged();
+        refreshActivityStatus();
+        updateStatusMessage(QString("Hover ready at %1:%2.").arg(QString::number(line), QString::number(column)));
+    });
+    QTimer::singleShot(2000, this, [this, generation]() {
+        if (generation == m_codeIntelGeneration && m_codeIntelBusy) {
+            m_codeIntelBusy = false;
+            emit codeIntelBusyChanged();
+            refreshActivityStatus();
+            updateStatusMessage(QStringLiteral("Hover request timed out."));
+        }
+    });
 }
 
 void MainViewModel::requestDefinitionAtCursor() {
@@ -604,23 +818,86 @@ void MainViewModel::requestDefinitionAtCursor() {
         return;
     }
     const ide::services::interfaces::EditorPosition position{m_cursorLine, m_cursorColumn};
-    const auto location = m_codeIntelService->definition(currentPath(), editorText(), position);
-    if (!location) {
-        m_definitionText = QStringLiteral("Definition not found at the current cursor position.");
-        emit definitionTextChanged();
-        updateStatusMessage(m_definitionText);
+    if (m_codeIntelBusy) {
+        updateStatusMessage(QStringLiteral("Code intel request already running."));
         return;
     }
-    m_definitionText = QString("%1:%2:%3").arg(location->path, QString::number(location->line), QString::number(location->column));
-    emit definitionTextChanged();
-    goToDocumentLocation(location->path, location->line, location->column);
+
+    const QString path = currentPath();
+    const QString text = editorText();
+    const int generation = ++m_codeIntelGeneration;
+    m_codeIntelBusy = true;
+    emit codeIntelBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QString("Definition requested at %1:%2...").arg(QString::number(m_cursorLine), QString::number(m_cursorColumn)));
+
+    m_codeIntelService->definitionAsync(path, text, position, [this, generation](std::optional<ide::services::interfaces::DefinitionLocation> location) {
+        if (generation != m_codeIntelGeneration) {
+            return;
+        }
+        m_codeIntelBusy = false;
+        emit codeIntelBusyChanged();
+        refreshActivityStatus();
+        if (!location) {
+            m_definitionText = QStringLiteral("Definition not found at the current cursor position.");
+            emit definitionTextChanged();
+            updateStatusMessage(m_definitionText);
+            return;
+        }
+        m_definitionText = QString("%1:%2:%3").arg(location->path, QString::number(location->line), QString::number(location->column));
+        emit definitionTextChanged();
+        goToDocumentLocation(location->path, location->line, location->column);
+    });
+    QTimer::singleShot(2000, this, [this, generation]() {
+        if (generation == m_codeIntelGeneration && m_codeIntelBusy) {
+            m_codeIntelBusy = false;
+            emit codeIntelBusyChanged();
+            refreshActivityStatus();
+            updateStatusMessage(QStringLiteral("Definition request timed out."));
+        }
+    });
 }
 
 void MainViewModel::runTerminalCommand() {
-    const auto result = m_terminalService->run(m_workspaceRootPath, m_terminalCommand);
-    m_terminalOutput = QString("$ %1\n(exit=%2)\n%3").arg(result.command, QString::number(result.exitCode), result.output);
-    emit terminalOutputChanged();
-    updateStatusMessage(QString("Command executed via %1.").arg(terminalBackendName()));
+    if (m_terminalBusy) {
+        updateStatusMessage(QStringLiteral("Terminal command already running."));
+        return;
+    }
+
+    const QString workspaceRoot = m_workspaceRootPath;
+    const QString command = m_terminalCommand;
+    const int generation = ++m_terminalGeneration;
+    m_terminalBusy = true;
+    emit terminalBusyChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QString("Running command via %1...").arg(terminalBackendName()));
+
+    auto* watcher = new QFutureWatcher<TerminalExecutionResult>(this);
+    connect(watcher, &QFutureWatcher<TerminalExecutionResult>::finished, this, [this, watcher, generation]() {
+        const TerminalExecutionResult result = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_terminalGeneration) {
+            return;
+        }
+
+        m_terminalOutput = QString("$ %1\n(exit=%2)\n%3")
+                               .arg(result.terminalResult.command,
+                                    QString::number(result.terminalResult.exitCode),
+                                    result.terminalResult.output);
+        emit terminalOutputChanged();
+
+        m_terminalBusy = false;
+        emit terminalBusyChanged();
+        refreshActivityStatus();
+        updateStatusMessage(QString("Command executed via %1.").arg(terminalBackendName()));
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, workspaceRoot, command]() {
+        TerminalExecutionResult result;
+        result.terminalResult = m_terminalService->run(workspaceRoot, command);
+        return result;
+    }));
 }
 
 void MainViewModel::dismissToast() {
@@ -642,12 +919,37 @@ void MainViewModel::refreshRelevantContext() {
         m_aiService->workspaceContextChars(),
         qMax(512, m_aiService->workspaceContextChars() / qMax(1, m_aiService->workspaceContextMaxFiles()))
     };
-    const auto files = m_workspaceContextService.collect(m_workspaceRootPath, currentPath(), m_chatInput, m_workspaceFiles, options);
-    m_renderedWorkspaceContext = m_workspaceContextService.render(files, m_aiService->workspaceContextChars());
-    m_relevantContextModel.setFiles(files);
-    m_relevantContextSummary = QString("%1 file(s) selected · %2 chars budget").arg(QString::number(relevantContextCount()), QString::number(m_aiService->workspaceContextChars()));
-    emit relevantContextChanged();
-    emit aiSettingsChanged();
+    const QString workspaceRoot = m_workspaceRootPath;
+    const QString currentDocumentPath = currentPath();
+    const QString prompt = m_chatInput;
+    const auto workspaceFilesSnapshot = m_workspaceFiles;
+    const int maxContextChars = m_aiService->workspaceContextChars();
+    const int generation = ++m_relevantContextRefreshGeneration;
+
+    auto* watcher = new QFutureWatcher<RelevantContextComputationResult>(this);
+    connect(watcher, &QFutureWatcher<RelevantContextComputationResult>::finished, this,
+            [this, watcher, generation, maxContextChars]() {
+        const RelevantContextComputationResult result = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_relevantContextRefreshGeneration) {
+            return;
+        }
+
+        m_renderedWorkspaceContext = result.rendered;
+        m_relevantContextModel.setFiles(result.files);
+        m_relevantContextSummary = QString("%1 file(s) selected · %2 chars budget")
+            .arg(QString::number(static_cast<int>(result.files.size())), QString::number(maxContextChars));
+        emit relevantContextChanged();
+        emit aiSettingsChanged();
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, workspaceRoot, currentDocumentPath, prompt, workspaceFilesSnapshot, options, maxContextChars]() {
+        RelevantContextComputationResult result;
+        result.files = m_workspaceContextService.collect(workspaceRoot, currentDocumentPath, prompt, workspaceFilesSnapshot, options);
+        result.rendered = m_workspaceContextService.render(result.files, maxContextChars);
+        return result;
+    }));
 }
 
 void MainViewModel::extractPatchPreview() {
@@ -819,40 +1121,103 @@ void MainViewModel::closeOpenEditor(const QString& path) {
 }
 
 void MainViewModel::stageGitPath(const QString& path) {
+    if (m_gitViewModel.busy()) {
+        updateStatusMessage(QStringLiteral("Git operation already running."));
+        return;
+    }
     m_gitViewModel.stage(m_workspaceRootPath, path);
-    updateStatusMessage(QString("Staged %1").arg(path));
+    updateStatusMessage(QString("Staging %1...").arg(path));
 }
 
 void MainViewModel::unstageGitPath(const QString& path) {
+    if (m_gitViewModel.busy()) {
+        updateStatusMessage(QStringLiteral("Git operation already running."));
+        return;
+    }
     m_gitViewModel.unstage(m_workspaceRootPath, path);
-    updateStatusMessage(QString("Unstaged %1").arg(path));
+    updateStatusMessage(QString("Unstaging %1...").arg(path));
 }
 
 void MainViewModel::discardGitPath(const QString& path) {
+    if (m_gitViewModel.busy()) {
+        updateStatusMessage(QStringLiteral("Git operation already running."));
+        return;
+    }
     m_gitViewModel.discard(m_workspaceRootPath, path);
-    updateStatusMessage(QString("Discarded changes in %1").arg(path));
+    updateStatusMessage(QString("Discarding changes in %1...").arg(path));
 }
 
 void MainViewModel::openGitDiff(const QString& path) {
-    const QString absolutePath = QDir(m_workspaceRootPath).filePath(path);
-    const QString original = m_gitViewModel.headFileContent(m_workspaceRootPath, path);
-    QString modified = QFileInfo(absolutePath).absoluteFilePath() == QFileInfo(currentPath()).absoluteFilePath() ? editorText() : loadTextFile(absolutePath);
-    if (original.isEmpty() && modified.isEmpty()) {
-        updateStatusMessage(QString("No diff available for %1").arg(path));
+    if (m_gitDiffBusy) {
+        updateStatusMessage(QStringLiteral("Diff already loading."));
         return;
     }
-    m_editorManager.setupDiffView(displayTitleForPath(path), 
-        original.isEmpty() ? QStringLiteral("<new file or unavailable in HEAD>\n") : original, 
-        modified);
-    updateStatusMessage(QString("Opened diff for %1").arg(path));
+
+    const QString relativePath = path;
+    const QString workspaceRoot = m_workspaceRootPath;
+    const QString absolutePath = QDir(workspaceRoot).filePath(relativePath);
+    const QString activePath = QFileInfo(currentPath()).absoluteFilePath();
+    const QString activeText = editorText();
+    const int generation = ++m_gitDiffGeneration;
+
+    m_gitDiffBusy = true;
+    emit gitOperationStateChanged();
+    refreshActivityStatus();
+    updateStatusMessage(QString("Loading diff for %1...").arg(relativePath));
+
+    auto* watcher = new QFutureWatcher<GitDiffExecutionResult>(this);
+    connect(watcher, &QFutureWatcher<GitDiffExecutionResult>::finished, this, [this, watcher, generation, relativePath]() {
+        const GitDiffExecutionResult result = watcher->result();
+        watcher->deleteLater();
+
+        if (generation != m_gitDiffGeneration) {
+            return;
+        }
+
+        m_gitDiffBusy = false;
+        emit gitOperationStateChanged();
+        refreshActivityStatus();
+
+        if (result.empty) {
+            updateStatusMessage(QString("No diff available for %1").arg(relativePath));
+            return;
+        }
+
+        m_editorManager.setupDiffView(
+            result.title,
+            result.original.isEmpty() ? QStringLiteral("<new file or unavailable in HEAD>\n") : result.original,
+            result.modified
+        );
+        updateStatusMessage(QString("Opened diff for %1").arg(relativePath));
+    });
+
+    watcher->setFuture(QtConcurrent::run([this, relativePath, workspaceRoot, absolutePath, activePath, activeText]() {
+        GitDiffExecutionResult result;
+        result.path = relativePath;
+        result.title = displayTitleForPath(relativePath);
+        result.original = m_gitViewModel.headFileContent(workspaceRoot, relativePath);
+        result.modified = QFileInfo(absolutePath).absoluteFilePath() == activePath ? activeText : loadTextFile(absolutePath);
+        result.empty = result.original.isEmpty() && result.modified.isEmpty();
+        return result;
+    }));
 }
 
 void MainViewModel::commitGitChanges() {
-    if (m_gitViewModel.commit(m_workspaceRootPath)) {
-        updateStatusMessage(QStringLiteral("Commit created."));
-    } else {
-        updateStatusMessage(QStringLiteral("Failed to create commit."));
+    if (m_gitViewModel.busy()) {
+        updateStatusMessage(QStringLiteral("Git operation already running."));
+        return;
     }
+    m_gitViewModel.commit(m_workspaceRootPath);
+    updateStatusMessage(QStringLiteral("Creating commit..."));
+}
+
+void MainViewModel::refreshGitChanges() {
+    if (m_gitViewModel.busy()) {
+        updateStatusMessage(QStringLiteral("Git operation running. Refresh will happen automatically."));
+        return;
+    }
+    refreshGitState();
+    updateStatusMessage(QStringLiteral("Refreshing source control..."));
 }
 
 void MainViewModel::toggleSecondaryAiSidebar() {
@@ -876,8 +1241,78 @@ void MainViewModel::showModelsSidebar() {
 QString MainViewModel::diagnosticsSummary() const { return m_diagnosticsModel.summaryText(); }
 
 void MainViewModel::updateStatusMessage(const QString& message) {
+    if (message.trimmed().isEmpty()) {
+        return;
+    }
+    m_lastExplicitStatusMessage = message;
+    if (m_activityStatusActive) {
+        return;
+    }
+    if (m_statusMessage == message) {
+        return;
+    }
     m_statusMessage = message;
     emit statusMessageChanged();
+}
+
+QString MainViewModel::currentActivityStatusMessage() const {
+    if (m_workspaceLoading) {
+        const QString detail = m_workspaceLoadingText.trimmed().isEmpty()
+            ? QStringLiteral("Indexing workspace files...")
+            : m_workspaceLoadingText.trimmed();
+        return QStringLiteral("Workspace: %1").arg(detail);
+    }
+    if (m_gitViewModel.busy()) {
+        return QStringLiteral("Source Control: running Git operation...");
+    }
+    if (m_gitDiffBusy) {
+        return QStringLiteral("Source Control: loading diff...");
+    }
+    if (m_searchBusy) {
+        return QStringLiteral("Search: scanning workspace...");
+    }
+    if (m_terminalBusy) {
+        return QStringLiteral("Terminal: running command...");
+    }
+    if (m_codeIntelBusy) {
+        return QStringLiteral("Code Intelligence: querying language server...");
+    }
+    if (m_aiBusy) {
+        return QStringLiteral("Assistant: generating response...");
+    }
+    if (isTransientDiagnosticsStatus(m_diagnosticsStatusLine)) {
+        return QStringLiteral("Diagnostics: %1").arg(m_diagnosticsStatusLine.trimmed());
+    }
+    return {};
+}
+
+void MainViewModel::applyActivityStatusMessage(const QString& activityMessage) {
+    if (activityMessage.trimmed().isEmpty()) {
+        if (!m_activityStatusActive) {
+            return;
+        }
+        m_activityStatusActive = false;
+        const QString fallback = m_lastExplicitStatusMessage.trimmed().isEmpty()
+            ? QStringLiteral("Ready.")
+            : m_lastExplicitStatusMessage;
+        if (m_statusMessage == fallback) {
+            return;
+        }
+        m_statusMessage = fallback;
+        emit statusMessageChanged();
+        return;
+    }
+
+    if (m_activityStatusActive && m_statusMessage == activityMessage) {
+        return;
+    }
+    m_activityStatusActive = true;
+    m_statusMessage = activityMessage;
+    emit statusMessageChanged();
+}
+
+void MainViewModel::refreshActivityStatus() {
+    applyActivityStatusMessage(currentActivityStatusMessage());
 }
 
 void MainViewModel::applyDiagnostics(const std::vector<ide::services::interfaces::Diagnostic>& diagnostics) {
@@ -1005,7 +1440,6 @@ void MainViewModel::rebuildCommandPalette(const QString& query) {
 
 void MainViewModel::refreshGitState() {
     m_gitViewModel.refresh(m_workspaceRootPath);
-    m_workspaceTreeModel.setGitChanges(m_gitService->listChanges(m_workspaceRootPath));
 }
 
 void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
@@ -1017,6 +1451,7 @@ void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
         m_workspaceLoading = false;
         m_workspaceLoadingText.clear();
         emit workspaceLoadingChanged();
+        refreshActivityStatus();
         return;
     }
 
@@ -1026,6 +1461,7 @@ void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
         ? QStringLiteral("Indexing workspace files...")
         : statusHint.trimmed();
     emit workspaceLoadingChanged();
+    refreshActivityStatus();
 
     auto* watcher = new QFutureWatcher<std::vector<ide::services::interfaces::WorkspaceFile>>(this);
     connect(watcher, &QFutureWatcher<std::vector<ide::services::interfaces::WorkspaceFile>>::finished, this,
@@ -1037,17 +1473,45 @@ void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
             return;
         }
 
-        m_workspaceFiles = files;
-        rebuildWorkspaceModels();
-        emit workspaceChanged();
-        refreshRelevantContext();
-        refreshPendingApprovals();
-        rebuildCommandPalette(QString());
-        refreshGitState();
-        m_workspaceLoading = false;
-        m_workspaceLoadingText.clear();
+        m_workspaceLoadingText = QStringLiteral("Finalizing workspace view... 99%");
         emit workspaceLoadingChanged();
-        updateStatusMessage(QString("Workspace indexed: %1 files.").arg(QString::number(workspaceFileCount())));
+        refreshActivityStatus();
+
+        QTimer::singleShot(0, this, [this, generation, files]() {
+            if (generation != m_workspaceRefreshGeneration || !m_workspaceLoading) {
+                return;
+            }
+            m_workspaceFiles = files;
+            rebuildWorkspaceModels();
+            emit workspaceChanged();
+
+            m_workspaceLoadingText = QStringLiteral("Finalizing workspace view... 100%");
+            emit workspaceLoadingChanged();
+            refreshActivityStatus();
+
+            QTimer::singleShot(0, this, [this, generation]() {
+                if (generation != m_workspaceRefreshGeneration || !m_workspaceLoading) {
+                    return;
+                }
+                refreshPendingApprovals();
+                rebuildCommandPalette(QString());
+
+                m_workspaceLoading = false;
+                m_workspaceLoadingText.clear();
+                emit workspaceLoadingChanged();
+                refreshActivityStatus();
+                updateStatusMessage(QString("Workspace indexed: %1 files.").arg(QString::number(workspaceFileCount())));
+
+                // Heavier tasks after overlay closes, to avoid "Not Responding" perception.
+                QTimer::singleShot(0, this, [this, generation]() {
+                    if (generation != m_workspaceRefreshGeneration) {
+                        return;
+                    }
+                    refreshRelevantContext();
+                    refreshGitState();
+                });
+            });
+        });
     });
 
     watcher->setFuture(QtConcurrent::run([this, rootPath, generation]() {
@@ -1060,11 +1524,15 @@ void MainViewModel::startWorkspaceRefresh(const QString& statusHint) {
                 if (totalCount > 0) {
                     percent = qBound(0, (indexedCount * 100) / totalCount, 100);
                 }
+                if (indexedCount < totalCount) {
+                    percent = qMin(percent, 99);
+                }
                 m_workspaceLoadingText = QString("Indexing workspace files... %1% (%2 / %3 files)")
                     .arg(QString::number(percent),
                          QString::number(indexedCount),
                          QString::number(totalCount));
                 emit workspaceLoadingChanged();
+                refreshActivityStatus();
             }, Qt::QueuedConnection);
         });
     }));

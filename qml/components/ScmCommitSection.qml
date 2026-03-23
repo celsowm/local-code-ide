@@ -21,6 +21,7 @@ Rectangle {
         TextField {
             Layout.fillWidth: true
             text: root.viewModel ? root.viewModel.scmCommitMessage : ""
+            enabled: root.viewModel && !root.viewModel.gitBusy
             placeholderText: "Message (Ctrl+Enter to commit staged changes)"
             color: "#d4d4d4"
             selectByMouse: true
@@ -43,9 +44,16 @@ Rectangle {
 
             Button {
                 id: commitButton
-                text: "Commit"
-                enabled: root.viewModel && root.viewModel.gitStagedCount > 0 && root.viewModel.scmCommitMessage.trim().length > 0
+                text: root.viewModel && root.viewModel.gitBusy ? "Working..." : "Commit"
+                enabled: root.viewModel && !root.viewModel.gitBusy && root.viewModel.gitStagedCount > 0 && root.viewModel.scmCommitMessage.trim().length > 0
                 onClicked: if (root.viewModel) root.viewModel.commitGitChanges()
+            }
+
+            BusyIndicator {
+                running: root.viewModel && root.viewModel.gitBusy
+                visible: running
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 20
             }
 
             Label {

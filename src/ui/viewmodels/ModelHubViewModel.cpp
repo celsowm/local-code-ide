@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QSet>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QUrl>
 #include <limits>
 #include <utility>
@@ -85,7 +86,7 @@ ModelHubViewModel::ModelHubViewModel(std::unique_ptr<ide::services::ModelCatalog
     });
 
     loadUiState();
-    refreshHardware();
+    QTimer::singleShot(0, this, [this]() { refreshHardware(); });
 }
 
 QString ModelHubViewModel::author() const { return m_author; }

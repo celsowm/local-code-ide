@@ -11,6 +11,8 @@ Rectangle {
 
     property int completionSelectedIndex: 0
     property bool completionPopupDismissed: false
+    property bool syncingPrimaryText: false
+    property bool syncingSecondaryText: false
 
     function cursorLine(text, pos) {
         const head = text.substring(0, pos)
@@ -70,6 +72,40 @@ Rectangle {
     Connections {
         target: mainViewModel
 
+        function onEditorTextChanged() {
+            if (!editor) {
+                return
+            }
+            const nextText = mainViewModel.editorText
+            if (editor.text === nextText) {
+                return
+            }
+            const oldCursor = editor.cursorPosition
+            root.syncingPrimaryText = true
+            editor.text = nextText
+            editor.cursorPosition = Math.min(oldCursor, editor.length)
+            root.syncingPrimaryText = false
+        }
+
+        function onCurrentPathChanged() {
+            onEditorTextChanged()
+        }
+
+        function onSplitEditorChanged() {
+            if (!secondaryEditor) {
+                return
+            }
+            const nextText = mainViewModel.secondaryEditorText
+            if (secondaryEditor.text === nextText) {
+                return
+            }
+            const oldCursor = secondaryEditor.cursorPosition
+            root.syncingSecondaryText = true
+            secondaryEditor.text = nextText
+            secondaryEditor.cursorPosition = Math.min(oldCursor, secondaryEditor.length)
+            root.syncingSecondaryText = false
+        }
+
         function onCompletionsChanged() {
             completionPopupDismissed = false
             completionSelectedIndex = 0
@@ -119,6 +155,7 @@ Rectangle {
 
                 ToolButton {
                     display: AbstractButton.IconOnly
+                    enabled: !mainViewModel.codeIntelBusy
                     icon.source: IconRegistry.source("complete")
                     icon.width: 16
                     icon.height: 16
@@ -353,7 +390,7 @@ Rectangle {
 
                                 TextArea {
                                     id: editor
-                                    text: mainViewModel.editorText
+                                    text: ""
                                     color: WorkbenchTheme.textPrimary
                                     selectionColor: WorkbenchTheme.selection
                                     selectedTextColor: "#ffffff"
@@ -362,8 +399,13 @@ Rectangle {
                                     font.pixelSize: 14
                                     persistentSelection: true
                                     background: Rectangle { color: WorkbenchTheme.editorBackground }
+                                    Component.onCompleted: text = mainViewModel.editorText
 
-                                    onTextChanged: mainViewModel.editorText = text
+                                    onTextChanged: {
+                                        if (!root.syncingPrimaryText) {
+                                            mainViewModel.editorText = text
+                                        }
+                                    }
                                     onCursorPositionChanged: {
                                         mainViewModel.setCursorPosition(root.cursorLine(text, cursorPosition), root.cursorColumn(text, cursorPosition))
                                     }
@@ -486,7 +528,7 @@ Rectangle {
 
                             TextArea {
                                 id: secondaryEditor
-                                text: mainViewModel.secondaryEditorText
+                                text: ""
                                 color: WorkbenchTheme.textPrimary
                                 selectionColor: WorkbenchTheme.selection
                                 selectedTextColor: "#ffffff"
@@ -495,7 +537,12 @@ Rectangle {
                                 font.pixelSize: 14
                                 persistentSelection: true
                                 background: Rectangle { color: WorkbenchTheme.editorAltBackground }
-                                onTextChanged: mainViewModel.secondaryEditorText = text
+                                Component.onCompleted: text = mainViewModel.secondaryEditorText
+                                onTextChanged: {
+                                    if (!root.syncingSecondaryText) {
+                                        mainViewModel.secondaryEditorText = text
+                                    }
+                                }
                             }
                         }
                     }

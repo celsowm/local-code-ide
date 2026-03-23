@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <functional>
 #include <memory>
 
 namespace ide::services {
@@ -44,6 +45,24 @@ public:
         const QString& text,
         const ide::services::interfaces::EditorPosition& position
     );
+    void completionsAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position,
+        std::function<void(std::vector<ide::services::interfaces::CompletionItem>)> onReady
+    );
+    void hoverAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position,
+        std::function<void(ide::services::interfaces::HoverInfo)> onReady
+    );
+    void definitionAsync(
+        const QString& filePath,
+        const QString& text,
+        const ide::services::interfaces::EditorPosition& position,
+        std::function<void(std::optional<ide::services::interfaces::DefinitionLocation>)> onReady
+    );
     RuntimeStatus runtimeStatus(const QString& filePathOrLanguageId) const;
     QString languageIdForPath(const QString& filePath) const;
 
@@ -75,6 +94,7 @@ private:
     ActiveClient ensureClient(const ide::services::LanguagePackService::ServerSpec& spec);
     void setRuntimeStatus(const QString& filePath, const RuntimeStatus& status);
     const DocumentState* documentStateFor(const QString& filePath) const;
+    QString pendingRequestKey(const QString& clientKey, int requestId) const;
 
     LanguagePackService* m_languagePackService = nullptr;
     QString m_globalOverrideCommand;
@@ -85,6 +105,9 @@ private:
     QHash<QString, RuntimeStatus> m_statusByLanguage;
     QHash<QString, std::vector<ide::services::interfaces::Diagnostic>> m_diagnosticsByPath;
     QHash<QString, std::shared_ptr<ide::adapters::diagnostics::LspClient>> m_clientsByKey;
+    QHash<QString, std::function<void(std::vector<ide::services::interfaces::CompletionItem>)>> m_pendingCompletionCallbacks;
+    QHash<QString, std::function<void(ide::services::interfaces::HoverInfo)>> m_pendingHoverCallbacks;
+    QHash<QString, std::function<void(std::optional<ide::services::interfaces::DefinitionLocation>)>> m_pendingDefinitionCallbacks;
 };
 
 } // namespace ide::services

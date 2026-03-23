@@ -13,7 +13,13 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml QuickControls2 Widgets N
 qt_standard_project_setup(REQUIRES 6.5)
 qt_policy(SET QTP0004 NEW)
 
+set(APP_ICON_RESOURCE)
+if(WIN32)
+    set(APP_ICON_RESOURCE src/app_icon.rc)
+endif()
+
 qt_add_executable(LocalCodeIDE
+    ${APP_ICON_RESOURCE}
     src/main.cpp
     src/core/Document.cpp
 
@@ -200,6 +206,7 @@ qt_add_qml_module(LocalCodeIDE
         qml/assets/icons/filetypes/readme.svg
         qml/assets/icons/filetypes/rust.svg
         qml/assets/icons/filetypes/settings.svg
+        assets/local-code-ide-logo-normalized.png
 )
 
 target_include_directories(LocalCodeIDE PRIVATE src)

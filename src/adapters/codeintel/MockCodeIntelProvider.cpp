@@ -23,6 +23,36 @@ std::optional<DefinitionLocation> MockCodeIntelProvider::definition(const QStrin
     return DefinitionLocation{filePath, 1, 1};
 }
 
+void MockCodeIntelProvider::completionsAsync(const QString& filePath,
+                                             const QString& text,
+                                             const EditorPosition& position,
+                                             std::function<void(std::vector<CompletionItem>)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    onReady(completions(filePath, text, position));
+}
+
+void MockCodeIntelProvider::hoverAsync(const QString& filePath,
+                                       const QString& text,
+                                       const EditorPosition& position,
+                                       std::function<void(HoverInfo)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    onReady(hover(filePath, text, position));
+}
+
+void MockCodeIntelProvider::definitionAsync(const QString& filePath,
+                                            const QString& text,
+                                            const EditorPosition& position,
+                                            std::function<void(std::optional<DefinitionLocation>)> onReady) {
+    if (!onReady) {
+        return;
+    }
+    onReady(definition(filePath, text, position));
+}
+
 QString MockCodeIntelProvider::name() const {
     return "Mock Code Intel Provider";
 }

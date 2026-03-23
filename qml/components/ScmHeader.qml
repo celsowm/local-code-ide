@@ -68,8 +68,15 @@ Rectangle {
         ToolButton {
             text: "Refresh"
             font.pixelSize: 11
-            enabled: !!root.viewModel
+            enabled: !!root.viewModel && !root.viewModel.gitBusy
             onClicked: if (root.viewModel) root.viewModel.refreshGitChanges()
+        }
+
+        BusyIndicator {
+            running: root.viewModel && root.viewModel.gitBusy
+            visible: running
+            Layout.preferredWidth: 18
+            Layout.preferredHeight: 18
         }
     }
 }
