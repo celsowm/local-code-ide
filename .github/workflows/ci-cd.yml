@@ -36,17 +36,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall ruff
 
-    - name: Validate Language Pack Manifest (Source)
-      run: |
-        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
-
-    - name: Install Qt
-      run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
-
     - name: Fetch Bundled Language Packs (Windows)
       run: |
         python scripts/fetch-language-packs.py --root . --platform windows --clean
+
+    - name: Validate Language Pack Manifest (Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
 
     - name: Configure CMake
       run: |
@@ -120,17 +116,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall
 
-    - name: Validate Language Pack Manifest (Source)
-      run: |
-        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
-
-    - name: Install Qt
-      run: |
-        python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --modules qt5compat --outputdir C:\Qt
-
     - name: Fetch Bundled Language Packs (Windows)
       run: |
         python scripts/fetch-language-packs.py --root . --platform windows --clean
+
+    - name: Validate Language Pack Manifest (Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform windows --smoke-check --verify-payload
 
     - name: Build Release
       run: |
