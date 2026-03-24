@@ -271,9 +271,18 @@ def qt_qmlls_path_linux() -> Path | None:
         candidate = Path(qt_dir) / "bin" / "qmlls"
         if candidate.exists():
             return candidate
+    
+    # Try common Ubuntu/Debian locations or symlinks
+    for candidate_name in ("qmlls", "qmlls6"):
+        direct = shutil.which(candidate_name)
+        if direct:
+            return Path(direct)
+
     for candidate in (
         Path("/usr/lib/qt6/bin/qmlls"),
+        Path("/usr/lib/qt6/bin/qmlls6"),
         Path("/usr/bin/qmlls"),
+        Path("/usr/bin/qmlls6"),
     ):
         if candidate.exists():
             return candidate
