@@ -233,7 +233,10 @@ LanguageServerHub::ActiveClient LanguageServerHub::ensureClient(const ide::servi
         return {m_clientsByKey.value(key), key, spec.source.isEmpty() ? QFileInfo(spec.command).fileName() : spec.source};
     }
 
-    auto client = std::make_shared<ide::adapters::diagnostics::LspClient>(spec.command, spec.args);
+    auto client = std::make_shared<ide::adapters::diagnostics::LspClient>(spec.command, spec.args,
+        [this](const QString& filePath) -> QString {
+            return languageIdForPath(filePath);
+        });
     connect(client.get(), &ide::adapters::diagnostics::LspClient::diagnosticsPublished, this,
             [this, weakClient = std::weak_ptr<ide::adapters::diagnostics::LspClient>(client)](
                 const QString& filePath, int version, const QString& source) {
@@ -329,6 +332,16 @@ const LanguageServerHub::DocumentState* LanguageServerHub::documentStateFor(cons
 
 QString LanguageServerHub::pendingRequestKey(const QString& clientKey, int requestId) const {
     return QStringLiteral("%1|%2").arg(clientKey, QString::number(requestId));
+}
+
+void LanguageServerHub::shutdown() {
+    for (auto it = m_clientsByKey.begin(); it != m_clientsByKey.end(); ++it) {
+        it.value()->stop();
+    }
+    m_clientsByKey.clear();
+    m_pendingCompletionCallbacks.clear();
+    m_pendingHoverCallbacks.clear();
+    m_pendingDefinitionCallbacks.clear();
 }
 
 } // namespace ide::services

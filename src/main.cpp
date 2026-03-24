@@ -213,6 +213,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
+        if (languageServerHub) {
+            languageServerHub->shutdown();
+        }
+    });
+
     // Defer startup-heavy work until the UI is already up.
     QTimer::singleShot(0, &app, [mainVm = mainViewModel.get(),
                                  modelHubVm = modelHubViewModel.get(),

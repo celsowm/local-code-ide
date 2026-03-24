@@ -50,12 +50,15 @@ qt_add_executable(LocalCodeIDE
     src/adapters/ai/MockAiBackend.cpp
 
     src/adapters/codeintel/LanguageServerCodeIntelProvider.cpp
-    src/adapters/codeintel/LspCodeIntelProvider.cpp
     src/adapters/codeintel/MockCodeIntelProvider.cpp
 
     src/adapters/diagnostics/HybridDiagnosticProvider.cpp
     src/adapters/diagnostics/LocalSyntaxDiagnosticProvider.cpp
     src/adapters/diagnostics/LspClient.cpp
+    src/adapters/diagnostics/LspDocumentManager.cpp
+    src/adapters/diagnostics/LspFeatureProvider.cpp
+    src/adapters/diagnostics/LspProtocol.cpp
+    src/adapters/diagnostics/LspTransport.cpp
     src/adapters/diagnostics/LspDiagnosticProvider.cpp
     src/adapters/diagnostics/MockDiagnosticProvider.cpp
 

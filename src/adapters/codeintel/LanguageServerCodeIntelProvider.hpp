@@ -10,14 +10,14 @@ public:
     explicit LanguageServerCodeIntelProvider(ide::services::LanguageServerHub* hub);
 
     std::vector<ide::services::interfaces::CompletionItem> completions(const QString& filePath,
-                                                                       const QString& text,
-                                                                       const ide::services::interfaces::EditorPosition& position) override;
+                                                                        const QString& text,
+                                                                        const ide::services::interfaces::EditorPosition& position) override;
     ide::services::interfaces::HoverInfo hover(const QString& filePath,
-                                               const QString& text,
-                                               const ide::services::interfaces::EditorPosition& position) override;
+                                                const QString& text,
+                                                const ide::services::interfaces::EditorPosition& position) override;
     std::optional<ide::services::interfaces::DefinitionLocation> definition(const QString& filePath,
-                                                                            const QString& text,
-                                                                            const ide::services::interfaces::EditorPosition& position) override;
+                                                                             const QString& text,
+                                                                             const ide::services::interfaces::EditorPosition& position) override;
     void completionsAsync(const QString& filePath,
                           const QString& text,
                           const ide::services::interfaces::EditorPosition& position,

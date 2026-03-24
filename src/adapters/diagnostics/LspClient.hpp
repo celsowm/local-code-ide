@@ -4,25 +4,35 @@
 #include "services/interfaces/IDiagnosticProvider.hpp"
 
 #include <QHash>
-#include <QJsonArray>
 #include <QJsonObject>
 #include <QObject>
-#include <QProcess>
 #include <QSet>
 #include <QString>
 #include <QStringList>
+#include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
 namespace ide::adapters::diagnostics {
 
+class LspTransport;
+class LspProtocol;
+class LspDocumentManager;
+class LspFeatureProvider;
+
 class LspClient final : public QObject {
     Q_OBJECT
 public:
-    explicit LspClient(QString program, QStringList args, QObject* parent = nullptr);
+    explicit LspClient(const QString& program,
+                       const QStringList& args,
+                       std::function<QString(const QString&)> languageIdResolver = {},
+                       QObject* parent = nullptr);
+    ~LspClient() override;
 
     bool ensureStarted();
     bool isRunning() const;
+    void stop();
     QString statusLine() const;
 
     int publishDocument(const QString& filePath, const QString& text);
@@ -36,41 +46,32 @@ public:
         const QString& filePath,
         const QString& text,
         const ide::services::interfaces::EditorPosition& position,
-        int waitMs = 700
-    );
+        int waitMs = 700);
 
     ide::services::interfaces::HoverInfo requestHover(
         const QString& filePath,
         const QString& text,
         const ide::services::interfaces::EditorPosition& position,
-        int waitMs = 700
-    );
+        int waitMs = 700);
 
     std::optional<ide::services::interfaces::DefinitionLocation> requestDefinition(
         const QString& filePath,
         const QString& text,
         const ide::services::interfaces::EditorPosition& position,
-        int waitMs = 700
-    );
+        int waitMs = 700);
+
     int requestCompletionsAsync(
         const QString& filePath,
         const QString& text,
-        const ide::services::interfaces::EditorPosition& position
-    );
+        const ide::services::interfaces::EditorPosition& position);
     int requestHoverAsync(
         const QString& filePath,
         const QString& text,
-        const ide::services::interfaces::EditorPosition& position
-    );
+        const ide::services::interfaces::EditorPosition& position);
     int requestDefinitionAsync(
         const QString& filePath,
         const QString& text,
-        const ide::services::interfaces::EditorPosition& position
-    );
-
-private slots:
-    void onReadyReadStandardOutput();
-    void onReadyReadStandardError();
+        const ide::services::interfaces::EditorPosition& position);
 
 signals:
     void diagnosticsPublished(const QString& filePath, int version, const QString& source);
@@ -87,51 +88,22 @@ signals:
                          const ide::services::interfaces::DefinitionLocation& location);
 
 private:
-    struct PendingDocumentOpen {
-        QString filePath;
-        QString text;
-    };
-
-    int sendRequest(const QString& method, const QJsonObject& params = {});
-    void sendNotification(const QString& method, const QJsonObject& params = {});
-    void sendMessage(const QJsonObject& message);
-    void parseBufferedMessages();
-    void handleMessage(const QJsonObject& message);
-    void sendInitialize();
-    bool ensureDocumentOpened(const QString& filePath, const QString& text, int version);
-    void waitUntilInitialized(int waitMs = 800);
-    QJsonObject waitForResponse(int requestId, int waitMs);
-    QJsonObject makeTextDocumentPositionParams(const QString& filePath,
-                                              const QString& text,
-                                              const ide::services::interfaces::EditorPosition& position);
-    void flushPendingDocumentOpens();
-
+    void onTransportMessage(const QJsonObject& message);
+    void handleInitializeResponse(const QJsonObject& message);
+    void handlePublishDiagnostics(const QJsonObject& params);
+    static std::vector<ide::services::interfaces::Diagnostic> parseDiagnostics(
+        const QJsonArray& diagnostics,
+        const QString& filePath,
+        const QString& source);
     QString uriForPath(const QString& filePath) const;
-    QString languageIdForPath(const QString& filePath) const;
 
-    static std::vector<ide::services::interfaces::Diagnostic> parseDiagnostics(const QJsonArray& diagnostics,
-                                                                              const QString& filePath,
-                                                                              const QString& source);
-    static std::vector<ide::services::interfaces::CompletionItem> parseCompletionItems(const QJsonValue& value);
-    static ide::services::interfaces::HoverInfo parseHover(const QJsonValue& value);
-    static std::optional<ide::services::interfaces::DefinitionLocation> parseDefinition(const QJsonValue& value);
+    std::unique_ptr<LspTransport> m_transport;
+    std::unique_ptr<LspProtocol> m_protocol;
+    std::unique_ptr<LspDocumentManager> m_documentManager;
+    std::unique_ptr<LspFeatureProvider> m_featureProvider;
 
-    QString m_program;
-    QStringList m_args;
-    QProcess m_process;
-    QByteArray m_stdoutBuffer;
-    QByteArray m_stderrBuffer;
-    bool m_initialized = false;
-    int m_nextId = 1;
-    QSet<QString> m_openDocuments;
-    QHash<QString, int> m_documentVersions;
     QHash<QString, std::vector<ide::services::interfaces::Diagnostic>> m_diagnosticsByUri;
     QHash<QString, int> m_diagnosticVersionsByUri;
-    QHash<int, QJsonObject> m_pendingResponses;
-    QHash<QString, PendingDocumentOpen> m_pendingDocumentOpensByUri;
-    QHash<int, QString> m_pendingCompletionByRequestId;
-    QHash<int, QString> m_pendingHoverByRequestId;
-    QHash<int, QString> m_pendingDefinitionByRequestId;
 };
 
 } // namespace ide::adapters::diagnostics

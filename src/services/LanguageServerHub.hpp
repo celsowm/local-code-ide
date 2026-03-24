@@ -65,6 +65,7 @@ public:
     );
     RuntimeStatus runtimeStatus(const QString& filePathOrLanguageId) const;
     QString languageIdForPath(const QString& filePath) const;
+    void shutdown();
 
 signals:
     void diagnosticsReady(const QString& filePath,
