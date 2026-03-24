@@ -432,6 +432,8 @@ QString MainViewModel::diffModifiedText() const { return m_editorManager.diffMod
 QString MainViewModel::diffEditorTitle() const { return m_editorManager.diffEditorTitle(); }
 QString MainViewModel::toastMessage() const { return m_toastMessage; }
 bool MainViewModel::toastVisible() const { return m_toastVisible; }
+int MainViewModel::cursorLine() const { return m_cursorLine; }
+int MainViewModel::cursorColumn() const { return m_cursorColumn; }
 
 void MainViewModel::analyzeNow() {
     if (!m_diagnosticCoordinator) {
@@ -728,8 +730,10 @@ void MainViewModel::runSearch() {
 void MainViewModel::openSearchResult(const QString& path, int line, int column) { goToDocumentLocation(path, line, column); }
 
 void MainViewModel::setCursorPosition(int line, int column) {
+    if (m_cursorLine == line && m_cursorColumn == column) return;
     m_cursorLine = qMax(1, line);
     m_cursorColumn = qMax(1, column);
+    emit cursorPositionChanged();
 }
 
 void MainViewModel::requestCompletionsAtCursor() {

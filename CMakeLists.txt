@@ -157,6 +157,7 @@ qt_add_qml_module(LocalCodeIDE
         qml/components/SearchPanel.qml
         qml/components/Sidebar.qml
         qml/components/SourceControlPanel.qml
+        qml/components/StatusBar.qml
     RESOURCES
         qml/assets/icons/explorer.svg
         qml/assets/icons/search.svg

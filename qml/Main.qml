@@ -149,22 +149,9 @@ ApplicationWindow {
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 26
-                color: WorkbenchTheme.accent
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
-                    Label { text: mainViewModel.statusMessage; color: "white"; elide: Text.ElideRight; Layout.fillWidth: true }
-                    Label { text: mainViewModel.openEditorCount + " tabs"; color: "white" }
-                    Label { text: mainViewModel.splitEditorVisible ? (mainViewModel.diffEditorVisible ? "diff" : "split") : "single"; color: "white" }
-                    Label { text: mainViewModel.diagnosticsStatusLine; color: "white"; elide: Text.ElideRight }
-                    Label { text: mainViewModel.gitChangeCount + " changes"; color: "white" }
-                    Label { text: modelHubViewModel.hardwareSummary; color: "white"; elide: Text.ElideRight }
-                    Label { text: mainViewModel.aiBackendName + " · " + modelHubViewModel.providerName; color: "white" }
-                }
+            StatusBar {
+                mainVM: window.mainViewModel
+                hubVM: window.modelHubViewModel
             }
         }
 

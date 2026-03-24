@@ -12,6 +12,7 @@ import sys
 import subprocess
 import shutil
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 # Colors
@@ -226,16 +227,21 @@ def doctor():
 
     os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
 
-    log("\n[1/3] Qt runtime deploy check...", BLUE)
-    if needs_qt_deploy(exe):
-        log("Qt runtime incomplete. Running deploy...", YELLOW)
-        try:
+    # Run deploy and lint checks concurrently
+    log("\n[1/3] Running preflight checks (Deploy + Lint)...", BLUE)
+    
+    def check_deploy():
+        if needs_qt_deploy(exe):
             deploy_qt(exe, qt_path)
-        except subprocess.CalledProcessError as e:
-            log(f"ERROR: Qt deploy failed: {e}", RED)
-            return 1
+        return [str(path) for path in required_qt_runtime_paths(exe) if not path.exists()]
 
-    missing = [str(path) for path in required_qt_runtime_paths(exe) if not path.exists()]
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        deploy_future = executor.submit(check_deploy)
+        lint_future = executor.submit(lint)
+        
+        missing = deploy_future.result()
+        lint_result = lint_future.result()
+
     if missing:
         log("ERROR: Missing runtime artifacts after deploy:", RED)
         for item in missing:
@@ -243,8 +249,6 @@ def doctor():
         return 1
     log("Qt runtime artifacts: OK", GREEN)
 
-    log("\n[2/3] QML lint check...", BLUE)
-    lint_result = lint()
     if lint_result != 0:
         log("ERROR: Lint failed.", RED)
         return lint_result
@@ -379,62 +383,72 @@ def lint():
     log("LocalCodeIDE - Lint", GREEN)
     log("=" * 60, GREEN)
 
-    # Python lint (ruff)
-    log("\n[1/3] Python lint (ruff)...", BLUE)
-    try:
-        subprocess.run([sys.executable, "-m", "ruff", "--version"], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        log("ruff not found. Installing...", YELLOW)
-        subprocess.run([sys.executable, "-m", "pip", "install", "ruff"], check=True)
-    subprocess.run([sys.executable, "-m", "ruff", "check", "setup.py", "version.py"], check=True)
-    log("ruff: OK", GREEN)
+    # Run Python and QML lint concurrently
+    log("\n[1/3] Running Python and QML lint concurrently...", BLUE)
+    
+    def run_ruff():
+        try:
+            subprocess.run([sys.executable, "-m", "ruff", "--version"], capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            log("ruff not found. Installing...", YELLOW)
+            subprocess.run([sys.executable, "-m", "pip", "install", "ruff"], check=True)
+        subprocess.run([sys.executable, "-m", "ruff", "check", "setup.py", "version.py"], check=True)
+        return 0
 
-    # QML lint (qmllint module mode)
-    log("\n[2/3] QML lint (qmllint)...", BLUE)
-    qmllint_path = find_qmllint()
-    if not qmllint_path:
-        log("ERROR: qmllint not found. Install Qt first.", RED)
-        return 1
+    def run_qmllint():
+        qmllint_path = find_qmllint()
+        if not qmllint_path:
+            log("ERROR: qmllint not found. Install Qt first.", RED)
+            return 1
+        
+        qt_path = find_qt()
+        env = os.environ.copy()
+        if qt_path:
+            env['CMAKE_PREFIX_PATH'] = qt_path
+            env['Qt6_DIR'] = qt6_cmake_dir(qt_path)
+            env['PATH'] = f"{qt_path}\\bin;{env['PATH']}"
 
-    qt_path = find_qt()
-    if qt_path:
-        os.environ['CMAKE_PREFIX_PATH'] = qt_path
-        os.environ['Qt6_DIR'] = qt6_cmake_dir(qt_path)
-        os.environ['PATH'] = f"{qt_path}\\bin;{os.environ['PATH']}"
+        build_dir = Path("build")
+        build_dir.mkdir(exist_ok=True)
+        if not (build_dir / "CMakeCache.txt").exists():
+            log("Configuring CMake (required for module lint)...", BLUE)
+            subprocess.run(["cmake", "-S", ".", "-B", "build", f"-DQt6_DIR={env['Qt6_DIR']}"], env=env, check=True)
 
-    build_dir = Path("build")
-    build_dir.mkdir(exist_ok=True)
-    if not (build_dir / "CMakeCache.txt").exists():
-        log("Configuring CMake (required for module lint)...", BLUE)
-        subprocess.run(["cmake", "-S", ".", "-B", "build", f"-DQt6_DIR={os.environ['Qt6_DIR']}"], check=True)
-
-    subprocess.run([
-        qmllint_path,
-        "-M",
-        "-I", "build",
-        "LocalCodeIDE",
-        "--unqualified", "info",
-        "--with", "info",
-        "--unused-imports", "warning",
-        "--multiline-strings", "warning",
-        "--max-warnings", "0",
-    ], check=True)
-    log("qmllint: OK", GREEN)
-
-    # Incremental strict checks for selected components
-    log("\n[3/4] QML strict components...", BLUE)
-    strict_qml_files = [
-        "qml/components/Sidebar.qml",
-        "qml/components/SearchPanel.qml",
-    ]
-    for qml_file in strict_qml_files:
         subprocess.run([
             qmllint_path,
-            "--unqualified", "warning",
+            "-M",
+            "-I", "build",
+            "LocalCodeIDE",
+            "--unqualified", "info",
+            "--with", "info",
+            "--unused-imports", "warning",
+            "--multiline-strings", "warning",
             "--max-warnings", "0",
-            qml_file,
-        ], check=True)
-    log("strict components: OK", GREEN)
+        ], env=env, check=True)
+        
+        # Incremental strict checks for selected components
+        strict_qml_files = [
+            "qml/components/Sidebar.qml",
+            "qml/components/SearchPanel.qml",
+        ]
+        for qml_file in strict_qml_files:
+            subprocess.run([
+                qmllint_path,
+                "--unqualified", "warning",
+                "--max-warnings", "0",
+                qml_file,
+            ], env=env, check=True)
+        return 0
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        ruff_future = executor.submit(run_ruff)
+        qmllint_future = executor.submit(run_qmllint)
+        
+        r1 = ruff_future.result()
+        r2 = qmllint_future.result()
+
+    if r1 != 0 or r2 != 0:
+        return 1
 
     log("\n[4/4] Lint summary", BLUE)
     log("All lint checks passed.", GREEN)

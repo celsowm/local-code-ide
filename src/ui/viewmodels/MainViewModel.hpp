@@ -112,6 +112,8 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(int bottomPanelHeight READ bottomPanelHeight WRITE setBottomPanelHeight NOTIFY bottomPanelChanged)
 
     Q_PROPERTY(bool currentDocumentDirty READ currentDocumentDirty NOTIFY openEditorsChanged)
+    Q_PROPERTY(int cursorLine READ cursorLine NOTIFY cursorPositionChanged)
+    Q_PROPERTY(int cursorColumn READ cursorColumn NOTIFY cursorPositionChanged)
 
     Q_PROPERTY(QObject* gitChangesModel READ gitChangesModel CONSTANT)
     Q_PROPERTY(QObject* scmSectionsModel READ scmSectionsModel CONSTANT)
