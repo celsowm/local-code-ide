@@ -268,6 +268,8 @@ public:
     void setBottomPanelHeight(int value);
 
     bool currentDocumentDirty() const;
+    int cursorLine() const;
+    int cursorColumn() const;
 
     QObject* gitChangesModel();
     QObject* scmSectionsModel();
@@ -392,6 +394,7 @@ signals:
     void gitOperationStateChanged();
     void quickOpenRequested();
     void toastChanged();
+    void cursorPositionChanged();
 
 private:
     struct CommandSpec {
