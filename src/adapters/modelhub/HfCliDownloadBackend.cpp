@@ -132,7 +132,7 @@ QString HfCliDownloadBackend::locateDownloadedFile(const QString& cacheDir, cons
 
 void HfCliDownloadBackend::handleChunk(const QString& chunk, bool stderrStream) {
     const auto lines = parseLines(chunk, stderrStream ? m_stderrCarry : m_stdoutCarry);
-    static const QRegularExpression pathPattern(QStringLiteral(R"(([A-Za-z]:\\[^\r\n]+\.gguf))"), QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression pathPattern(QStringLiteral(R"(([A-Za-z]:\\[^\r\n]+\.gguf|/[^\r\n\s]+\.gguf))"), QRegularExpression::CaseInsensitiveOption);
     for (const QString& rawLine : lines) {
         const QString line = rawLine.trimmed();
         if (line.isEmpty()) {

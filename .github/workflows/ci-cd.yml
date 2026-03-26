@@ -207,3 +207,169 @@ jobs:
         files: build/installer/LocalCodeIDE-${{ github.event.release.tag_name }}.msi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Qt6 and build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build npm python3-venv
+        pip install aqtinstall
+        python -m aqt install-qt linux desktop 6.8.0 gcc_64 --outputdir $HOME/Qt
+
+    - name: Fetch Bundled Language Packs (Linux)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform linux --clean
+
+    - name: Validate Language Pack Manifest (Source)
+      run: |
+        python scripts/validate-language-packs.py --root . --platform linux --smoke-check --verify-payload
+
+    - name: Configure CMake
+      run: |
+        cmake -S . -B build -G Ninja \
+          -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.0/gcc_64 \
+          -DQt6_DIR=$HOME/Qt/6.8.0/gcc_64/lib/cmake/Qt6
+
+    - name: Build
+      run: |
+        cmake --build build --parallel $(nproc)
+
+    - name: Lint
+      run: |
+        python setup.py lint
+
+    - name: Copy Bundled Language Packs
+      run: |
+        mkdir -p build/language-packs
+        cp -r resources/language-packs/* build/language-packs/
+        cp -r language-packs/* build/language-packs/ 2>/dev/null || true
+        find build/language-packs/linux -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+
+    - name: Upload Artifact (Portable)
+      uses: actions/upload-artifact@v4
+      with:
+        name: LocalCodeIDE-linux
+        path: build/bin/LocalCodeIDE
+        retention-days: 30
+
+    - name: Upload Artifact (Language Packs)
+      uses: actions/upload-artifact@v4
+      with:
+        name: LocalCodeIDE-linux-language-packs
+        path: build/bin/language-packs/
+        retention-days: 30
+
+  build-linux-appimage:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Qt6 and build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build npm python3-venv fuse libfuse2
+        pip install aqtinstall
+        python -m aqt install-qt linux desktop 6.8.0 gcc_64 --outputdir $HOME/Qt
+
+    - name: Fetch Bundled Language Packs (Linux)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform linux --clean
+
+    - name: Build Release
+      run: |
+        cmake -S . -B build -G Ninja \
+          -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.0/gcc_64 \
+          -DQt6_DIR=$HOME/Qt/6.8.0/gcc_64/lib/cmake/Qt6
+        cmake --build build --parallel $(nproc)
+
+    - name: Copy Bundled Language Packs
+      run: |
+        mkdir -p build/bin/language-packs
+        cp -r resources/language-packs/* build/bin/language-packs/
+        cp -r language-packs/* build/bin/language-packs/ 2>/dev/null || true
+        find build/bin/language-packs/linux -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+
+    - name: Build AppImage
+      run: |
+        chmod +x scripts/build-appimage.sh
+        bash scripts/build-appimage.sh ${{ github.event.release.tag_name }}
+
+    - name: Upload to Release (AppImage)
+      uses: softprops/action-gh-release@v2
+      with:
+        files: build/LocalCodeIDE-${{ github.event.release.tag_name }}.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-linux:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Qt6 and build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build npm python3-venv
+        pip install aqtinstall
+        python -m aqt install-qt linux desktop 6.8.0 gcc_64 --outputdir $HOME/Qt
+
+    - name: Fetch Bundled Language Packs (Linux)
+      run: |
+        python scripts/fetch-language-packs.py --root . --platform linux --clean
+
+    - name: Build Release
+      run: |
+        cmake -S . -B build -G Ninja \
+          -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.0/gcc_64 \
+          -DQt6_DIR=$HOME/Qt/6.8.0/gcc_64/lib/cmake/Qt6
+        cmake --build build --parallel $(nproc)
+
+    - name: Copy Bundled Language Packs
+      run: |
+        mkdir -p build/bin/language-packs
+        cp -r resources/language-packs/* build/bin/language-packs/
+        cp -r language-packs/* build/bin/language-packs/ 2>/dev/null || true
+        find build/bin/language-packs/linux -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+
+    - name: Create TAR (Portable)
+      run: |
+        mkdir -p pkg/language-packs
+        cp -r build/bin/language-packs/* pkg/language-packs/ 2>/dev/null || true
+        cp -r build/bin/LocalCodeIDE pkg/
+        tar czf LocalCodeIDE-${{ github.event.release.tag_name }}-linux-x86_64.tar.gz -C pkg .
+
+    - name: Upload to Release (Portable TAR)
+      uses: softprops/action-gh-release@v2
+      with:
+        files: LocalCodeIDE-${{ github.event.release.tag_name }}-linux-x86_64.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

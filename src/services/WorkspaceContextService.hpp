@@ -22,13 +22,15 @@ public:
         int maxFiles = 4;
         int maxTotalChars = 16000;
         int maxExcerptCharsPerFile = 4000;
+
+        static Options defaults() { return Options{}; }
     };
 
     std::vector<RelevantContextFile> collect(const QString& workspaceRoot,
                                              const QString& currentPath,
                                              const QString& prompt,
                                              const std::vector<interfaces::WorkspaceFile>& workspaceFiles,
-                                             const Options& options = {}) const;
+                                              const Options& options = Options::defaults()) const;
 
     QString render(const std::vector<RelevantContextFile>& files,
                    int maxTotalChars) const;

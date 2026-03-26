@@ -4,7 +4,7 @@
   "description": "Local-first IDE with Qt Quick and local AI",
   "homepage": "https://github.com/celsowm/local-code-ide",
   "license": "MIT",
-  "supports": "windows & x64",
+  "supports": "(windows & x64) | (linux & x64)",
   "dependencies": [
   ]
 }

@@ -14,11 +14,34 @@
 
 ### Prerequisites
 
+#### Windows
+
 | Dependency | How to install |
 |------------|----------------|
 | Python 3.8+ | [python.org](https://python.org) |
 | Visual Studio 2022+ | `winget install Microsoft.VisualStudio.2022.Community` |
 | CMake | `winget install Kitware.CMake` |
+
+#### Linux
+
+| Dependency | How to install (Debian/Ubuntu) |
+|------------|-------------------------------|
+| Python 3.8+ | `sudo apt-get install python3` |
+| C++ compiler | `sudo apt-get install build-essential` |
+| CMake | `sudo apt-get install cmake` |
+| Qt 6.5+ dev packages | Ubuntu 24.04 ships Qt 6.4; install Qt 6.5+ via `aqt`: see below |
+
+**Installing Qt 6.5+ on Ubuntu (via aqt):**
+```bash
+pip install --user aqtinstall
+python -m aqt install-qt linux desktop 6.8.0 gcc_64 --outputdir $HOME/Qt
+# Then set: export QT_DIR=$HOME/Qt/6.8.0/gcc_64
+```
+
+Alternatively, install system Qt 6 dev packages if your distro ships Qt >= 6.5:
+```bash
+sudo apt-get install qt6-base-dev qt6-declarative-dev qt6-tools-dev qt6-declarative-dev-tools
+```
 
 ### Quick Setup
 
@@ -40,6 +63,16 @@ python setup.py testdeps
 
 # Run tests
 python setup.py test
+```
+
+#### Linux convenience scripts
+
+```bash
+# Quick build (assumes Qt and CMake installed)
+./dev.sh
+
+# Build + doctor preflight + run
+./run.sh
 ```
 
 ### Qt + CMake Path Rules

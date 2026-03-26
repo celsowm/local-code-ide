@@ -9,9 +9,22 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# RPATH configuration for Linux (needed for AppImage and portable builds)
+if(UNIX AND NOT APPLE)
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    # Avoid conflict between executable name "LocalCodeIDE" and the QML module output directory
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+endif()
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick Qml QuickControls2 Widgets Network Concurrent)
 qt_standard_project_setup(REQUIRES 6.5)
-qt_policy(SET QTP0004 NEW)
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.5)
+    qt_policy(SET QTP0004 NEW)
+endif()
 
 set(APP_ICON_RESOURCE)
 if(WIN32)
@@ -255,4 +268,27 @@ if(WIN32)
     else()
         message(STATUS "WiX Toolset not found. To build installer, install from: https://wixtoolset.org/")
     endif()
+endif()
+
+# Install rules (needed for AppImage packaging on Linux)
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+
+    install(TARGETS LocalCodeIDE
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+
+    # Install language packs
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources/language-packs/
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/local-code-ide/language-packs
+    )
+
+    # Desktop entry (for AppImage / system integration)
+    install(FILES ${CMAKE_SOURCE_DIR}/assets/local-code-ide-logo-normalized.png
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
+        RENAME local-code-ide.png
+        OPTIONAL
+    )
 endif()
