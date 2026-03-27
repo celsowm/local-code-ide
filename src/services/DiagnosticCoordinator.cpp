@@ -68,6 +68,10 @@ void DiagnosticCoordinator::forceRefresh() {
     analyzeNow();
 }
 
+LanguageServerHub* DiagnosticCoordinator::languageServerHub() const {
+    return m_languageServerHub;
+}
+
 QString DiagnosticCoordinator::activeProviderLabel() const {
     return m_providerLabel;
 }

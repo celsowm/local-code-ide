@@ -144,6 +144,18 @@ def smoke_check_launcher(launcher: Path, target_platform: str) -> None:
         fail(f"Launcher smoke-check failed for '{launcher}': {output}")
 
 
+def validate_pack_payload_shape(pack_id: str, payload_path: Path) -> None:
+    if pack_id != "pyright":
+        return
+
+    shim_text = payload_path.read_text(encoding="utf-8", errors="replace")
+    if "langserver.index.js" not in shim_text:
+        fail(
+            "Pyright payload launcher does not target langserver.index.js. "
+            f"Offending file: {payload_path}"
+        )
+
+
 def iter_platforms(selection: str) -> Iterable[str]:
     if selection == "all":
         return ("windows", "linux")
@@ -236,6 +248,7 @@ def validate_manifest(
                             f"Pack '{pack_id}' missing expected payload for {target_platform}: "
                             f"{expected_relpath} (resolved to {payload_path})"
                         )
+                    validate_pack_payload_shape(pack_id, payload_path)
                     if lock_data:
                         prefix = f"language-packs/{target_platform}/{pack_id}/"
                         payload_suffix = expected_relpath[len(prefix):] if expected_relpath.startswith(prefix) else expected_relpath

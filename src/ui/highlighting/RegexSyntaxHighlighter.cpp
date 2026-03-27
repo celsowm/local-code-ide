@@ -1,4 +1,4 @@
-#include "ui/highlighting/CppSyntaxHighlighter.hpp"
+#include "ui/highlighting/RegexSyntaxHighlighter.hpp"
 
 #include <QBrush>
 #include <QColor>
@@ -17,8 +17,8 @@ QTextCharFormat makeFormat(const QString& hexColor, bool bold = false, bool ital
 }
 } // namespace
 
-CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument* parent)
-    : QSyntaxHighlighter(parent)
+RegexSyntaxHighlighter::RegexSyntaxHighlighter(QTextDocument* parent)
+    : SyntaxHighlighterBackend(parent)
     , m_commentStart(QRegularExpression("/\\*"))
     , m_commentEnd(QRegularExpression("\\*/")) {
     const auto keywordFormat = makeFormat("#569CD6", true);
@@ -59,12 +59,7 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument* parent)
     m_multiLineCommentFormat = commentFormat;
 }
 
-void CppSyntaxHighlighter::setDiagnostics(std::vector<DiagnosticRange> diagnostics) {
-    m_diagnostics = std::move(diagnostics);
-    rehighlight();
-}
-
-void CppSyntaxHighlighter::setLexicalHighlightingEnabled(bool enabled) {
+void RegexSyntaxHighlighter::setLexicalHighlightingEnabled(bool enabled) {
     if (m_lexicalHighlightingEnabled == enabled) {
         return;
     }
@@ -72,7 +67,7 @@ void CppSyntaxHighlighter::setLexicalHighlightingEnabled(bool enabled) {
     rehighlight();
 }
 
-void CppSyntaxHighlighter::highlightBlock(const QString& text) {
+void RegexSyntaxHighlighter::highlightBlock(const QString& text) {
     if (m_lexicalHighlightingEnabled) {
         for (const auto& rule : m_rules) {
             auto matchIterator = rule.pattern.globalMatch(text);
@@ -108,38 +103,7 @@ void CppSyntaxHighlighter::highlightBlock(const QString& text) {
         setCurrentBlockState(0);
     }
 
-    const int currentLine = currentBlock().blockNumber() + 1;
-    for (const auto& diag : m_diagnostics) {
-        if (currentLine < diag.lineStart || currentLine > diag.lineEnd) {
-            continue;
-        }
-
-        int startCol = 1;
-        int endCol = qMax(2, text.size() + 1);
-        if (currentLine == diag.lineStart) {
-            startCol = qMax(1, diag.columnStart);
-        }
-        if (currentLine == diag.lineEnd) {
-            endCol = qMax(startCol + 1, diag.columnEnd);
-        }
-
-        const int startIndex = qMax(0, startCol - 1);
-        const int endIndex = qMin(text.size(), qMax(startIndex + 1, endCol - 1));
-        const int length = qMax(1, endIndex - startIndex);
-
-        QTextCharFormat overlay = format(startIndex);
-        if (diag.severity == "error") {
-            overlay.setUnderlineStyle(QTextCharFormat::WaveUnderline);
-            overlay.setUnderlineColor(QColor("#f14c4c"));
-        } else if (diag.severity == "warning") {
-            overlay.setUnderlineStyle(QTextCharFormat::WaveUnderline);
-            overlay.setUnderlineColor(QColor("#d7ba7d"));
-        } else {
-            overlay.setUnderlineStyle(QTextCharFormat::DotLine);
-            overlay.setUnderlineColor(QColor("#4fc1ff"));
-        }
-        setFormat(startIndex, length, overlay);
-    }
+    applyDiagnosticsOverlay(text);
 }
 
 } // namespace ide::ui::highlighting

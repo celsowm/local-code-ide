@@ -18,6 +18,7 @@ public:
 
     void setDocumentSnapshot(const QString& filePath, const QString& text, bool immediate);
     void forceRefresh();
+    LanguageServerHub* languageServerHub() const;
 
     QString activeProviderLabel() const;
     QString statusLine() const;

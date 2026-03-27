@@ -86,6 +86,7 @@ class MainViewModel final : public QObject {
     Q_PROPERTY(QString pendingApprovalSummary READ pendingApprovalSummary NOTIFY aiSettingsChanged)
     Q_PROPERTY(QObject* diagnosticsModel READ diagnosticsModel CONSTANT)
     Q_PROPERTY(QVariantList currentFileDiagnostics READ currentFileDiagnostics NOTIFY diagnosticsChanged)
+    Q_PROPERTY(QVariantList secondaryFileDiagnostics READ secondaryFileDiagnostics NOTIFY splitEditorChanged)
     Q_PROPERTY(QObject* workspaceFilesModel READ workspaceFilesModel CONSTANT)
     Q_PROPERTY(QObject* workspaceTreeModel READ workspaceTreeModel CONSTANT)
     Q_PROPERTY(QObject* searchResultsModel READ searchResultsModel CONSTANT)
@@ -235,6 +236,7 @@ public:
 
     QObject* diagnosticsModel();
     QVariantList currentFileDiagnostics() const;
+    QVariantList secondaryFileDiagnostics() const;
     QObject* workspaceFilesModel();
     QObject* workspaceTreeModel();
     QObject* searchResultsModel();
@@ -425,6 +427,7 @@ private:
 
     std::unique_ptr<ide::services::DocumentService> m_documentService;
     std::unique_ptr<ide::services::DiagnosticCoordinator> m_diagnosticCoordinator;
+    std::unique_ptr<ide::services::DiagnosticCoordinator> m_secondaryDiagnosticCoordinator;
     std::unique_ptr<ide::services::CodeIntelService> m_codeIntelService;
     std::unique_ptr<ide::services::AiService> m_aiService;
     std::unique_ptr<ide::services::GitService> m_gitService;
@@ -464,6 +467,7 @@ private:
     QString m_terminalCommand = "pwd";
     QString m_terminalOutput;
     QVariantList m_currentFileDiagnostics;
+    QVariantList m_secondaryFileDiagnostics;
     QString m_toastMessage;
     bool m_toastVisible = false;
     QString m_renderedWorkspaceContext;

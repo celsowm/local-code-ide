@@ -14,6 +14,8 @@ import sys
 import subprocess
 import shutil
 import time
+import json
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -675,9 +677,82 @@ def _check_linux_compiler():
     return None
 
 
+def _default_run_env():
+    """Apply default run-time observability settings."""
+    os.environ.setdefault("LOCALCODEIDE_LOG_LEVEL", "info")
+    os.environ.setdefault("LOCALCODEIDE_KEEP_LOG_FILES", "20")
+    if IS_WINDOWS:
+        os.environ.setdefault("LOCALCODEIDE_ENABLE_MINIDUMP", "0")
+
+
+def _run_logs_root():
+    return Path("build") / "logs"
+
+
+def _sanitize_keep_logs(value, default=20):
+    try:
+        keep = int(str(value).strip())
+        if keep < 1:
+            return default
+        return keep
+    except (TypeError, ValueError):
+        return default
+
+
+def _rotate_run_sessions(logs_root, keep_count):
+    if not logs_root.exists():
+        return
+
+    sessions = [entry for entry in logs_root.iterdir() if entry.is_dir()]
+    sessions.sort(key=lambda entry: entry.stat().st_mtime, reverse=True)
+    for stale in sessions[keep_count:]:
+        shutil.rmtree(stale, ignore_errors=True)
+
+
+def _new_run_session(logs_root):
+    logs_root.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    session_id = f"{timestamp}-{os.getpid()}-{int(time.time() * 1000) % 1000:03d}"
+    session_dir = logs_root / session_id
+    session_dir.mkdir(parents=True, exist_ok=False)
+    return session_dir
+
+
+def _tail_text_file(path, line_count=20):
+    if not path.exists():
+        return "(log file not found)"
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    if not lines:
+        return "(log file is empty)"
+    return "\n".join(lines[-line_count:])
+
+
+def _now_iso_utc():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _normalize_exit_for_parent(exit_code):
+    """Normalize return code for sys.exit on Windows (signed 32-bit)."""
+    if not IS_WINDOWS:
+        return int(exit_code)
+    code = int(exit_code) & 0xFFFFFFFF
+    if code >= 0x80000000:
+        return code - 0x100000000
+    return code
+
+
+def _file_size(path):
+    try:
+        return path.stat().st_size
+    except OSError:
+        return 0
+
+
 def run():
     if IS_LINUX:
         _setup_aqt_linux_env()
+
+    _default_run_env()
 
     qt_path = find_qt()
     out_dir = build_output_dir()
@@ -699,8 +774,112 @@ def run():
         # Make sure executable is executable
         exe.chmod(exe.stat().st_mode | 0o111)
 
-    result = subprocess.run([str(exe)])
-    return result.returncode
+    logs_root = _run_logs_root()
+    keep_count = _sanitize_keep_logs(os.environ.get("LOCALCODEIDE_KEEP_LOG_FILES", "20"))
+    _rotate_run_sessions(logs_root, keep_count)
+    session_dir = _new_run_session(logs_root)
+    runtime_log = session_dir / "runtime.log"
+    session_json = session_dir / "session.json"
+
+    env = os.environ.copy()
+    env["LOCALCODEIDE_SESSION_DIR"] = str(session_dir.resolve())
+    env["LOCALCODEIDE_RUNTIME_LOG"] = str(runtime_log.resolve())
+    env["LOCALCODEIDE_APP_LOG_FILE"] = str((session_dir / "app.log").resolve())
+    env["QT_FORCE_STDERR_LOGGING"] = "1"
+
+    log_level = env.get("LOCALCODEIDE_LOG_LEVEL", "info").strip().lower()
+    if log_level == "debug":
+        env["QT_LOGGING_RULES"] = "*.debug=true"
+    elif log_level == "warn":
+        env["QT_LOGGING_RULES"] = "*.debug=false;*.info=false"
+    else:
+        env["QT_LOGGING_RULES"] = "*.debug=false"
+
+    start_wall = time.time()
+    start_iso = _now_iso_utc()
+    exit_code = 1
+    interrupted = False
+
+    with runtime_log.open("w", encoding="utf-8", errors="replace") as handle:
+        try:
+            proc = subprocess.Popen(
+                [str(exe)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                bufsize=1,
+            )
+            if proc.stdout is not None:
+                for line in proc.stdout:
+                    sys.stdout.write(line)
+                    handle.write(line)
+            exit_code = proc.wait()
+        except KeyboardInterrupt:
+            interrupted = True
+            if "proc" in locals() and proc.poll() is None:
+                proc.terminate()
+                try:
+                    proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=3)
+            exit_code = 130
+            log("\nRun interrupted by user.", YELLOW)
+        finally:
+            handle.flush()
+
+    end_iso = _now_iso_utc()
+    duration_ms = int((time.time() - start_wall) * 1000)
+    session_meta = {
+        "schema": "localcodeide/run-session-v1",
+        "platform": sys.platform,
+        "cwd": str(Path.cwd()),
+        "command": [str(exe)],
+        "started_at_utc": start_iso,
+        "ended_at_utc": end_iso,
+        "duration_ms": duration_ms,
+        "exit_code": exit_code,
+        "exit_code_for_parent": _normalize_exit_for_parent(exit_code),
+        "interrupted": interrupted,
+        "artifacts": {
+            "runtime_log": str(runtime_log.resolve()),
+            "app_log": str((session_dir / "app.log").resolve()),
+            "minidump": str((session_dir / "crash.dmp").resolve()),
+        },
+        "env": {
+            "LOCALCODEIDE_LOG_LEVEL": env.get("LOCALCODEIDE_LOG_LEVEL", ""),
+            "LOCALCODEIDE_KEEP_LOG_FILES": env.get("LOCALCODEIDE_KEEP_LOG_FILES", ""),
+            "LOCALCODEIDE_ENABLE_MINIDUMP": env.get("LOCALCODEIDE_ENABLE_MINIDUMP", ""),
+        },
+    }
+    session_json.write_text(json.dumps(session_meta, indent=2), encoding="utf-8")
+
+    _rotate_run_sessions(logs_root, keep_count)
+
+    log("\nRun session artifacts:", BLUE)
+    log(f"  - Session: {session_dir}", BLUE)
+    log(f"  - Runtime log: {runtime_log}", BLUE)
+    log(f"  - Session metadata: {session_json}", BLUE)
+
+    if exit_code != 0:
+        log("\nApplication exited with an error.", RED)
+        log(f"Exit code: {exit_code}", RED)
+        log(f"Runtime log: {runtime_log}", RED)
+        if _file_size(runtime_log) > 0:
+            log("Last runtime log lines:", RED)
+            log(_tail_text_file(runtime_log, line_count=20), RED)
+        else:
+            app_log = session_dir / "app.log"
+            if _file_size(app_log) > 0:
+                log("Runtime log is empty. Last app log lines:", RED)
+                log(_tail_text_file(app_log, line_count=20), RED)
+            else:
+                log("Runtime and app logs are empty for this crash.", RED)
+
+    return _normalize_exit_for_parent(exit_code)
 
 
 def lint():

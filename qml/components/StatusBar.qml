@@ -11,6 +11,8 @@ Rectangle {
 
     property var mainVM
     property var hubVM
+    readonly property bool hasMainVM: !!mainVM
+    readonly property bool hasHubVM: !!hubVM
 
     RowLayout {
         anchors.fill: parent
@@ -23,30 +25,31 @@ Rectangle {
 
             StatusBarItem {
                 iconName: "git"
-                text: mainVM.gitBranchLabel
-                visible: mainVM.gitBranchLabel !== ""
-                onClicked: mainVM.primaryViewIndex = 2
+                text: hasMainVM ? mainVM.gitBranchLabel : ""
+                visible: hasMainVM && mainVM.gitBranchLabel !== ""
+                onClicked: if (hasMainVM) mainVM.primaryViewIndex = 2
             }
 
             StatusBarItem {
-                text: mainVM.gitChangeCount + " changes"
-                visible: mainVM.gitChangeCount > 0
+                text: hasMainVM ? (mainVM.gitChangeCount + " changes") : ""
+                visible: hasMainVM && mainVM.gitChangeCount > 0
                 display: AbstractButton.TextOnly
-                onClicked: mainVM.primaryViewIndex = 2
+                onClicked: if (hasMainVM) mainVM.primaryViewIndex = 2
             }
 
             StatusBarItem {
                 iconName: "analyze"
-                text: mainVM.diagnosticsStatusLine
-                visible: mainVM.diagnosticsStatusLine.length > 0
+                text: hasMainVM ? mainVM.diagnosticsStatusLine : ""
+                visible: hasMainVM && mainVM.diagnosticsStatusLine.length > 0
                 onClicked: {
+                    if (!hasMainVM) return
                     mainVM.bottomPanelTab = 0
                     mainVM.bottomPanelHeight = WorkbenchTheme.defaultBottomPanelHeight
                 }
             }
 
             StatusBarItem {
-                text: mainVM.statusMessage
+                text: hasMainVM ? mainVM.statusMessage : ""
                 Layout.maximumWidth: 400
                 display: AbstractButton.TextOnly
             }
@@ -60,30 +63,32 @@ Rectangle {
             spacing: 0
 
             StatusBarItem {
-                text: "Ln " + mainVM.cursorLine + ", Col " + mainVM.cursorColumn
-                visible: mainVM.currentPath !== ""
+                text: hasMainVM ? ("Ln " + mainVM.cursorLine + ", Col " + mainVM.cursorColumn) : ""
+                visible: hasMainVM && mainVM.currentPath !== ""
             }
 
             StatusBarItem {
-                text: mainVM.openEditorCount + " tabs"
+                text: hasMainVM ? (mainVM.openEditorCount + " tabs") : "0 tabs"
                 display: AbstractButton.TextOnly
             }
 
             StatusBarItem {
                 iconName: "split"
-                text: mainVM.splitEditorVisible ? (mainVM.diffEditorVisible ? "diff" : "split") : "single"
+                text: hasMainVM
+                    ? (mainVM.splitEditorVisible ? (mainVM.diffEditorVisible ? "diff" : "split") : "single")
+                    : "single"
             }
 
             StatusBarItem {
                 iconName: "auto_profile"
-                text: hubVM.hardwareSummary
-                onClicked: mainVM.showModelsSidebar()
+                text: hasHubVM ? hubVM.hardwareSummary : ""
+                onClicked: if (hasMainVM) mainVM.showModelsSidebar()
             }
 
             StatusBarItem {
                 iconName: "assistant"
-                text: mainVM.aiBackendName + " · " + hubVM.providerName
-                onClicked: mainVM.showAssistantSidebar()
+                text: hasMainVM && hasHubVM ? (mainVM.aiBackendName + " · " + hubVM.providerName) : ""
+                onClicked: if (hasMainVM) mainVM.showAssistantSidebar()
             }
         }
     }

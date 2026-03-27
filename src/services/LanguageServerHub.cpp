@@ -1,5 +1,6 @@
 #include "services/LanguageServerHub.hpp"
 
+#include <QDir>
 #include <QFileInfo>
 
 namespace ide::services {
@@ -208,7 +209,11 @@ QString LanguageServerHub::languageIdForPath(const QString& filePath) const {
 }
 
 QString LanguageServerHub::normalizedPath(const QString& filePath) const {
-    return QFileInfo(filePath).absoluteFilePath();
+    QString normalized = QDir::cleanPath(QFileInfo(filePath).absoluteFilePath());
+#ifdef Q_OS_WIN
+    normalized = normalized.toLower();
+#endif
+    return normalized;
 }
 
 std::optional<ide::services::LanguagePackService::ServerSpec> LanguageServerHub::resolveServerSpec(const QString& languageId) {
@@ -268,6 +273,7 @@ LanguageServerHub::ActiveClient LanguageServerHub::ensureClient(const ide::servi
                 continue;
             }
             RuntimeStatus runtime = it->runtime;
+            runtime.lspReady = status.contains(QStringLiteral(" running"));
             runtime.statusLine = status;
             it->runtime = runtime;
             setRuntimeStatus(it.key(), runtime);

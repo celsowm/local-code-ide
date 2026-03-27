@@ -401,7 +401,7 @@ def fetch_node_based(target_platform: str, repo_root: Path, cache_dir: Path, che
         ),
         "pyright": (
             [f"pyright@{PYRIGHT_VERSION}"],
-            "pyright/index.js",
+            "pyright/langserver.index.js",
             "pyright-langserver",
         ),
         "json-language-server": (

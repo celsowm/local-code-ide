@@ -159,6 +159,36 @@ powershell -ExecutionPolicy Bypass -File scripts/capture-localcodeide-screenshot
 
 `run.bat` now runs `python setup.py doctor` before launching the app. If preflight fails, launch is blocked.
 
+### Crash Diagnostics (Windows/Linux)
+
+`python setup.py run` now creates per-run session artifacts in:
+
+```bash
+build/logs/<timestamp>-<pid>-<ms>/
+```
+
+Each session includes:
+
+- `runtime.log` (merged stdout/stderr stream from the app process)
+- `session.json` (run metadata: command, times, exit code, artifact paths)
+- `app.log` (structured in-app Qt/exception logs)
+- `crash.dmp` (Windows only, when enabled)
+
+Environment controls:
+
+```bash
+# Default: info
+LOCALCODEIDE_LOG_LEVEL=info|debug|warn
+
+# Default: 20 sessions
+LOCALCODEIDE_KEEP_LOG_FILES=<int>
+
+# Windows only, default off
+LOCALCODEIDE_ENABLE_MINIDUMP=0|1
+```
+
+`run.bat` and `run.sh` keep the terminal open on crash and print the last log lines from the latest run session.
+
 ---
 
 ## 🧪 Testing

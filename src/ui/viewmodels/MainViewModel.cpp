@@ -1,4 +1,5 @@
 #include "ui/viewmodels/MainViewModel.hpp"
+#include "adapters/diagnostics/LocalSyntaxDiagnosticProvider.hpp"
 
 #include <QDir>
 #include <QFile>
@@ -11,6 +12,7 @@
 #include <QMetaObject>
 #include <QTimer>
 #include <QUrl>
+#include <QVariantMap>
 #include <QtGlobal>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -233,7 +235,61 @@ MainViewModel::MainViewModel(std::unique_ptr<ide::services::DocumentService> doc
             refreshActivityStatus();
         });
         connect(m_diagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::toastRequested, this, &MainViewModel::showToast);
+
+        if (auto* sharedHub = m_diagnosticCoordinator->languageServerHub()) {
+            m_secondaryDiagnosticCoordinator = std::make_unique<ide::services::DiagnosticCoordinator>(
+                std::make_unique<ide::adapters::diagnostics::LocalSyntaxDiagnosticProvider>(),
+                sharedHub,
+                this
+            );
+            connect(m_secondaryDiagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::diagnosticsUpdated, this,
+                    [this](const std::vector<ide::services::interfaces::Diagnostic>& diagnostics, int) {
+                QVariantList rows;
+                rows.reserve(static_cast<int>(diagnostics.size()));
+                for (const auto& item : diagnostics) {
+                    QVariantMap row;
+                    row.insert(QStringLiteral("filePath"), item.filePath);
+                    row.insert(QStringLiteral("lineStart"), item.lineStart);
+                    row.insert(QStringLiteral("columnStart"), item.columnStart);
+                    row.insert(QStringLiteral("lineEnd"), item.lineEnd);
+                    row.insert(QStringLiteral("columnEnd"), item.columnEnd);
+                    row.insert(QStringLiteral("message"), item.message);
+                    row.insert(QStringLiteral("source"), item.source);
+                    row.insert(QStringLiteral("code"), item.code);
+                    switch (item.severity) {
+                    case ide::services::interfaces::Diagnostic::Severity::Info:
+                        row.insert(QStringLiteral("severity"), QStringLiteral("info"));
+                        break;
+                    case ide::services::interfaces::Diagnostic::Severity::Warning:
+                        row.insert(QStringLiteral("severity"), QStringLiteral("warning"));
+                        break;
+                    case ide::services::interfaces::Diagnostic::Severity::Error:
+                        row.insert(QStringLiteral("severity"), QStringLiteral("error"));
+                        break;
+                    }
+                    rows.push_back(row);
+                }
+                m_secondaryFileDiagnostics = rows;
+                emit splitEditorChanged();
+            });
+            connect(m_secondaryDiagnosticCoordinator.get(), &ide::services::DiagnosticCoordinator::toastRequested,
+                    this, &MainViewModel::showToast);
+        }
     }
+
+    connect(&m_editorManager, &EditorManager::splitEditorChanged, this, [this]() {
+        if (!m_secondaryDiagnosticCoordinator) {
+            return;
+        }
+        if (!splitEditorVisible() || diffEditorVisible() || secondaryEditorPath().trimmed().isEmpty()) {
+            if (!m_secondaryFileDiagnostics.isEmpty()) {
+                m_secondaryFileDiagnostics.clear();
+                emit splitEditorChanged();
+            }
+            return;
+        }
+        m_secondaryDiagnosticCoordinator->setDocumentSnapshot(secondaryEditorPath(), secondaryEditorText(), true);
+    });
 
     refreshWorkspace();
     refreshPendingApprovals();
@@ -354,6 +410,7 @@ QString MainViewModel::pendingApprovalSummary() const { return m_aiService->pend
 
 QObject* MainViewModel::diagnosticsModel() { return &m_diagnosticsModel; }
 QVariantList MainViewModel::currentFileDiagnostics() const { return m_currentFileDiagnostics; }
+QVariantList MainViewModel::secondaryFileDiagnostics() const { return m_secondaryFileDiagnostics; }
 QObject* MainViewModel::workspaceFilesModel() { return &m_workspaceFilesModel; }
 QObject* MainViewModel::workspaceTreeModel() { return &m_workspaceTreeModel; }
 QObject* MainViewModel::searchResultsModel() { return &m_searchResultsModel; }

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ui/highlighting/CppSyntaxHighlighter.hpp"
+#include "ui/highlighting/SyntaxHighlighterBackend.hpp"
+#include "ui/highlighting/SyntaxHighlighterFactory.hpp"
 
 #include <QObject>
+#include <QPointer>
 #include <QVariantList>
 #include <memory>
 
@@ -17,6 +19,7 @@ class DocumentHighlighter : public QObject {
     Q_PROPERTY(QVariantList diagnostics READ diagnostics WRITE setDiagnostics NOTIFY diagnosticsChanged)
 public:
     explicit DocumentHighlighter(QObject* parent = nullptr);
+    void setHighlighterFactory(std::unique_ptr<ISyntaxHighlighterFactory> factory);
 
     QObject* textDocument() const;
     void setTextDocument(QObject* textDocument);
@@ -35,10 +38,11 @@ signals:
 private:
     void rebuildHighlighter();
 
-    QObject* m_textDocument = nullptr;
+    QPointer<QObject> m_textDocument;
     QString m_language = "cpp";
     QVariantList m_diagnostics;
-    std::unique_ptr<CppSyntaxHighlighter> m_cppHighlighter;
+    QPointer<SyntaxHighlighterBackend> m_highlighter;
+    std::unique_ptr<ISyntaxHighlighterFactory> m_highlighterFactory;
 };
 
 } // namespace ide::ui::highlighting

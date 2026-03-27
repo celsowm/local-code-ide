@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(LocalCodeIDE VERSION 0.10.1 LANGUAGES CXX)
+project(LocalCodeIDE VERSION 0.10.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -94,8 +94,11 @@ qt_add_executable(LocalCodeIDE
     src/adapters/vcs/GitCliProvider.cpp
     src/adapters/vcs/MockVersionControlProvider.cpp
 
-    src/ui/highlighting/CppSyntaxHighlighter.cpp
+    src/ui/highlighting/RegexSyntaxHighlighter.cpp
     src/ui/highlighting/DocumentHighlighter.cpp
+    src/ui/highlighting/SyntaxHighlighterFactory.cpp
+    src/ui/highlighting/SyntaxHighlighterBackend.cpp
+    src/ui/highlighting/TreeSitterSyntaxHighlighter.cpp
 
     src/ui/models/CommandPaletteListModel.cpp
     src/ui/models/CompletionListModel.cpp
@@ -231,6 +234,62 @@ qt_add_qml_module(LocalCodeIDE
 
 target_include_directories(LocalCodeIDE PRIVATE src)
 
+if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/src/lib.c AND
+   EXISTS ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-python/src/parser.c)
+    add_library(tree_sitter_core STATIC
+        third_party/tree-sitter/lib/src/lib.c
+    )
+    target_include_directories(tree_sitter_core PUBLIC
+        ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/include
+        ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/src
+    )
+
+    add_library(tree_sitter_python STATIC
+        third_party/tree-sitter-python/src/parser.c
+        third_party/tree-sitter-python/src/scanner.c
+    )
+    target_include_directories(tree_sitter_python PUBLIC
+        ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/include
+        ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-python/src
+    )
+    target_link_libraries(tree_sitter_python PUBLIC tree_sitter_core)
+
+    if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-c/src/parser.c)
+        add_library(tree_sitter_c STATIC
+            third_party/tree-sitter-c/src/parser.c
+        )
+        target_include_directories(tree_sitter_c PUBLIC
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/include
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-c/src
+        )
+        target_link_libraries(tree_sitter_c PUBLIC tree_sitter_core)
+    endif()
+
+    if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-cpp/src/parser.c)
+        add_library(tree_sitter_cpp STATIC
+            third_party/tree-sitter-cpp/src/parser.c
+            third_party/tree-sitter-cpp/src/scanner.c
+        )
+        target_include_directories(tree_sitter_cpp PUBLIC
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/include
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-cpp/src
+        )
+        target_link_libraries(tree_sitter_cpp PUBLIC tree_sitter_core)
+    endif()
+
+    if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-rust/src/parser.c)
+        add_library(tree_sitter_rust STATIC
+            third_party/tree-sitter-rust/src/parser.c
+            third_party/tree-sitter-rust/src/scanner.c
+        )
+        target_include_directories(tree_sitter_rust PUBLIC
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter/lib/include
+            ${CMAKE_SOURCE_DIR}/third_party/tree-sitter-rust/src
+        )
+        target_link_libraries(tree_sitter_rust PUBLIC tree_sitter_core)
+    endif()
+endif()
+
 target_link_libraries(LocalCodeIDE PRIVATE
     Qt6::Core
     Qt6::Quick
@@ -240,6 +299,23 @@ target_link_libraries(LocalCodeIDE PRIVATE
     Qt6::Network
     Qt6::Concurrent
 )
+
+if(WIN32)
+    target_link_libraries(LocalCodeIDE PRIVATE Dbghelp)
+endif()
+
+if(TARGET tree_sitter_python)
+    target_link_libraries(LocalCodeIDE PRIVATE tree_sitter_python)
+endif()
+if(TARGET tree_sitter_c)
+    target_link_libraries(LocalCodeIDE PRIVATE tree_sitter_c)
+endif()
+if(TARGET tree_sitter_cpp)
+    target_link_libraries(LocalCodeIDE PRIVATE tree_sitter_cpp)
+endif()
+if(TARGET tree_sitter_rust)
+    target_link_libraries(LocalCodeIDE PRIVATE tree_sitter_rust)
+endif()
 
 if(WIN32)
     if(EXISTS ${CMAKE_SOURCE_DIR}/resources/language-packs)

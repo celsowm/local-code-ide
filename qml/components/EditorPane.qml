@@ -557,7 +557,7 @@ Rectangle {
                 DocumentHighlighter {
                     textDocument: secondaryEditor.textDocument
                     language: mainViewModel.secondaryLanguageId
-                    diagnostics: []
+                    diagnostics: mainViewModel.secondaryFileDiagnostics
                 }
             }
 
