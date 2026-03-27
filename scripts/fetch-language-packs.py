@@ -271,7 +271,15 @@ def qt_qmlls_path_linux() -> Path | None:
         candidate = Path(qt_dir) / "bin" / "qmlls"
         if candidate.exists():
             return candidate
-    
+
+    # Detect aqt installs under $HOME/Qt/<version>/{gcc_64,linux_gcc_64}/bin.
+    qt_home = Path.home() / "Qt"
+    if qt_home.exists():
+        for pattern in ("*/gcc_64/bin/qmlls", "*/linux_gcc_64/bin/qmlls"):
+            for candidate in sorted(qt_home.glob(pattern), reverse=True):
+                if candidate.exists():
+                    return candidate
+
     # Try common Ubuntu/Debian locations or symlinks
     for candidate_name in ("qmlls", "qmlls6"):
         direct = shutil.which(candidate_name)
