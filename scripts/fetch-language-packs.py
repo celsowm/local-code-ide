@@ -352,8 +352,8 @@ def platform_assets(target_platform: str) -> dict[str, DirectAsset]:
             "powershell-editor-services": DirectAsset(
                 url=f"https://github.com/PowerShell/PowerShellEditorServices/releases/download/{POWERSHELL_EDITOR_SERVICES_VERSION}/PowerShellEditorServices.zip",
                 archive="pses_zip",
-                matcher=lambda p: p.name == "Start-EditorServices.sh",
-                out_relpath="bin/Start-EditorServices.sh",
+                matcher=lambda p: p.name == "Start-EditorServices.ps1",
+                out_relpath="bin/Start-EditorServices.ps1",
             ),
         }
     raise RuntimeError(f"Unsupported platform: {target_platform}")
@@ -373,7 +373,7 @@ def fetch_direct_assets(target_platform: str, repo_root: Path, cache_dir: Path, 
         out_file = pack_root / spec.out_relpath
         if spec.archive == "pses_zip":
             out_dir = pack_root / "bin"
-            script_name = "Start-EditorServices.ps1" if target_platform == "windows" else "Start-EditorServices.sh"
+            script_name = "Start-EditorServices.ps1"
             extract_pses_zip(archive_path, out_dir, script_name)
         else:
             extract_single_asset(archive_path, spec.archive, spec.matcher, out_file)

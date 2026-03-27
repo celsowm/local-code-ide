@@ -40,7 +40,7 @@ EXPECTED_PAYLOAD = {
         "yaml-language-server": "language-packs/linux/yaml-language-server/node/yaml-language-server",
         "taplo": "language-packs/linux/taplo/bin/taplo",
         "marksman": "language-packs/linux/marksman/bin/marksman",
-        "powershell-editor-services": "language-packs/linux/powershell-editor-services/bin/Start-EditorServices.sh",
+        "powershell-editor-services": "language-packs/linux/powershell-editor-services/bin/Start-EditorServices.ps1",
         "cmake-language-server": "language-packs/linux/cmake-language-server/python/bin/cmake-language-server",
         "qmlls": "language-packs/linux/qmlls/bin/qmlls",
     },
